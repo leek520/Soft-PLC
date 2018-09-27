@@ -1,40 +1,9 @@
 ﻿#include "graphwindow.h"
 
-QVariant MyStandardItemModel::data(const QModelIndex & index, int role) const
-{
-    int column=index.column();
-
-    if(role==Qt::DisplayRole && column!=0)
-        return column+1;
-    if(role==Qt::ToolTipRole && column==0)
-        return tr("love");
-    return QStandardItemModel::data(index,role);
-}
-
-QVariant MyStandardItemModel::headerData(int section,
-                                         Qt::Orientation orientation,
-                                         int role) const
-{
-    if(section==0 && orientation==Qt::Horizontal){
-        if(role==Qt::DecorationRole)
-            return QIcon(":/favourite.png");
-        if(role==Qt::DisplayRole)
-            return "";
-        if(role==Qt::ToolTipRole)
-            return tr("love");
-    }
-    return QStandardItemModel::headerData(section,orientation,role);
-}
 
 GraphTable::GraphTable(QWidget *parent) :
-    QTableView(parent)
+    QTableWidget(parent)
 {
-    model = new MyStandardItemModel;
-    model->setRowCount(6);
-    model->setColumnCount(8);
-    this->setModel(model);
-
-
     horizontalHeader()->hide();
     horizontalScrollBar()->hide();
     verticalHeader()->hide();
@@ -50,31 +19,63 @@ GraphTable::GraphTable(QWidget *parent) :
     setStyleSheet("QTableWidget{background-color: white}"
                   /*"QTableWidget::item:selected {background-color: white}"*/);
 
+    setItemDelegate(new GraphItemDelegate());
+}
 
+void GraphTable::InitTable()
+{
+    setRowCount(10);
+    setColumnCount(10);
+
+    setColumnWidth(1, LINE_WIDTH);
+
+    for (int i=0;i<rowCount();i++){
+        InsertSplitLine(i);
+    }
 
 }
 
-void GraphTable::SetLeftLine()
+
+void GraphTable::SetItemPixmap(int row, int col, QPixmap pixmap)
 {
-    int row = model->rowCount();
-    int col = model->columnCount();
-
-    this->setSpan(0, 1, row, 1);
-    setColumnWidth(1, 10);
-
-
+    QTableWidgetItem *item = this->item(row, col);
+    if (item == NULL){
+        item = new QTableWidgetItem();
+        setItem(row, col, item);
+    }
+    item->setData(Qt::DisplayRole,
+                  QVariant::fromValue<QPixmap>(pixmap));
 }
 
-void GraphTable::mouseMoveEvent(QMouseEvent *event)
+void GraphTable::InsertSplitLine(int row)
 {
-    int column = this->columnAt(event->x());
-    int row = this->rowAt(event->y());
-    if(column == 0 && row != -1){
-        this->setCursor(Qt::PointingHandCursor);
+    Element emt;
+    emt.col = 1;
+    emt.row = row;
+    emt.graphType = VerticalLine;
+
+    InsertGraphElement(&emt);
+}
+
+void GraphTable::InsertGraphElement(Element *emt)
+{
+    GraphElement *graph = NULL;
+    switch (emt->graphType) {
+    case VerticalLine:
+        graph = new GraphLine(emt);
+        break;
+    case HorizontalLine:
+        graph = new GraphBlank(emt);
+        break;
+    case LogicX:
+        graph = new GraphX(emt);
+        break;
+    default:
+        graph = new GraphBlank(emt);
+        break;
     }
-    else{
-        this->setCursor(Qt::ArrowCursor);
-    }
+    SetItemPixmap(emt->row, emt->col, graph->DrawPixMap());
+
 }
 
 GraphWindow::GraphWindow(QWidget *parent) :
@@ -91,7 +92,16 @@ GraphWindow::GraphWindow(QWidget *parent) :
     int heigh = this->height();
 
 
-    m_graphTable->SetLeftLine();
+    m_graphTable->InitTable();
+
+
+    Element emt;
+    emt.col = 2;
+    emt.row = 2;
+    emt.graphType = HorizontalLine;
+
+    m_graphTable->InsertGraphElement(&emt);
+
 }
 
 

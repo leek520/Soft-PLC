@@ -14,7 +14,7 @@ Copyright (c) 2018 PLT. All Rights Reserved.
 class GraphFB
 {
 public:
-    GraphFB(QPixmap *pix1);
+    GraphFB();
     virtual ~GraphFB();
 protected:
     virtual void draw();

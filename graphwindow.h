@@ -1,36 +1,53 @@
 ﻿#ifndef GRAPHWINDOW_H
 #define GRAPHWINDOW_H
 
+#include <QTableWidget>
 #include <QTableView>
 #include <QHeaderView>
 #include <QStandardItemModel>
 #include <QHBoxLayout>
+#include <QStyledItemDelegate>
 #include <QScrollBar>
 #include <QMouseEvent>
+#include <QPainter>
+#include <QDebug>
 #include "common.h"
+#include "graphelement.h"
 
-class MyStandardItemModel:public QStandardItemModel
+
+class GraphItemDelegate : public QStyledItemDelegate
 {
 public:
-    MyStandardItemModel(QObject * parent=0)
-        :QStandardItemModel(parent){}
-    virtual ~ MyStandardItemModel(){}
-    QVariant data(const QModelIndex & index, int role=Qt::DisplayRole) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role=Qt::DisplayRole) const;
+    GraphItemDelegate(QObject* parent = 0):QStyledItemDelegate(parent){ }
+    //在委托类的paint中画图
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        if(index.data(Qt::DisplayRole).canConvert<QPixmap>())
+        {
+            QPixmap pix = index.data(Qt::DisplayRole).value<QPixmap>();
+            painter->drawPixmap(option.rect,pix);
+        }
+
+        QStyledItemDelegate::paint(painter,option,index);
+    }
+    //选中时，展示该图
+
+
+
 };
-class GraphTable : public QTableView
+class GraphTable : public QTableWidget
 {
     Q_OBJECT
 public:
     explicit GraphTable(QWidget *parent = 0);
     virtual ~ GraphTable(){}
-    void SetLeftLine();
-protected:
-    void mouseMoveEvent(QMouseEvent * event);
+    void InitTable();
 
+
+    void InsertGraphElement(Element *emt);
+    void InsertSplitLine(int row);
 private:
- //   MyItemDelegate * delegate;
-    MyStandardItemModel * model;
+    void SetItemPixmap(int row, int col, QPixmap pixmap);
 
 };
 
