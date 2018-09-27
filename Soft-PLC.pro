@@ -13,6 +13,16 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    graphelement.cpp \
+    graphfb.cpp \
+    graphwindow.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    graphelement.h \
+    graphfb.h \
+    common.h \
+    graphwindow.h
+
+RESOURCES += \
+    application.qrc
