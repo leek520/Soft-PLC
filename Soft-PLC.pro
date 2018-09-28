@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-
+QT       += xml
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Soft-PLC
@@ -16,13 +16,17 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     graphelement.cpp \
     graphfb.cpp \
-    graphwindow.cpp
+    graphwindow.cpp \
+    inputwindow.cpp
 
 HEADERS  += mainwindow.h \
     graphelement.h \
     graphfb.h \
     common.h \
-    graphwindow.h
+    graphwindow.h \
+    inputwindow.h
 
 RESOURCES += \
     application.qrc
+
+RC_ICONS = mamtool.ico

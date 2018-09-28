@@ -4,6 +4,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle(tr("Soft PLC"));//设置窗口标题
+    setWindowIcon(QIcon(":/mamtool.ico"));
     resize(1000,700);
 
     createActions();
@@ -13,6 +14,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     SetupUi();
     SetupMdiArea();
+
+    m_inputW = new InputWindow();
+    connect(m_inputW, SIGNAL(sig_inputPara(QString,int,QString,int)),
+            m_graphWid,SLOT(slt_inputPara(QString,int,QString,int)));
 }
 
 MainWindow::~MainWindow()
@@ -80,6 +85,17 @@ void MainWindow::createActions()
 //            cutAct, SLOT(setEnabled(bool)));
 //    connect(textEdit, SIGNAL(copyAvailable(bool)),
 //            copyAct, SLOT(setEnabled(bool)));
+
+
+    QAction *act = new QAction(QIcon(":/images/graph/Xopen.png"), tr("常开开关"), this);
+    act->setStatusTip(tr("常开开关"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
+
+    act = new QAction(QIcon(":/images/graph/Xclose.png"), tr("常闭开关"), this);
+    act->setStatusTip(tr("常闭开关"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
 }
 
 void MainWindow::createMenus()
@@ -119,6 +135,11 @@ void MainWindow::createToolBars()
 //    editToolBar->addAction(cutAct);
 //    editToolBar->addAction(copyAct);
 //    editToolBar->addAction(pasteAct);
+
+    graphToolBar = addToolBar(tr("Graph"));
+    for(int i=0;i<m_graphActList.count();i++){
+        graphToolBar->addAction(m_graphActList[i]);
+    }
 }
 void MainWindow::createStatusBar()
 {
@@ -143,6 +164,7 @@ void MainWindow::SetupUi()
     m_dockW->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
     m_dockW->setWidget(m_bottomW);
     this->addDockWidget(Qt::BottomDockWidgetArea, m_dockW);//初始位置
+
 }
 
 void MainWindow::SetupMdiArea()
@@ -183,3 +205,14 @@ void MainWindow::about()
 {
 
 }
+
+void MainWindow::drawGraph()
+{
+    int type = m_graphActList.indexOf((QAction *)sender());
+    if (type < 0) return;
+
+    m_inputW->SetCurrentName(type);
+    m_inputW->show();
+
+}
+

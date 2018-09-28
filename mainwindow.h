@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 #include "common.h"
 #include "graphwindow.h"
-
+#include "inputwindow.h"
 #include <QMainWindow>
 #include <QMdiArea>
 #include <QMdiSubWindow>
@@ -17,7 +17,11 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 #include <QDockWidget>
-
+#include <QLabel>
+#include <QComboBox>
+#include <QDir>
+#include <QMutex>
+#include <QDateTime>
 class ListWidget;
 class TextEdit;
 class MainWindow : public QMainWindow
@@ -42,24 +46,27 @@ private slots:
     bool save();
     bool saveAs();
     void about();
-
+    void drawGraph();
 private :
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *helpMenu;
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
+    QToolBar *graphToolBar;
 
     QAction *newAct;
     QAction *openAct;
     QAction *saveAct;
     QAction *saveAsAct;
     QAction *exitAct;
+
     QAction *cutAct;
     QAction *copyAct;
     QAction *pasteAct;
     QAction *aboutAct;
 
+    QList <QAction *>m_graphActList;
 
     QDockWidget *m_dockW;
     ListWidget *m_leftW;
@@ -69,7 +76,7 @@ private :
 
     GraphWindow *m_graphWid;
     QWidget *m_cmdWid;
-
+    InputWindow *m_inputW;
 
 };
 class ListWidget : public QListWidget

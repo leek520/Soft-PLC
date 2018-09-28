@@ -40,10 +40,10 @@ public:
     QPixmap DrawPixMap();
 
 };
-class GraphX : public GraphElement
+class GraphInput : public GraphElement
 {
 public:
-    GraphX(Element *emt = NULL) : GraphElement(emt){}
+    GraphInput(Element *emt = NULL) : GraphElement(emt){}
     QPixmap DrawPixMap();
 
 };

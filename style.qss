@@ -1,0 +1,388 @@
+﻿/**********全局的按钮**********/
+
+QPushButton{
+        border: 1px solid #aaaaaa;
+        font-size: 14px;
+        color: #000000;
+        height: 30px;
+        width: 50px;
+}
+QPushButton:enabled {
+        color: #000000;
+}
+QPushButton:!enabled {
+        background: #EAEAEA;
+        color: #aaaaaa;
+}
+QPushButton:enabled:hover{
+        background-color: #3f75ae;
+        color: #ffffff;
+}
+QPushButton:enabled:pressed{
+        background: rgb(0, 78, 161);
+}
+QPushButton:enabled:checked{
+        background: rgb(0, 78, 161);
+}
+/**********标题栏**********/
+QLabel#titleLabel{
+    color: #ffffff;
+    font: 16px;
+}
+QPushButton#minimizeButton{
+    background: #273140;
+    border: 2px solid rgb(0,0,0,25);
+}
+QPushButton#minimizeButton:hover{
+    background: #18202d;
+}
+QPushButton#maximizeButton{
+    background: #273140;
+    border: 2px solid rgb(0,0,0,25);
+}
+QPushButton#maximizeButton:hover{
+    background: #18202d;
+}
+QPushButton#closeButton{
+    background: #273140;
+    border: 2px solid rgb(0,0,0,25);
+}
+QPushButton#closeButton:hover{
+    background: #18202d;
+}
+/**********菜单栏**********/
+
+
+/**********菜单**********/
+QMenu {
+        border: 1px solid #bbbbbb;
+        background: #ffffff;
+       /*width: 120px;*/
+}
+
+QMenu::item {
+        font-size: 12px;
+        padding: 10px 20px 8px 20px;
+}
+QMenu::item:enabled {
+        color: #555555;
+}
+
+QMenu::item:enabled:selected {
+        color: #ffffff;
+        background: #3f75ae;
+}
+QMenu::separator {
+        height: 1px;
+        background: rgb(111, 156, 207);
+}
+QMenu::indicator {
+        width: 13px;
+        height: 13px;
+}
+QMenu::icon {
+        padding-left: 2px;
+        padding-right: 20px;
+}
+
+
+/**********工具栏**********/
+
+QToolButton#actionParament {
+        background-image: url(:/pic/parament_off.png);
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        margin-top: 4px;
+        height: 50px;
+        width: 40px;
+        border: no;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+}
+QToolButton#actionParament:hover {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/parament_on.png);
+}
+QToolButton#actionParament:pressed {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/parament_on.png);
+}
+QToolButton#actionJOG {
+        background-image: url(:/pic/JOG_off.png);
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        margin-top: 4px;
+        height: 50px;
+        width: 40px;
+        border: no;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+}
+QToolButton#actionJOG:hover {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/JOG_on.png);
+}
+QToolButton#actionJOG:pressed {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/JOG_on.png);
+}
+QToolButton#actionWarning {
+        background-image: url(:/pic/alarm_off.png);
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        margin-top: 4px;
+        height: 50px;
+        width: 40px;
+        border: no;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+}
+QToolButton#actionWarning:hover {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/alarm_on.png);
+}
+QToolButton#actionWarning:pressed {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/alarm_on.png);
+}
+QToolButton#actionPlot {
+        background-image: url(:/pic/plot_off.png);
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        margin-top: 4px;
+        height: 50px;
+        width: 40px;
+        border: no;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+}
+QToolButton#actionPlot:hover {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/plot_on.png);
+}
+QToolButton#actionPlot:pressed {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/plot_on.png);
+}
+QToolButton#actionRun {
+        background-image: url(:/pic/run_off.png);
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        margin-top: 4px;
+        height: 50px;
+        width: 40px;
+        border: no;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+}
+QToolButton#actionRun:hover {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/run_on.png);
+}
+QToolButton#actionRun:pressed {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/run_on.png);
+}
+QToolButton#actionEnable {
+        background-image: url(:/pic/s-off_off.png);
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        margin-top: 4px;
+        height: 50px;
+        width: 40px;
+        border: no;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+}
+QToolButton#actionEnable:hover {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/s-off_on.png);
+}
+QToolButton#actionEnable:pressed {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/s-off_on.png);
+}
+QToolButton#actionEnable:checked {
+        background-image: url(:/pic/s-on_off.png);
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        margin-top: 4px;
+        height: 50px;
+        width: 40px;
+        border: no;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+}
+QToolButton#actionEnable:checked:hover {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/s-on_on.png);
+}
+QToolButton#actionEnable:checked:pressed {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/s-on_on.png);
+}
+
+QToolButton#actionRestart {
+        background-image: url(:/pic/restart_off.png);
+        background-repeat: no-repeat;
+        background-position: 0 0;
+        margin-top: 4px;
+        height: 50px;
+        width: 40px;
+        border: no;
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px;
+}
+QToolButton#actionRestart:hover {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/restart_on.png);
+}
+QToolButton#actionRestart:pressed {
+        border-bottom: 2px solid #3f75ae;
+        background-image: url(:/pic/restart_on.png);
+}
+
+
+
+/**********左侧驱动列表栏的添加工程按钮**********/
+QListWidget{
+        background-color: #ededef;
+        border: no;
+}
+
+QListWidget:hover{
+
+}
+QToolButton#add_project_btn{
+        background-color: white;
+        border: 2px dotted #aaaaaa;
+        background-image: url(:/pic/add_on.png);
+        background-repeat:no-repeat;
+        background-position: center;
+        margin: 2px 6px 2px 6px;
+}
+QToolButton#add_project_btn:pressed{
+        background-image: url(:/pic/add_off.png);
+        background-repeat:no-repeat;
+}
+QToolButton::menu-indicator{
+        image: none;
+}
+
+QToolButton::menu-indicator{
+        image: none;
+}
+/**********窗体选择界面的列表栏**********/
+QGroupBox#menubox{
+        border:1px solid gray;
+        padding-top: 5px;
+        padding-bottom: 2px;
+        font-size: 16px;
+}
+QGroupBox#menubox::title{
+    subcontrol-origin: margin;
+    subcontrol-position: top middle;
+    padding-top: 3px;   /*文字在方框中位置的偏离度*/
+}
+
+QToolButton#axis_btn{
+        background-color: #eeeeee;
+        min-width:70px;
+        min-height:30px;
+        border: 1px solid #aaaaaa;
+}
+QToolButton#axis_btn:hover{  /*鼠标放上后*/
+
+
+}
+QToolButton#axis_btn:pressed{ /*按下按钮后*/
+
+}
+QToolButton#axis_btn:checked{    /*选中后*/
+        background-color: #e3eeff;
+        border:1px solid #3f75ae;
+}
+
+
+/**********下拉列表**********/
+/*QComboBox {
+        height: 30px;
+        border: 1px solid rgb(111, 156, 207);
+        background: white;
+}
+QComboBox:enabled {
+        color: rgb(84, 84, 84);
+}
+QComboBox:!enabled {
+        color: rgb(80, 80, 80);
+}
+QComboBox:enabled:hover, QComboBox:enabled:focus {
+        background: rgb(232, 241, 250);
+        color: rgb(51, 51, 51);
+}
+
+QComboBox QAbstractItemView {
+        border: 1px solid rgb(111, 156, 207);
+        background: white;
+        outline: none;
+}
+QComboBox QAbstractItemView::item {
+        height: 25px;
+        color: rgb(73, 73, 73);
+}
+QComboBox QAbstractItemView::item:selected {
+        background: rgb(232, 241, 250);
+        color: rgb(2, 65, 132);
+}*/
+
+
+/**********提示**********/
+QToolTip{
+        border: 1px solid rgb(111, 156, 207);
+        background: white;
+        color: rgb(51, 51, 51);
+}
+/**********页签项**********/
+QTabWidget::pane {
+/*        border: none;*/
+/*        background: white;*/
+}
+QTabWidget::tab-bar {
+        border: none;
+}
+QTabBar::tab {
+        border: none;
+        /*color: white;*/
+        background: #3f75ae;
+        height: 28px;
+        min-width: 85px;
+        margin-right: 5px;
+        padding-left: 5px;
+        padding-right: 5px;
+}
+QTabBar::tab:hover {
+        background: rgb(0, 78, 161);
+}
+QTabBar::tab:selected {
+        color: white;
+        background: rgb(0, 78, 161);
+}
+/*QTabBar::close-button {
+        image: url(:/pic/wClose.png);
+        image-width: 5px;
+        subcontrol-position: right;
+        margin-right: 5px;
+}
+QTabBar::close-button:hover {
+        image: url(:/pic/close.png);
+}*/
+/**********参数设置表格**********/
+
