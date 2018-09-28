@@ -33,9 +33,11 @@ QPixmap GraphInput::DrawPixMap()
 {
     QPixmap pix(UNIT_WIDTH, UNIT_HEIGH);
     pix.fill(Qt::transparent);
+
     QPainter painterPix(&pix);
     if (element == NULL) return pix;
     painterPix.setRenderHint(QPainter::Antialiasing, true);
+    painterPix.setPen(QPen(Qt::black,1,Qt::SolidLine) ) ;//设置画笔的类型：笔头大小、划线类型、颜色
 
     int fw = UNIT_WIDTH/UNIT_W_FACTOR;
     int fh = UNIT_HEIGH/UNIT_H_FACTOR;
@@ -61,12 +63,13 @@ QPixmap GraphInput::DrawPixMap()
 
     //return pix;
 
-    QPoint pt1(fw+2, 1);
-    QPoint pt2(UNIT_WIDTH-fw, fh);
+    QPoint pt1(fw+5, 5);
+    QPoint pt2(UNIT_WIDTH-fw, 2*fh);
     QRect rect(pt1, pt2);
     QFont font;
     QString text = QString("%1%2").arg(element->name).arg(element->index);
     font.setPointSize(10);
+
     painterPix.setFont(font);
     painterPix.setPen(Qt::black);
     painterPix.drawText(rect, text);

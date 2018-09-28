@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     //设置字体
     QFont font;
     font.setFamily(QObject::tr("微软雅黑"));
-    font.setPixelSize(14);
+    font.setPixelSize(12);
     a.setFont(font);
 
     MainWindow w;
