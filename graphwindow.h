@@ -78,7 +78,7 @@ public:
     void InsertGraphElement(Element *emt);
     void InsertSplitLine(int row);
 private:
-    void SetItemPixmap(int row, int col, QPixmap pixmap);
+    void SetItemPixmap(GraphElement *graph);
 private slots:
     void SelectionChanged();
 };

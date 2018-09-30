@@ -7,7 +7,6 @@
 #define UNIT_W_FACTOR   3
 #define UNIT_H_FACTOR   4
 
-#define LINE_WIDTH      2
 /*****************************
  * 图元数据结构：梯形图梯级的存储结构采用两个层次的双向链表结构
 *****************************/
@@ -21,14 +20,21 @@ typedef struct _tElement
     int index;
     bool upFlag;
     bool dnFlag;
+    QString mark;
 }Element;
 
 enum GraphType
 {
-    VerticalLine,
+    NumLine,
     HorizontalLine,
+    verticalLine,
 
     InputOpen = 10,
     InputClose,
+    InputPedge,
+    InputNedge,
+    StepNode,
+    OutputNode,
+    ReverseLogic,
 };
 #endif // COMMON_H

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<InputDevice>
+    <X name="输入继电器(Input relay)"          minnum="0" maxnum="177" />
+    <Y name="输出继电器(Output relay)"         minnum="0" maxnum="177" />
+    <M name="输内部辅助继电器(Internal relay)" minnum="0" maxnum="1999" />
+    <S name="步进点(Steps)"                    minnum="0" maxnum="127" />
+    <T name="定时器(Timer)"                    minnum="0" maxnum="127" />
+    <C name="计数器(Counter)"                  minnum="0" maxnum="177" />
+</InputDevice>

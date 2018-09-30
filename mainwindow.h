@@ -39,7 +39,8 @@ private:
     void createStatusBar();
     void SetupUi();
     void SetupMdiArea();
-
+signals:
+    void sig_inputPara(QString name, int index, QString mark, int type);
 private slots:
     void newFile();
     void open();

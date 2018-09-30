@@ -21,30 +21,53 @@ public:
 
     virtual ~GraphElement(){}
 
-    virtual QPixmap DrawPixMap(){}
+    virtual QPixmap DrawPixMap(QPixmap pix){}
+
 public:
     Element *element;
 };
 
-class GraphLine : public GraphElement
+class GraphNumLine : public GraphElement
 {
 public:
-    GraphLine(Element *emt = NULL) : GraphElement(emt){}
-    QPixmap DrawPixMap();
+    GraphNumLine(Element *emt = NULL) : GraphElement(emt){}
+    QPixmap DrawPixMap(QPixmap pix);
 
 };
-class GraphBlank : public GraphElement
+class GraphVLine : public GraphElement
 {
 public:
-    GraphBlank(Element *emt = NULL) : GraphElement(emt){}
-    QPixmap DrawPixMap();
+    GraphVLine(Element *emt = NULL, int phase=0) : GraphElement(emt), m_phase(phase){}
+    QPixmap DrawPixMap(QPixmap pix);
+private:
+    int m_phase;
+};
+class GraphHLine : public GraphElement
+{
+public:
+    GraphHLine(Element *emt = NULL) : GraphElement(emt){}
+    QPixmap DrawPixMap(QPixmap pix);
+
+};
+class GraphRLogic : public GraphElement
+{
+public:
+    GraphRLogic(Element *emt = NULL) : GraphElement(emt){}
+    QPixmap DrawPixMap(QPixmap pix);
 
 };
 class GraphInput : public GraphElement
 {
 public:
     GraphInput(Element *emt = NULL) : GraphElement(emt){}
-    QPixmap DrawPixMap();
+    QPixmap DrawPixMap(QPixmap pix);
+
+};
+class GraphOutput : public GraphElement
+{
+public:
+    GraphOutput(Element *emt = NULL) : GraphElement(emt){}
+    QPixmap DrawPixMap(QPixmap pix);
 
 };
 #endif // GRAPHELEMENT_H

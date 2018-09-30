@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
     SetupMdiArea();
 
     m_inputW = new InputWindow();
+    connect(this, SIGNAL(sig_inputPara(QString,int,QString,int)),
+            m_graphWid,SLOT(slt_inputPara(QString,int,QString,int)));
     connect(m_inputW, SIGNAL(sig_inputPara(QString,int,QString,int)),
             m_graphWid,SLOT(slt_inputPara(QString,int,QString,int)));
 }
@@ -87,15 +89,51 @@ void MainWindow::createActions()
 //            copyAct, SLOT(setEnabled(bool)));
 
 
-    QAction *act = new QAction(QIcon(":/images/graph/Xopen.png"), tr("常开开关"), this);
+    QAction *act = new QAction(QIcon(":/images/graph/Btn0.bmp"), tr("常开开关"), this);
     act->setStatusTip(tr("常开开关"));
     connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
     m_graphActList.append(act);
 
-    act = new QAction(QIcon(":/images/graph/Xclose.png"), tr("常闭开关"), this);
+    act = new QAction(QIcon(":/images/graph/Btn1.bmp"), tr("常闭开关"), this);
     act->setStatusTip(tr("常闭开关"));
     connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
     m_graphActList.append(act);
+
+    act = new QAction(QIcon(":/images/graph/Btn2.bmp"), tr("正缘触发开关"), this);
+    act->setStatusTip(tr("正缘触发开关"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
+
+    act = new QAction(QIcon(":/images/graph/Btn3.bmp"), tr("负缘触发开关"), this);
+    act->setStatusTip(tr("负缘触发开关"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
+
+    act = new QAction(QIcon(":/images/graph/Btn4.bmp"), tr("步进接点"), this);
+    act->setStatusTip(tr("步进接点"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
+
+    act = new QAction(QIcon(":/images/graph/Btn5.bmp"), tr("输出接点"), this);
+    act->setStatusTip(tr("输出接点"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
+
+    act = new QAction(QIcon(":/images/graph/Btn6.bmp"), tr("水平线"), this);
+    act->setStatusTip(tr("水平线"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
+
+    act = new QAction(QIcon(":/images/graph/Btn7.bmp"), tr("垂直线"), this);
+    act->setStatusTip(tr("垂直线"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
+
+    act = new QAction(QIcon(":/images/graph/Btn8.bmp"), tr("反向逻辑"), this);
+    act->setStatusTip(tr("反向逻辑"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
+
 }
 
 void MainWindow::createMenus()
@@ -208,11 +246,29 @@ void MainWindow::about()
 
 void MainWindow::drawGraph()
 {
-    int type = m_graphActList.indexOf((QAction *)sender());
-    if (type < 0) return;
+    int index = m_graphActList.indexOf((QAction *)sender());
+    if (index < 0) return;
 
-    m_inputW->SetCurrentName(type);
-    m_inputW->show();
+    if (index < 6){
+        m_inputW->SetCurrentName(index);
+        m_inputW->show();
+    }else{
+        switch (index) {
+        case 6:
+            emit sig_inputPara("", 0, "", HorizontalLine);
+            break;
+        case 7:
+            emit sig_inputPara("", 0, "", verticalLine);
+            break;
+        case 8:
+            emit sig_inputPara("", 0, "", ReverseLogic);
+            break;
+        default:
+            break;
+        }
+
+    }
+
 
 }
 

@@ -6,9 +6,20 @@
         <file>images/open.png</file>
         <file>images/paste.png</file>
         <file>images/save.png</file>
-        <file>images/graph/Xopen.png</file>
-        <file>images/graph/Xclose.png</file>
         <file>style.qss</file>
         <file>mamtool.ico</file>
+        <file>images/graph/Btn0.bmp</file>
+        <file>images/graph/Btn1.bmp</file>
+        <file>images/graph/Btn2.bmp</file>
+        <file>images/graph/Btn3.bmp</file>
+        <file>images/graph/Btn4.bmp</file>
+        <file>images/graph/Btn5.bmp</file>
+        <file>images/graph/Btn6.bmp</file>
+        <file>images/graph/Btn7.bmp</file>
+        <file>images/graph/Btn8.bmp</file>
+        <file>images/graph/Btn9.bmp</file>
+        <file>images/graph/Btn10.bmp</file>
+        <file>images/graph/Btn11.bmp</file>
+        <file>config/input_device_info.xml</file>
     </qresource>
 </RCC>

@@ -54,30 +54,45 @@ void GraphTable::InitTable()
     setRowCount(10);
     setColumnCount(14);
 
-    setColumnWidth(1, LINE_WIDTH);
-    setSpan(0,13,10,14);
-
-    QTableWidgetItem *item = new QTableWidgetItem();
-    item->setFlags(item->flags() & ~Qt::ItemIsEnabled & ~Qt::ItemIsSelectable);
-    setItem(0,13,item);
 
     for (int i=0;i<rowCount();i++){
         InsertSplitLine(i);
     }
-    setCurrentCell(0,2);
+    setCurrentCell(0,1);
 }
 
 
-void GraphTable::SetItemPixmap(int row, int col, QPixmap pixmap)
+void GraphTable::SetItemPixmap(GraphElement *graph)
 {
-    QTableWidgetItem *item = this->item(row, col);
+    int type = graph->element->graphType;
+    int row = graph->element->row;
+    int col = graph->element->col;
+    QString mark = graph->element->mark;
+    QTableWidgetItem *item;
+    QPixmap oldPix;
+
+    item = this->item(row, col);
     if (item == NULL){
         item = new QTableWidgetItem();
         setItem(row, col, item);
+        QPixmap pix(UNIT_WIDTH, UNIT_HEIGH);
+        pix.fill(Qt::white);
+        oldPix = pix;
+    }else{
+        oldPix = item->data(Qt::DisplayRole).value<QPixmap>();
     }
+    QPixmap pixmap = graph->DrawPixMap(oldPix);
     item->setData(Qt::DisplayRole,
                   QVariant::fromValue<QPixmap>(pixmap));
+    item->setToolTip(mark);
 
+
+    //画完图自动转下一个单元格
+    if (col == columnCount()-1){
+       setCurrentCell(row+1, 1);
+    }else if (type != verticalLine){
+       setCurrentCell(row, col+1);
+    }
 }
 
 void GraphTable::SelectionChanged()
@@ -88,10 +103,10 @@ void GraphTable::SelectionChanged()
 void GraphTable::InsertSplitLine(int row)
 {
     Element emt;
-    emt.col = 1;
+    emt.col = 0;
     emt.row = row;
     emt.name = "";
-    emt.graphType = VerticalLine;
+    emt.graphType = NumLine;
 
     InsertGraphElement(&emt);
 }
@@ -100,25 +115,62 @@ void GraphTable::InsertGraphElement(Element *emt)
 {
     GraphElement *graph = NULL;
     switch (emt->graphType) {
-    case VerticalLine:
-        graph = new GraphLine(emt);
+    case NumLine:
+        if (emt->col != 0) return;
+        graph = new GraphNumLine(emt);
         break;
     case HorizontalLine:
-        graph = new GraphBlank(emt);
+        graph = new GraphHLine(emt);
         break;
-    case InputOpen:
-    case InputClose:
-        if (emt->col < 2) return;
-        graph = new GraphInput(emt);
-        break;
-    default:
-        graph = new GraphBlank(emt);
+    case verticalLine:
+    {
+        Element emt2;
+        emt2.row = emt->row + 1;
+        emt2.col = emt->col;
+        emt2.graphType = verticalLine;
+        emt2.mark = "";
+
+        graph = new GraphVLine(&emt2,1);
+        SetItemPixmap(graph);
+        graph = new GraphVLine(emt);
         break;
     }
-    SetItemPixmap(emt->row, emt->col, graph->DrawPixMap());
+    case InputOpen:
+    case InputClose:
+        if (emt->col == 0) return;
+        graph = new GraphInput(emt);
+        break;
+    case ReverseLogic:
+        if (emt->col == 0) return;
+        graph = new GraphRLogic(emt);
+        break;
+    case StepNode:
+        if (emt->col == 0) return;
+        graph = new GraphRLogic(emt);
+        break;
+    case OutputNode:
+    {
+        if (emt->col == 0) return;
+        Element emt2;
+        for(int j=emt->col;j<columnCount()-1;j++){
+            emt2.row = emt->row;
+            emt2.col = j;
+            emt2.graphType = HorizontalLine;
+            emt2.mark = "";
+            graph = new GraphHLine(&emt2);
+            SetItemPixmap(graph);
+        }
+        emt->col = columnCount()-1;
+        graph = new GraphOutput(emt);
+        break;
+    }
+    default:
+        graph = new GraphHLine(emt);
+        break;
+    }
+    SetItemPixmap(graph);
 
-    if (emt->name != "")
-        graph->DrawPixMap().save(QString("%1.png").arg(emt->name));
+
 }
 
 GraphWindow::GraphWindow(QWidget *parent) :
@@ -142,9 +194,10 @@ void GraphWindow::slt_inputPara(QString name, int index, QString mark, int type)
     emt.row = m_graphTable->currentRow();
     emt.name = name;
     emt.index = index;
-    emt.graphType = type + 10;
-
+    emt.graphType = type;
+    emt.mark = mark;
     m_graphTable->InsertGraphElement(&emt);
+
 }
 
 
