@@ -22,6 +22,8 @@
 #include <QDir>
 #include <QMutex>
 #include <QDateTime>
+#include <QFileDialog>
+
 class ListWidget;
 class TextEdit;
 class MainWindow : public QMainWindow
@@ -43,11 +45,15 @@ signals:
     void sig_inputPara(QString name, int index, QString mark, int type);
 private slots:
     void newFile();
-    void open();
+    bool open();
     bool save();
     bool saveAs();
     void about();
+
+
     void drawGraph();
+
+    void buildGraph();
 private :
     QMenu *fileMenu;
     QMenu *editMenu;
@@ -55,6 +61,7 @@ private :
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
     QToolBar *graphToolBar;
+    QToolBar *buildToolBar;
 
     QAction *newAct;
     QAction *openAct;
@@ -68,6 +75,8 @@ private :
     QAction *aboutAct;
 
     QList <QAction *>m_graphActList;
+    QAction *buildAct;
+
 
     QDockWidget *m_dockW;
     ListWidget *m_leftW;

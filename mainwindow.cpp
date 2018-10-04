@@ -134,6 +134,11 @@ void MainWindow::createActions()
     connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
     m_graphActList.append(act);
 
+
+    buildAct = new QAction(QIcon(":/images/build.png"), tr("编译"), this);
+    buildAct->setStatusTip(tr("编译"));
+    connect(buildAct, SIGNAL(triggered()), this, SLOT(buildGraph()));
+
 }
 
 void MainWindow::createMenus()
@@ -174,10 +179,17 @@ void MainWindow::createToolBars()
 //    editToolBar->addAction(copyAct);
 //    editToolBar->addAction(pasteAct);
 
+    buildToolBar = addToolBar(tr("Build"));
+    buildToolBar->addAction(buildAct);
+
+
     graphToolBar = addToolBar(tr("Graph"));
     for(int i=0;i<m_graphActList.count();i++){
         graphToolBar->addAction(m_graphActList[i]);
     }
+
+
+
 }
 void MainWindow::createStatusBar()
 {
@@ -224,14 +236,26 @@ void MainWindow::newFile()
     SetupMdiArea();
 }
 
-void MainWindow::open()
+bool MainWindow::open()
 {
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    tr("打开文件"),
+                                                    "",
+                                                    tr("梯形图文件(*.tgf);;All files(*.*)"));
+    if (filename.isEmpty()) return false;
 
+    m_graphWid->OpenGraph(filename);
 }
 
 bool MainWindow::save()
 {
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                    tr("保存文件"),
+                                                    "",
+                                                    tr("保存为 (*.tgf)"));
+    if (filename.isEmpty()) return false;
 
+    m_graphWid->SaveGraph(filename);
 }
 
 bool MainWindow::saveAs()
@@ -270,5 +294,10 @@ void MainWindow::drawGraph()
     }
 
 
+}
+
+void MainWindow::buildGraph()
+{
+    m_graphWid->BuildGraph();
 }
 

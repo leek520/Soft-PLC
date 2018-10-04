@@ -77,10 +77,20 @@ public:
 
     void InsertGraphElement(Element *emt);
     void InsertSplitLine(int row);
+
+    void BuildGraph();
+    int DealNode(int row, int col);
 private:
     void SetItemPixmap(GraphElement *graph);
+    void RecordGraph(GraphElement *graph);
 private slots:
     void SelectionChanged();
+public:
+    QList<Element> m_emtList;
+    QList<QPoint> m_trail;
+private:
+    int buildPos[MAX_ROW];
+    int buildPreRow;
 };
 
 
@@ -96,6 +106,9 @@ signals:
 
 public slots:
     void slt_inputPara(QString name, int index, QString mark, int type);
+    void BuildGraph();
+    void SaveGraph(QString name);
+    void OpenGraph(QString name);
 private:
     GraphTable *m_graphTable;
 };
