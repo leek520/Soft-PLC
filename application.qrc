@@ -22,5 +22,9 @@
         <file>images/graph/Btn11.bmp</file>
         <file>config/input_device_info.xml</file>
         <file>images/build.png</file>
+        <file>images/redo.png</file>
+        <file>images/undo.png</file>
+        <file>images/about.png</file>
+        <file>images/remove.png</file>
     </qresource>
 </RCC>

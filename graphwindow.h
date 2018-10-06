@@ -12,6 +12,8 @@
 #include <QPainter>
 #include <QSpinBox>
 #include <QDebug>
+#include <QMessageBox>
+#include <QApplication>
 #include "common.h"
 #include "graphelement.h"
 
@@ -73,24 +75,43 @@ public:
     explicit GraphTable(QWidget *parent = 0);
     virtual ~ GraphTable(){}
     void InitTable();
+    void InsertRowGraph(int row);
 
-
-    void InsertGraphElement(Element *emt);
+    void InsertGraphElement(Element emt);
+    void RemoveGraphElement(int row, int col);
     void InsertSplitLine(int row);
 
     void BuildGraph();
     int DealNode(int row, int col);
+protected:
+    void keyPressEvent(QKeyEvent *event);
+
+signals:
+    void sig_InsertBottomRowText(QString text);
 private:
     void SetItemPixmap(GraphElement *graph);
     void RecordGraph(GraphElement *graph);
 private slots:
     void SelectionChanged();
+public slots:
+    void redo();
+    void undo();
+    void copy();
+    void paste();
+    void cut();
+    void remove();
+
 public:
     QList<Element> m_emtList;
-    QList<QPoint> m_trail;
+    QList<QPoint> m_buildTrail;
+
+    QList<QPoint> m_editTrail;
 private:
     int buildPos[MAX_ROW];
     int buildPreRow;
+
+    QTableWidgetSelectionRange m_ClipBorad;
+    int m_ClipType;
 };
 
 
@@ -101,7 +122,6 @@ class GraphWindow : public QWidget
 public:
     explicit GraphWindow(QWidget *parent = 0);
     virtual ~ GraphWindow(){}
-
 signals:
 
 public slots:
@@ -109,7 +129,7 @@ public slots:
     void BuildGraph();
     void SaveGraph(QString name);
     void OpenGraph(QString name);
-private:
+public:
     GraphTable *m_graphTable;
 };
 

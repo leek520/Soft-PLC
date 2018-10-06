@@ -17,57 +17,15 @@ Copyright (c) 2018 PLT. All Rights Reserved.
 class GraphElement
 {
 public:
-    GraphElement(Element *emt = NULL) : element(emt){}
+    GraphElement(Element emt) : element(emt){}
 
-    virtual ~GraphElement(){}
+    ~GraphElement(){}
 
-    virtual QPixmap DrawPixMap(QPixmap pix){}
-
-public:
-    Element *element;
-};
-
-class GraphNumLine : public GraphElement
-{
-public:
-    GraphNumLine(Element *emt = NULL) : GraphElement(emt){}
     QPixmap DrawPixMap(QPixmap pix);
 
-};
-class GraphVLine : public GraphElement
-{
-public:
-    GraphVLine(Element *emt = NULL, int phase=0) : GraphElement(emt), m_phase(phase){}
-    QPixmap DrawPixMap(QPixmap pix);
-private:
-    int m_phase;
-};
-class GraphHLine : public GraphElement
-{
-public:
-    GraphHLine(Element *emt = NULL) : GraphElement(emt){}
-    QPixmap DrawPixMap(QPixmap pix);
 
-};
-class GraphRLogic : public GraphElement
-{
 public:
-    GraphRLogic(Element *emt = NULL) : GraphElement(emt){}
-    QPixmap DrawPixMap(QPixmap pix);
-
+    Element element;
 };
-class GraphInput : public GraphElement
-{
-public:
-    GraphInput(Element *emt = NULL) : GraphElement(emt){}
-    QPixmap DrawPixMap(QPixmap pix);
 
-};
-class GraphOutput : public GraphElement
-{
-public:
-    GraphOutput(Element *emt = NULL) : GraphElement(emt){}
-    QPixmap DrawPixMap(QPixmap pix);
-
-};
 #endif // GRAPHELEMENT_H

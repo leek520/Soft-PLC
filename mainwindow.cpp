@@ -5,8 +5,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowTitle(tr("Soft PLC"));//设置窗口标题
     setWindowIcon(QIcon(":/mamtool.ico"));
-    resize(1000,700);
-
+    //resize(SCREEN_WIDTH,SCREEN_HEIGHT);
+    setWindowState(Qt::WindowMaximized);
     createActions();
     createMenus();
     createToolBars();
@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent)
             m_graphWid,SLOT(slt_inputPara(QString,int,QString,int)));
     connect(m_inputW, SIGNAL(sig_inputPara(QString,int,QString,int)),
             m_graphWid,SLOT(slt_inputPara(QString,int,QString,int)));
+    connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertBottomRowText(QString)),
+            this, SLOT(slt_InsertBottomRowText(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -54,39 +56,45 @@ void MainWindow::createActions()
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
+    undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
+    undoAct->setShortcuts(QKeySequence::Undo);
+    undoAct->setStatusTip(tr("撤销(Ctrl+Z)"));
+    connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
 
-//    cutAct = new QAction(QIcon(":/images/cut.png"), tr("Cu&t"), this);
+    redoAct = new QAction(QIcon(":/images/redo.png"), tr("&Redo"), this);
+    redoAct->setShortcuts(QKeySequence::Redo);
+    redoAct->setStatusTip(tr("恢复(Ctrl+Y)"));
+    connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
 
-//    cutAct->setShortcuts(QKeySequence::Cut);
-//    cutAct->setStatusTip(tr("Cut the current selection's contents to the "
-//                            "clipboard"));
-//    connect(cutAct, SIGNAL(triggered()), textEdit, SLOT(cut()));
+    cutAct = new QAction(QIcon(":/images/cut.png"), tr("Cu&t"), this);
+    cutAct->setShortcuts(QKeySequence::Cut);
+    cutAct->setStatusTip(tr("Cut the current selection's contents to the "
+                            "clipboard"));
+    connect(cutAct, SIGNAL(triggered()), this, SLOT(cut()));
 
-//    copyAct = new QAction(QIcon(":/images/copy.png"), tr("&Copy"), this);
-//    copyAct->setShortcuts(QKeySequence::Copy);
-//    copyAct->setStatusTip(tr("Copy the current selection's contents to the "
-//                             "clipboard"));
-//    connect(copyAct, SIGNAL(triggered()), textEdit, SLOT(copy()));
+    copyAct = new QAction(QIcon(":/images/copy.png"), tr("&Copy"), this);
+    copyAct->setShortcuts(QKeySequence::Copy);
+    copyAct->setStatusTip(tr("Copy the current selection's contents to the "
+                             "clipboard"));
+    connect(copyAct, SIGNAL(triggered()), this, SLOT(copy()));
 
-//    pasteAct = new QAction(QIcon(":/images/paste.png"), tr("&Paste"), this);
-//    pasteAct->setShortcuts(QKeySequence::Paste);
-//    pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
-//                              "selection"));
-//    connect(pasteAct, SIGNAL(triggered()), textEdit, SLOT(paste()));
+    pasteAct = new QAction(QIcon(":/images/paste.png"), tr("&Paste"), this);
+    pasteAct->setShortcuts(QKeySequence::Paste);
+    pasteAct->setStatusTip(tr("Paste the clipboard's contents into the current "
+                              "selection"));
+    connect(pasteAct, SIGNAL(triggered()), this, SLOT(paste()));
 
-    aboutAct = new QAction(tr("&About"), this);
+    removeAct = new QAction(QIcon(":/images/remove.png"), tr("&Remove"), this);
+    removeAct->setShortcuts(QKeySequence::Delete);
+    removeAct->setStatusTip(tr("Paste the clipboard's contents into the current "
+                              "selection"));
+    connect(removeAct, SIGNAL(triggered()), this, SLOT(remove()));
+
+
+    aboutAct = new QAction(QIcon(":/images/about.png"), tr("&About"), this);
     aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
-
-
-//    cutAct->setEnabled(false);
-
-//    copyAct->setEnabled(false);
-//    connect(textEdit, SIGNAL(copyAvailable(bool)),
-//            cutAct, SLOT(setEnabled(bool)));
-//    connect(textEdit, SIGNAL(copyAvailable(bool)),
-//            copyAct, SLOT(setEnabled(bool)));
 
 
     QAction *act = new QAction(QIcon(":/images/graph/Btn0.bmp"), tr("常开开关"), this);
@@ -155,9 +163,13 @@ void MainWindow::createMenus()
     fileMenu->addAction(exitAct);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
-//    editMenu->addAction(cutAct);
-//    editMenu->addAction(copyAct);
-//    editMenu->addAction(pasteAct);
+    editMenu->addAction(undoAct);
+    editMenu->addAction(redoAct);
+    editMenu->addSeparator();
+    editMenu->addAction(cutAct);
+    editMenu->addAction(copyAct);
+    editMenu->addAction(pasteAct);
+    editMenu->addAction(removeAct);
 
     menuBar()->addSeparator();
 
@@ -175,9 +187,12 @@ void MainWindow::createToolBars()
     fileToolBar->addAction(saveAct);
 
     editToolBar = addToolBar(tr("Edit"));
-//    editToolBar->addAction(cutAct);
-//    editToolBar->addAction(copyAct);
-//    editToolBar->addAction(pasteAct);
+    editToolBar->addAction(undoAct);
+    editToolBar->addAction(redoAct);
+    editToolBar->addAction(cutAct);
+    editToolBar->addAction(copyAct);
+    editToolBar->addAction(pasteAct);
+    editToolBar->addAction(removeAct);
 
     buildToolBar = addToolBar(tr("Build"));
     buildToolBar->addAction(buildAct);
@@ -225,7 +240,7 @@ void MainWindow::SetupMdiArea()
     child->resize(700,400);
 
     child->show();
-    //m_graphWid->setWindowState(Qt::WindowMaximized);
+    m_graphWid->setWindowState(Qt::WindowMaximized);
 
 
 
@@ -268,6 +283,36 @@ void MainWindow::about()
 
 }
 
+void MainWindow::redo()
+{
+    m_graphWid->m_graphTable->redo();
+}
+
+void MainWindow::undo()
+{
+    m_graphWid->m_graphTable->undo();
+}
+
+void MainWindow::copy()
+{
+    m_graphWid->m_graphTable->copy();
+}
+
+void MainWindow::paste()
+{
+    m_graphWid->m_graphTable->paste();
+}
+
+void MainWindow::cut()
+{
+    m_graphWid->m_graphTable->cut();
+}
+
+void MainWindow::remove()
+{
+    m_graphWid->m_graphTable->remove();
+}
+
 void MainWindow::drawGraph()
 {
     int index = m_graphActList.indexOf((QAction *)sender());
@@ -282,7 +327,7 @@ void MainWindow::drawGraph()
             emit sig_inputPara("", 0, "", HorizontalLine);
             break;
         case 7:
-            emit sig_inputPara("", 0, "", verticalLine);
+            emit sig_inputPara("", 0, "", verticalLine1);
             break;
         case 8:
             emit sig_inputPara("", 0, "", ReverseLogic);
@@ -298,6 +343,11 @@ void MainWindow::drawGraph()
 
 void MainWindow::buildGraph()
 {
+    m_bottomW->clear();
     m_graphWid->BuildGraph();
 }
 
+void MainWindow::slt_InsertBottomRowText(QString text)
+{
+    m_bottomW->insertPlainText(text);
+}

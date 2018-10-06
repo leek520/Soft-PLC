@@ -2,6 +2,8 @@
 #define COMMON_H
 
 #include <QString>
+#define SCREEN_WIDTH    1200
+#define SCREEN_HEIGHT   700
 #define UNIT_WIDTH      80
 #define UNIT_HEIGH      60
 #define UNIT_W_FACTOR   3
@@ -9,7 +11,7 @@
 
 #define MAX_COL         12
 #define MAX_ROW         1000
-
+#define INIT_ROW        10
 /*****************************
  * 图元数据结构：梯形图梯级的存储结构采用两个层次的双向链表结构
 *****************************/
@@ -28,8 +30,10 @@ typedef struct _tElement
 
 enum GraphType
 {
-    NumLine,
-    verticalLine,
+    NumLine=1,
+    verticalLine1,
+    verticalLine2,
+
     HorizontalLine,
 
     InputOpen = 10,

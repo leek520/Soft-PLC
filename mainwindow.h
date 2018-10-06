@@ -50,14 +50,23 @@ private slots:
     bool saveAs();
     void about();
 
+    void redo();
+    void undo();
+    void copy();
+    void paste();
+    void cut();
+    void remove();
 
     void drawGraph();
 
     void buildGraph();
+
+    void slt_InsertBottomRowText(QString text);
 private :
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *helpMenu;
+
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
     QToolBar *graphToolBar;
@@ -69,9 +78,13 @@ private :
     QAction *saveAsAct;
     QAction *exitAct;
 
+    QAction *redoAct;
+    QAction *undoAct;
     QAction *cutAct;
     QAction *copyAct;
     QAction *pasteAct;
+    QAction *removeAct;
+
     QAction *aboutAct;
 
     QList <QAction *>m_graphActList;
@@ -102,7 +115,7 @@ class TextEdit : public QTextEdit
 public:
     TextEdit(QWidget *parent = 0) {}
     QSize sizeHint() const {
-        return QSize(200, 100);
+        return QSize(200, 150);
     }
 };
 #endif // MAINWINDOW_H
