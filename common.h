@@ -44,4 +44,6 @@ enum GraphType
     OutputNode,
     ReverseLogic,
 };
+enum OptType{Insert, Remove, CutPaste, CopyPaste};
+
 #endif // COMMON_H

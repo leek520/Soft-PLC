@@ -75,7 +75,9 @@ public:
     explicit GraphTable(QWidget *parent = 0);
     virtual ~ GraphTable(){}
     void InitTable();
+    void InitParament();
     void InsertRowGraph(int row);
+    void InsertRecordOpt(Element emt, OptType type, bool *isNew);
 
     void InsertGraphElement(Element emt);
     void RemoveGraphElement(int row, int col);
@@ -91,6 +93,7 @@ signals:
 private:
     void SetItemPixmap(GraphElement *graph);
     void RecordGraph(GraphElement *graph);
+
 private slots:
     void SelectionChanged();
 public slots:
@@ -110,8 +113,16 @@ private:
     int buildPos[MAX_ROW];
     int buildPreRow;
 
-    QTableWidgetSelectionRange m_ClipBorad;
-    int m_ClipType;
+    struct RecordBorad{
+        int curStep;
+        QList<QList<Element> > record;
+        QList<OptType> type;
+    }m_recordBorad;
+
+    struct ClipBorad{
+        int type;
+        QTableWidgetSelectionRange range;
+    }m_ClipBorad;
 };
 
 

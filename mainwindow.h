@@ -66,6 +66,7 @@ private :
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *helpMenu;
+    QMenu *buildMenu;
 
     QToolBar *fileToolBar;
     QToolBar *editToolBar;

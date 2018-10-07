@@ -51,6 +51,7 @@ GraphTable::GraphTable(QWidget *parent) :
 
 void GraphTable::InitTable()
 {
+    InitParament();
     setRowCount(INIT_ROW);
     setColumnCount(MAX_COL+1);
 
@@ -58,6 +59,36 @@ void GraphTable::InitTable()
         InsertSplitLine(i);
     }
     setCurrentCell(0,1);
+}
+
+void GraphTable::InitParament()
+{
+    m_recordBorad.curStep = 0;
+    m_recordBorad.record.clear();
+    m_recordBorad.type.clear();
+
+    m_ClipBorad.type = 0;
+}
+
+void GraphTable::InsertRecordOpt(Element emt, OptType type, bool *isNew)
+{
+    //检测是否覆盖
+    while (m_recordBorad.curStep > m_recordBorad.record.count()){
+        m_recordBorad.record.removeLast();
+        m_recordBorad.type.removeLast();
+    }
+    //记录
+    if (*isNew){
+        m_recordBorad.curStep++;
+        QList<Element> newOpt;
+        newOpt.append(emt);
+        m_recordBorad.record.append(newOpt);
+        m_recordBorad.type.append(type);
+    }else{
+        m_recordBorad.record.last().append(emt);
+    }
+
+    *isNew = false;
 }
 
 void GraphTable::InsertRowGraph(int row)
@@ -92,6 +123,7 @@ void GraphTable::SetItemPixmap(GraphElement *graph)
         oldPix = pix;
     }else{
         int oldType = m_emtList[row*MAX_COL+col-1].graphType;
+
         //如果画的是竖直线，则需要保留原有的图像
         if ((type == verticalLine1)
              || (type == verticalLine2)
@@ -160,21 +192,54 @@ void GraphTable::SelectionChanged()
 
 void GraphTable::redo()
 {
+    int i = 0;
+    QList<Element> emtList;
+    if (m_recordBorad.curStep == m_recordBorad.record.count()) return;
+    int step = m_recordBorad.curStep;
+    switch (m_recordBorad.type[step]) {
+    case Insert:
+        emtList =  m_recordBorad.record[step];
+        for (i=0;i<emtList.count();i++){
+           InsertGraphElement(emtList[i]);
+        }
 
+        break;
+    default:
+        break;
+    }
+    m_recordBorad.curStep++;
 }
 
 void GraphTable::undo()
 {
+    int i = 0;
+    int row, col;
+    QList<Element> emtList;
+    if (m_recordBorad.curStep == 0) return;
+    int step = m_recordBorad.curStep-1;
+    switch (m_recordBorad.type[step]) {
+    case Insert:
+        emtList =  m_recordBorad.record[step];
+        for (i=0;i<emtList.count();i++){
+           row = emtList[i].row;
+           col = emtList[i].col;
+           RemoveGraphElement(row, col);
+        }
 
+        break;
+    default:
+        break;
+    }
+    m_recordBorad.curStep--;
 }
 
 void GraphTable::copy()
 {
     QList<QTableWidgetSelectionRange> selectRange = this->selectedRanges();
     if (selectRange.count() == 1){
-        m_ClipBorad = selectRange[0];
+        m_ClipBorad.range = selectRange[0];
+        m_ClipBorad.type = 0;
     }
-    m_ClipType = 0;
 }
 
 void GraphTable::paste()
@@ -184,22 +249,22 @@ void GraphTable::paste()
     int row = curRow;
     int col = curCol;
     int i, j;
-    for (i=m_ClipBorad.topRow();i<=m_ClipBorad.bottomRow();i++){
-        for(j=m_ClipBorad.leftColumn();j<=m_ClipBorad.rightColumn();j++){
+    for (i=m_ClipBorad.range.topRow();i<=m_ClipBorad.range.bottomRow();i++){
+        for(j=m_ClipBorad.range.leftColumn();j<=m_ClipBorad.range.rightColumn();j++){
             int idx = i*MAX_COL+j-1;
             if (idx >= m_emtList.count()){
                 qDebug()<<"Paste blank";
                 break;
             }
-            row = curRow + i - m_ClipBorad.topRow();
-            col = curCol + j - m_ClipBorad.leftColumn();
+            row = curRow + i - m_ClipBorad.range.topRow();
+            col = curCol + j - m_ClipBorad.range.leftColumn();
             qDebug()<<QString("Paste (%1,%2) to (%3,%4)").arg(i).arg(j).arg(row).arg(col);
             m_emtList[idx].row = row;
             m_emtList[idx].col = col;
             InsertGraphElement(m_emtList[idx]);
 
             //如果是剪切，则删除原来位置内容
-            if (m_ClipType == 1){
+            if (m_ClipBorad.type == 1){
                 Element emt={i,j,0,0,0,false,false,"",""};
                 InsertGraphElement(emt);
                 if (j == columnCount()-1){
@@ -221,15 +286,15 @@ void GraphTable::paste()
     //设置粘贴后的区域全部选中
     setRangeSelected(QTableWidgetSelectionRange(curRow, curCol, row, col), true);
 
-    if (m_ClipType == 1){
-        m_ClipType = 0;
+    if (m_ClipBorad.type == 1){
+        m_ClipBorad.type = 0;
     }
 }
 
 void GraphTable::cut()
 {
     copy();
-    m_ClipType = 1;
+    m_ClipBorad.type = 1;
 }
 void GraphTable::remove()
 {
@@ -342,7 +407,6 @@ void GraphTable::InsertGraphElement(Element emt)
     SetItemPixmap(graph);
     //3.记录画的每一个图
     RecordGraph(graph);
-
 }
 
 void GraphTable::RemoveGraphElement(int row, int col)
@@ -391,7 +455,7 @@ void GraphWindow::slt_inputPara(QString name, int index, QString mark, int type)
     Element emt={0,0,0,0,0,false,false,"",""};
     int curRow = m_graphTable->currentRow();
     int curCol = m_graphTable->currentColumn();
-
+    bool isNew = true;
     m_graphTable->InsertRowGraph(curRow);
     switch (type) {
     //如果要画竖直线，则分两步，先画下一行
@@ -403,6 +467,7 @@ void GraphWindow::slt_inputPara(QString name, int index, QString mark, int type)
         emt.row = curRow + 1;
         emt.graphType =  verticalLine2;
         m_graphTable->InsertGraphElement(emt);
+        m_graphTable->InsertRecordOpt(emt, Insert, &isNew);
         emt.upFlag = false;
         emt.dnFlag = true;
         break;
@@ -414,6 +479,7 @@ void GraphWindow::slt_inputPara(QString name, int index, QString mark, int type)
             emt.row = curRow;
             emt.graphType =  HorizontalLine;
             m_graphTable->InsertGraphElement(emt);
+            m_graphTable->InsertRecordOpt(emt, Insert, &isNew);
         }
         curRow = m_graphTable->currentRow();
         curCol = m_graphTable->currentColumn();
@@ -429,7 +495,7 @@ void GraphWindow::slt_inputPara(QString name, int index, QString mark, int type)
     emt.graphType = type;
     emt.mark = mark;
     m_graphTable->InsertGraphElement(emt);
-
+    m_graphTable->InsertRecordOpt(emt, Insert, &isNew);
 
 }
 
@@ -469,6 +535,8 @@ void GraphWindow::OpenGraph(QString name)
 
     }
     fileRead.close();
+
+    m_graphTable->InitParament();
 }
 void GraphWindow::SaveGraph(QString name)
 {

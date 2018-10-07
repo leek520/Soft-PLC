@@ -171,6 +171,9 @@ void MainWindow::createMenus()
     editMenu->addAction(pasteAct);
     editMenu->addAction(removeAct);
 
+    buildMenu = menuBar()->addMenu(tr("&Build"));
+    buildMenu->addAction(buildAct);
+
     menuBar()->addSeparator();
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -197,8 +200,10 @@ void MainWindow::createToolBars()
     buildToolBar = addToolBar(tr("Build"));
     buildToolBar->addAction(buildAct);
 
+    addToolBarBreak(Qt::TopToolBarArea);
 
     graphToolBar = addToolBar(tr("Graph"));
+    graphToolBar->addWidget(new QLabel("装置"));
     for(int i=0;i<m_graphActList.count();i++){
         graphToolBar->addAction(m_graphActList[i]);
     }
