@@ -5,7 +5,6 @@ int GraphFB::g_unitHeight = UNIT_HEIGH;
 
 GraphFB::GraphFB(Element element) : emt(element)
 {
-
     conColor = QColor(Qt::black);
     entColor = QColor(Qt::black);
 }
@@ -20,7 +19,7 @@ GraphFB::~GraphFB()
 
 }
 
-void GraphFB::reDraw()
+void GraphFB::drawGraph()
 {
     int width = g_unitWidth * emt.width;
     int height = g_unitHeight * emt.height;
@@ -63,12 +62,14 @@ void GraphFB::reDraw()
         break;
 
     case HorizontalLine:
+        painter.setPen(QPen(conColor, g_unitWidth/UNIT_WIDTH));
         painter.drawLine(p1, p2);
         break;
     case ReverseLogic:
     {
         QPointF offset(width/6, height/6);
         QPointF p0(width/2, height-fh);
+        painter.setPen(QPen(conColor, g_unitWidth/UNIT_WIDTH));
         painter.drawLine(p1, p2);
         painter.drawLine(p0-offset, p0+offset);
         break;
@@ -86,8 +87,10 @@ void GraphFB::reDraw()
 
         QPointF offset(width/30, -1*height/20);
 
+        painter.setPen(QPen(conColor, g_unitWidth/UNIT_WIDTH));
         painter.drawLine(p1, p3);
         painter.drawLine(p2, p4);
+        painter.setPen(QPen(entColor, g_unitWidth/UNIT_WIDTH));
         painter.drawLine(p5, p6);
         painter.drawLine(p7, p8);
 

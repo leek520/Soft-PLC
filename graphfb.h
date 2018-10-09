@@ -21,13 +21,13 @@ public:
     GraphFB(Element element);
     GraphFB(int row, int col);
     virtual ~GraphFB();
-    void reDraw();
+    void drawGraph();
 public:
     static int g_unitWidth;
     static int g_unitHeight;
     Element emt;
     QPixmap pixMap;  //用作绘图设备
-private:
+public:
     QColor conColor;
     QColor entColor;
 };

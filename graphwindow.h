@@ -79,8 +79,9 @@ public:
     void InsertRecordOpt(Element emt, OptType type, bool *isNew);
 
     void InsertGraph(Element emt);
-    void BuildGraph();
 
+    void BuildGraph();
+    void RunGraph(bool enable);
 signals:
     void sig_InsertBottomRowText(QString text);
 
@@ -90,10 +91,16 @@ private:
     void RecordGraph(GraphFB *graph);
     void RemoveGraph(int row, int col);
     GraphFB *GetGraph(int row, int col);
-    void DrawGraph(GraphFB *graph);
+    void ReDrawGraph(GraphFB *graph);
     void SetCurrentGraph(int row, int col);
     int DealNode(int row, int col);
 
+    //To do:
+    /*
+    1.用户插入图形合法性校验
+    2.编译时去除空白行
+    3.编译时合法性校验
+    */
 public slots:
     void slt_inputPara(QString name, int index, QString mark, int type);
     void redo();
@@ -138,7 +145,6 @@ signals:
 
 public slots:
 
-    void BuildGraph();
     void SaveGraph(QString name);
     void OpenGraph(QString name);
 public:

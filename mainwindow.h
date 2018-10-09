@@ -64,6 +64,7 @@ private slots:
     void drawGraph();
 
     void buildGraph();
+    void runGraph();
 
     void slt_InsertBottomRowText(QString text);
 private :
@@ -101,7 +102,7 @@ private :
 
     QList <QAction *>m_graphActList;
     QAction *buildAct;
-
+    QAction *runAct;
 
     QDockWidget *m_dockW;
     ListWidget *m_leftW;

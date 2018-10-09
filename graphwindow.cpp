@@ -54,7 +54,7 @@ void GraphTable::InitTable()
     setRowCount(INIT_ROW);
     setColumnCount(MAX_COL+1);
 
-    for (int i=0;i<rowCount();i++){
+    for (int i=0;i<INIT_ROW;i++){
         InsertSplitLine(i);
     }
     setCurrentCell(0,1);
@@ -94,13 +94,13 @@ void GraphTable::InsertGraph(Element emt)
 {
     GraphFB *graph = GetGraph(emt.row, emt.col);
     graph->emt = emt;
-    DrawGraph(graph);
+    ReDrawGraph(graph);
 }
 void GraphTable::InsertSplitLine(int row)
 {
     GraphFB *graph = GetGraph(row, 0);
     graph->emt.graphType = NumLine;
-    DrawGraph(graph);
+    ReDrawGraph(graph);
 }
 GraphFB *GraphTable::GetGraph(int row, int col)
 {
@@ -121,10 +121,11 @@ GraphFB *GraphTable::GetGraph(int row, int col)
     return graph;
 }
 
-void GraphTable::DrawGraph(GraphFB *graph)
+void GraphTable::ReDrawGraph(GraphFB *graph)
 {
-    graph->reDraw();
+    graph->drawGraph();
 
+    int type = graph->emt.graphType;
     int row = graph->emt.row;
     int col = graph->emt.col;
 
@@ -140,6 +141,7 @@ void GraphTable::DrawGraph(GraphFB *graph)
     item->setData(Qt::DisplayRole,
                   QVariant::fromValue<QPixmap>(graph->pixMap));
     item->setToolTip(mark);
+
 }
 
 void GraphTable::SetCurrentGraph(int row, int col)
@@ -154,11 +156,15 @@ void GraphTable::SetCurrentGraph(int row, int col)
 void GraphTable::InsertNewRow(int row, int col)
 {
     if (col == 0) return;
-    //多两个空行
-    if (row >= INIT_ROW-2){
-        this->insertRow(row);
-        InsertSplitLine(row);
+    //始终末尾多两个空行
+    int rowCnt = rowCount();
+    if (row >= rowCnt - 2){
+        for (int i=row;i<rowCnt-1;i++){
+            this->insertRow(i);
+            InsertSplitLine(i);
+        }
     }
+
 
 }
 
@@ -189,9 +195,9 @@ void GraphTable::RemoveGraph(int row, int col)
     if (graph->emt.dnFlag){
         graph->emt.dnFlag = false;
         m_graphList[idx+MAX_COL]->emt.upFlag = false;
-        DrawGraph(m_graphList[idx+MAX_COL]);
+        ReDrawGraph(m_graphList[idx+MAX_COL]);
     }
-    DrawGraph(graph);
+    ReDrawGraph(graph);
     //如果是最后一个，则直接删除
     if (idx == m_graphList.count()-1){
         m_graphList.removeAt(idx);
@@ -212,16 +218,16 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
         if (curCol < 2) return;
         graph = GetGraph(curRow, curCol);
         graph->emt.dnFlag = true;
-        DrawGraph(graph);
+        ReDrawGraph(graph);
         graph = GetGraph(curRow+1, curCol);
         graph->emt.upFlag = true;
-        DrawGraph(graph);
+        ReDrawGraph(graph);
         SetCurrentGraph(curRow, curCol-1);
         break;
     case HorizontalLine:
         graph = GetGraph(curRow, curCol);
         graph->emt.graphType =  type;
-        DrawGraph(graph);
+        ReDrawGraph(graph);
         SetCurrentGraph(curRow, curCol);
         break;
     case InputOpen:
@@ -232,21 +238,21 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
         graph->emt.name =  name;
         graph->emt.index =  index;
         graph->emt.mark =  mark;
-        DrawGraph(graph);
+        ReDrawGraph(graph);
         SetCurrentGraph(curRow, curCol);
         break;
     case OutputNode:
         for(i=curCol;i<MAX_COL;i++){
             graph = GetGraph(curRow, i);
             graph->emt.graphType =  HorizontalLine;
-            DrawGraph(graph);
+            ReDrawGraph(graph);
         }
         graph = GetGraph(curRow, i);
         graph->emt.graphType =  type;
         graph->emt.name =  name;
         graph->emt.index =  index;
         graph->emt.mark =  mark;
-        DrawGraph(graph);
+        ReDrawGraph(graph);
         SetCurrentGraph(curRow, i);
         break;
     default:
@@ -332,12 +338,12 @@ void GraphTable::paste()
             graph->emt.row = row;
             graph->emt.col = col;
             graph->emt.upFlag = false;  //upflag不复制
-            DrawGraph(graph);
+            ReDrawGraph(graph);
 
             if (graph->emt.dnFlag){
                 GraphFB *graph = GetGraph(row+1, col);
                 graph->emt.upFlag = true;
-                DrawGraph(graph);
+                ReDrawGraph(graph);
             }
 
             //如果是剪切，则删除原来位置内容
@@ -395,7 +401,7 @@ void GraphTable::zoomin()
 
     //重绘所有graph
     for (int i=0; i<m_graphList.count();i++){
-        DrawGraph(m_graphList[i]);
+        ReDrawGraph(m_graphList[i]);
     }
 }
 
@@ -419,7 +425,7 @@ void GraphTable::zoomout()
 
     //重绘所有graph
     for (int i=0; i<m_graphList.count();i++){
-        DrawGraph(m_graphList[i]);
+        ReDrawGraph(m_graphList[i]);
     }
 
 }
@@ -505,6 +511,23 @@ void GraphTable::BuildGraph()
 
 }
 
+void GraphTable::RunGraph(bool enable)
+{
+    for (int i=0;i<m_graphList.count();i++){
+        if (enable){
+            if (m_graphList[i]->emt.name == "Y"){
+                m_graphList[i]->entColor = Qt::blue;
+            }
+            m_graphList[i]->conColor = Qt::red;
+        }else{
+            m_graphList[i]->entColor = Qt::black;
+            m_graphList[i]->conColor = Qt::black;
+        }
+
+        ReDrawGraph(m_graphList[i]);
+    }
+}
+
 GraphWindow::GraphWindow(QWidget *parent) :
     QWidget(parent)
 {
@@ -521,11 +544,6 @@ GraphWindow::GraphWindow(QWidget *parent) :
 }
 
 
-void GraphWindow::BuildGraph()
-{
-    //打印
-    m_graphTable->BuildGraph();
-}
 void GraphWindow::OpenGraph(QString name)
 {
     QFile fileRead(name);

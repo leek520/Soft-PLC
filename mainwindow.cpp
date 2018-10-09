@@ -153,9 +153,14 @@ void MainWindow::createActions()
     m_graphActList.append(act);
 
 
-    buildAct = new QAction(QIcon(":/images/build.png"), tr("编译"), this);
-    buildAct->setStatusTip(tr("编译"));
+    buildAct = new QAction(QIcon(":/images/build.png"), tr("Build"), this);
+    buildAct->setStatusTip(tr("Build"));
     connect(buildAct, SIGNAL(triggered()), this, SLOT(buildGraph()));
+
+    runAct = new QAction(QIcon(":/images/run.png"), tr("Run"), this);
+    runAct->setStatusTip(tr("Run"));
+    connect(runAct, SIGNAL(triggered()), this, SLOT(runGraph()));
+    runAct->setCheckable(true);
 
 }
 
@@ -183,6 +188,7 @@ void MainWindow::createMenus()
 
     buildMenu = menuBar()->addMenu(tr("&Build"));
     buildMenu->addAction(buildAct);
+    buildMenu->addAction(runAct);
 
 
     viewMenu = menuBar()->addMenu(tr("&View"));
@@ -220,6 +226,7 @@ void MainWindow::createToolBars()
 
     buildToolBar = addToolBar(tr("Build"));
     buildToolBar->addAction(buildAct);
+    buildToolBar->addAction(runAct);
 
     addToolBarBreak(Qt::TopToolBarArea);
 
@@ -390,7 +397,16 @@ void MainWindow::drawGraph()
 void MainWindow::buildGraph()
 {
     m_bottomW->clear();
-    m_graphWid->BuildGraph();
+    m_graphWid->m_graphTable->BuildGraph();
+}
+
+void MainWindow::runGraph()
+{
+    if (runAct->isChecked()){
+        m_graphWid->m_graphTable->RunGraph(true);
+    }else{
+        m_graphWid->m_graphTable->RunGraph(false);
+    }
 }
 
 void MainWindow::slt_InsertBottomRowText(QString text)
