@@ -17,9 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_inputW = new InputWindow();
     connect(this, SIGNAL(sig_inputPara(QString,int,QString,int)),
-            m_graphWid,SLOT(slt_inputPara(QString,int,QString,int)));
+            m_graphWid->m_graphTable,SLOT(slt_inputPara(QString,int,QString,int)));
     connect(m_inputW, SIGNAL(sig_inputPara(QString,int,QString,int)),
-            m_graphWid,SLOT(slt_inputPara(QString,int,QString,int)));
+            m_graphWid->m_graphTable,SLOT(slt_inputPara(QString,int,QString,int)));
     connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertBottomRowText(QString)),
             this, SLOT(slt_InsertBottomRowText(QString)));
 }
@@ -290,21 +290,25 @@ void MainWindow::about()
 
 void MainWindow::redo()
 {
+    if (this->focusWidget() != m_graphWid->m_graphTable) return;
     m_graphWid->m_graphTable->redo();
 }
 
 void MainWindow::undo()
 {
+    if (this->focusWidget() != m_graphWid->m_graphTable) return;
     m_graphWid->m_graphTable->undo();
 }
 
 void MainWindow::copy()
 {
+    if (this->focusWidget() != m_graphWid->m_graphTable) return;
     m_graphWid->m_graphTable->copy();
 }
 
 void MainWindow::paste()
 {
+    if (this->focusWidget() != m_graphWid->m_graphTable) return;
     m_graphWid->m_graphTable->paste();
 }
 
@@ -315,6 +319,7 @@ void MainWindow::cut()
 
 void MainWindow::remove()
 {
+    if (this->focusWidget() != m_graphWid->m_graphTable) return;
     m_graphWid->m_graphTable->remove();
 }
 
@@ -332,7 +337,7 @@ void MainWindow::drawGraph()
             emit sig_inputPara("", 0, "", HorizontalLine);
             break;
         case 7:
-            emit sig_inputPara("", 0, "", verticalLine1);
+            emit sig_inputPara("", 0, "", verticalLine);
             break;
         case 8:
             emit sig_inputPara("", 0, "", ReverseLogic);

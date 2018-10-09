@@ -45,8 +45,6 @@ GraphTable::GraphTable(QWidget *parent) :
                   "QTableWidget::item:selected {background-color: rgb(0,0,255,100);}");
 
     setItemDelegate(new GraphItemDelegate());
-
-    connect(this, SIGNAL(itemSelectionChanged()), this, SLOT(SelectionChanged()));
 }
 
 void GraphTable::InitTable()
@@ -91,8 +89,70 @@ void GraphTable::InsertRecordOpt(Element emt, OptType type, bool *isNew)
     *isNew = false;
 }
 
-void GraphTable::InsertRowGraph(int row)
+void GraphTable::InsertGraph(Element emt)
 {
+    GraphFB *graph = GetGraph(emt.row, emt.col);
+    graph->emt = emt;
+    DrawGraph(graph);
+}
+void GraphTable::InsertSplitLine(int row)
+{
+    GraphFB *graph = GetGraph(row, 0);
+    graph->emt.graphType = NumLine;
+    DrawGraph(graph);
+}
+GraphFB *GraphTable::GetGraph(int row, int col)
+{
+    InsertNewRow(row, col);
+
+    GraphFB *graph = NULL;
+    int idx = CalIdx(row, col);
+    if (col == 0){
+        graph = new GraphFB(row, col);
+    }else{
+        if (idx < m_graphList.count()){
+            graph = m_graphList[idx];
+        }else{
+            graph = new GraphFB(row, col);
+            RecordGraph(graph);
+        }
+    }
+    return graph;
+}
+
+void GraphTable::DrawGraph(GraphFB *graph)
+{
+    graph->reDraw();
+
+    int row = graph->emt.row;
+    int col = graph->emt.col;
+
+    QString mark = graph->emt.mark;
+
+    QTableWidgetItem *item;
+
+    item = this->item(row, col);
+    if (item == NULL){
+        item = new QTableWidgetItem();
+        setItem(row, col, item);
+    }
+    item->setData(Qt::DisplayRole,
+                  QVariant::fromValue<QPixmap>(graph->pixMap));
+    item->setToolTip(mark);
+}
+
+void GraphTable::SetCurrentGraph(int row, int col)
+{
+    if (col == MAX_COL){
+        setCurrentCell(row+1, 1);
+    }else{
+        setCurrentCell(row, col+1);
+    }
+}
+
+void GraphTable::InsertNewRow(int row, int col)
+{
+    if (col == 0) return;
     //多两个空行
     if (row >= INIT_ROW-2){
         this->insertRow(row);
@@ -101,94 +161,98 @@ void GraphTable::InsertRowGraph(int row)
 
 }
 
-
-void GraphTable::SetItemPixmap(GraphElement *graph)
+void GraphTable::RecordGraph(GraphFB *graph)
 {
-    int type = graph->element.graphType;
-    int row = graph->element.row;
-    int col = graph->element.col;
-
-    QString mark = graph->element.mark;
-
-    QTableWidgetItem *item;
-
-    QPixmap oldPix;
-
-    item = this->item(row, col);
-    if (item == NULL){
-        item = new QTableWidgetItem();
-        setItem(row, col, item);
-        QPixmap pix(UNIT_WIDTH, UNIT_HEIGH);
-        pix.fill(Qt::white);
-        oldPix = pix;
-    }else{
-        int oldType = m_emtList[row*MAX_COL+col-1].graphType;
-
-        //如果画的是竖直线，则需要保留原有的图像
-        if ((type == verticalLine1)
-             || (type == verticalLine2)
-             || (oldType== verticalLine1)
-             || (oldType == verticalLine2)){
-            oldPix = item->data(Qt::DisplayRole).value<QPixmap>();
-        }else{
-            QPixmap pix(UNIT_WIDTH, UNIT_HEIGH);
-            pix.fill(Qt::white);
-            oldPix = pix;
-        }
-    }
-    QPixmap pixmap = graph->DrawPixMap(oldPix);
-    item->setData(Qt::DisplayRole,
-                  QVariant::fromValue<QPixmap>(pixmap));
-    item->setToolTip(mark);
-
-    //画完图自动转下一个单元格
-    if (col == columnCount()-1){
-       setCurrentCell(row+1, 1);
-    }else{
-        if ((type == verticalLine1)
-           || (type == verticalLine2)){
-
-        }else{
-            setCurrentCell(row, col+1);
-        }
-    }
-}
-
-void GraphTable::RecordGraph(GraphElement *graph)
-{
-    int row = graph->element.row;
-    int col = graph->element.col;
-    if (col==0) return;
+    int row = graph->emt.row;
+    int col = graph->emt.col;
+    if (col == 0) return;
     //动态申请二维数组内存
-    int emtCnt = m_emtList.count();
-    int emtCur = row * MAX_COL + (col-1);
-    for(int i=emtCnt;i<=emtCur;i++){
-        Element emt={i/MAX_COL,i%MAX_COL+1,0,0,0,false,false,"",""};
-        m_emtList.append(emt);
+    int emtCnt = m_graphList.count();
+    int emtCur = CalIdx(row, col);;
+    for(int i=emtCnt;i<emtCur;i++){
+        Element emt={i/MAX_COL,i%MAX_COL+1,1,1,0,0,0,false,false,"",""};
+        GraphFB *gfb = new GraphFB(emt);
+        m_graphList.append(gfb);
     }
-    //是实际的图形
-    graph->element.dnFlag = graph->element.dnFlag | m_emtList[emtCur].dnFlag;
-    graph->element.upFlag = graph->element.upFlag | m_emtList[emtCur].upFlag;
-    int type = graph->element.graphType;
-    if (m_emtList[emtCur].graphType != 0){
-        if ((type == verticalLine1)
-            || (type == verticalLine2)){
-            m_emtList[emtCur].dnFlag = graph->element.dnFlag;
-            m_emtList[emtCur].upFlag = graph->element.upFlag;
-            return;
-        }
-    }
-
-    //记录当前单元格
-    memcpy(&m_emtList[emtCur], &(graph->element), sizeof(Element));
-
-
+    m_graphList.append(graph);
 }
 
-void GraphTable::SelectionChanged()
+void GraphTable::RemoveGraph(int row, int col)
 {
+    if (col == 0) return;
+    int idx = CalIdx(row, col);
+    if (idx >= m_graphList.count()) return;
+
+    GraphFB *graph = m_graphList[idx];
+    graph->emt.graphType = NoneGraph;
+    if (graph->emt.dnFlag){
+        graph->emt.dnFlag = false;
+        m_graphList[idx+MAX_COL]->emt.upFlag = false;
+        DrawGraph(m_graphList[idx+MAX_COL]);
+    }
+    DrawGraph(graph);
+    //如果是最后一个，则直接删除
+    if (idx == m_graphList.count()-1){
+        m_graphList.removeAt(idx);
+    }
+}
+
+
+void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
+{
+    int i = 0;
+    int curRow = currentRow();
+    int curCol = currentColumn();
+    GraphFB *graph = NULL;
+
+    switch (type) {
+    //如果要画竖直线，则分两步，先画下一行
+    case verticalLine:
+        if (curCol < 2) return;
+        graph = GetGraph(curRow, curCol);
+        graph->emt.dnFlag = true;
+        DrawGraph(graph);
+        graph = GetGraph(curRow+1, curCol);
+        graph->emt.upFlag = true;
+        DrawGraph(graph);
+        SetCurrentGraph(curRow, curCol-1);
+        break;
+    case HorizontalLine:
+        graph = GetGraph(curRow, curCol);
+        graph->emt.graphType =  type;
+        DrawGraph(graph);
+        SetCurrentGraph(curRow, curCol);
+        break;
+    case InputOpen:
+    case InputClose:
+        graph = GetGraph(curRow, curCol);
+        graph->emt.graphType =  type;
+        graph->emt.name =  name;
+        graph->emt.index =  index;
+        graph->emt.mark =  mark;
+        DrawGraph(graph);
+        SetCurrentGraph(curRow, curCol);
+        break;
+    case OutputNode:
+        for(i=curCol;i<MAX_COL;i++){
+            graph = GetGraph(curRow, i);
+            graph->emt.graphType =  HorizontalLine;
+            DrawGraph(graph);
+        }
+        graph = GetGraph(curRow, i);
+        graph->emt.graphType =  type;
+        graph->emt.name =  name;
+        graph->emt.index =  index;
+        graph->emt.mark =  mark;
+        DrawGraph(graph);
+        SetCurrentGraph(curRow, i);
+        break;
+    default:
+        break;
+    }
 
 }
+
 
 void GraphTable::redo()
 {
@@ -200,7 +264,7 @@ void GraphTable::redo()
     case Insert:
         emtList =  m_recordBorad.record[step];
         for (i=0;i<emtList.count();i++){
-           InsertGraphElement(emtList[i]);
+           //InsertGraphElement(emtList[i]);
         }
 
         break;
@@ -223,7 +287,7 @@ void GraphTable::undo()
         for (i=0;i<emtList.count();i++){
            row = emtList[i].row;
            col = emtList[i].col;
-           RemoveGraphElement(row, col);
+           //RemoveGraphElement(row, col);
         }
 
         break;
@@ -252,21 +316,21 @@ void GraphTable::paste()
     for (i=m_ClipBorad.range.topRow();i<=m_ClipBorad.range.bottomRow();i++){
         for(j=m_ClipBorad.range.leftColumn();j<=m_ClipBorad.range.rightColumn();j++){
             int idx = i*MAX_COL+j-1;
-            if (idx >= m_emtList.count()){
-                qDebug()<<"Paste blank";
-                break;
-            }
+//            if (idx >= m_emtList.count()){
+//                qDebug()<<"Paste blank";
+//                break;
+//            }
             row = curRow + i - m_ClipBorad.range.topRow();
             col = curCol + j - m_ClipBorad.range.leftColumn();
             qDebug()<<QString("Paste (%1,%2) to (%3,%4)").arg(i).arg(j).arg(row).arg(col);
-            m_emtList[idx].row = row;
-            m_emtList[idx].col = col;
-            InsertGraphElement(m_emtList[idx]);
+            //m_emtList[idx].row = row;
+            //m_emtList[idx].col = col;
+            //InsertGraphElement(m_emtList[idx]);
 
             //如果是剪切，则删除原来位置内容
             if (m_ClipBorad.type == 1){
                 Element emt={i,j,0,0,0,false,false,"",""};
-                InsertGraphElement(emt);
+                //InsertGraphElement(emt);
                 if (j == columnCount()-1){
                     setRangeSelected(QTableWidgetSelectionRange(i+1, 1, i+2, 2), false);
                 }else{
@@ -298,40 +362,29 @@ void GraphTable::cut()
 }
 void GraphTable::remove()
 {
+
     int row = currentRow();
     int col = currentColumn();
-    RemoveGraphElement(row, col);
-}
-void GraphTable::InsertSplitLine(int row)
-{
-    Element emt={0,0,0,0,0,false,false,"",""};
-    emt.col = 0;
-    emt.row = row;
-    emt.name = "";
-    emt.graphType = NumLine;
-
-    InsertGraphElement(emt);
+    RemoveGraph(row, col);
 }
 
 //此处传入的row和col不是窗口中的实际坐标，而是列-1。
 int GraphTable::DealNode(int row, int col)
 {
     int idx = row * MAX_COL + col;
-    if (idx >= m_emtList.count()) return -1;
+    if (idx >= m_graphList.count()) return -1;
     if ((row >= MAX_ROW) | (row < 0)) return -1;
     if ((col >= MAX_COL) | (col < 0)) return -1;
 
 
     //是否为结尾
-    if ((m_emtList[idx].graphType == 0)
-        || (m_emtList[idx].graphType == verticalLine1)
-        || (m_emtList[idx].graphType == verticalLine2)){
+    if (m_graphList[idx]->emt.graphType == 0){
         DealNode(row-1, buildPos[row-1]);
         return 1;
     }
 
     //是否要转上一行：条件=upflag和已经处理完
-    if (m_emtList[idx].upFlag){
+    if (m_graphList[idx]->emt.upFlag){
         if (buildPos[row-1] <= col){
             DealNode(row-1, buildPos[row-1]);
             if (buildPos[row-1] > col){
@@ -345,8 +398,8 @@ int GraphTable::DealNode(int row, int col)
     m_buildTrail.append(QPoint(row, col));
     QString text = QString("Pos:(%1,%2), %3%4")
                     .arg(row).arg(col)
-                    .arg(m_emtList[idx].name)
-                    .arg(m_emtList[idx].index);
+                    .arg(m_graphList[idx]->emt.name)
+                    .arg(m_graphList[idx]->emt.index);
     qDebug()<<text;
 
     emit sig_InsertBottomRowText(text + "\n");
@@ -358,9 +411,9 @@ int GraphTable::DealNode(int row, int col)
         return 1;
     }
 
-    if (idx+1 >= m_emtList.count()) return 1;
+    if (idx+1 >= m_graphList.count()) return 1;
 
-    if (m_emtList[idx+1].dnFlag){
+    if (m_graphList[idx+1]->emt.dnFlag){
         buildPreRow = row+1;
         DealNode(row+1, buildPos[row+1]);
     }else{
@@ -390,49 +443,6 @@ void GraphTable::BuildGraph()
     }
 
 }
-void GraphTable::keyPressEvent(QKeyEvent *event)
-{
-    //如果按下delete
-    if(event->key() == Qt::Key_Delete){
-
-        return;
-    }
-
-}
-void GraphTable::InsertGraphElement(Element emt)
-{
-    //1.创建对象
-    GraphElement *graph = new GraphElement(emt);
-    //2.画图
-    SetItemPixmap(graph);
-    //3.记录画的每一个图
-    RecordGraph(graph);
-}
-
-void GraphTable::RemoveGraphElement(int row, int col)
-{
-    int idx = row*MAX_COL+col-1;
-    if (idx >= m_emtList.count()) return;
-
-    if (m_emtList[idx].dnFlag){
-        //删除下一行的半个竖直线
-        m_emtList[idx+MAX_COL].upFlag = false;
-        if (m_emtList[idx+MAX_COL].graphType == verticalLine2){
-            m_emtList[idx+MAX_COL].graphType = 0;
-        }
-        InsertGraphElement(m_emtList[idx+MAX_COL]);
-
-    }
-
-    m_emtList[idx].graphType = 0;
-    m_emtList[idx].funInsType = 0;
-    m_emtList[idx].index = 0;
-    m_emtList[idx].name = "";
-    m_emtList[idx].mark = "";
-    m_emtList[idx].dnFlag = false;
-    InsertGraphElement(m_emtList[idx]);
-    setCurrentCell(row, col);
-}
 
 GraphWindow::GraphWindow(QWidget *parent) :
     QWidget(parent)
@@ -449,66 +459,10 @@ GraphWindow::GraphWindow(QWidget *parent) :
 
 }
 
-void GraphWindow::slt_inputPara(QString name, int index, QString mark, int type)
-{
-
-    Element emt={0,0,0,0,0,false,false,"",""};
-    int curRow = m_graphTable->currentRow();
-    int curCol = m_graphTable->currentColumn();
-    bool isNew = true;
-    m_graphTable->InsertRowGraph(curRow);
-    switch (type) {
-    //如果要画竖直线，则分两步，先画下一行
-    case verticalLine1:
-        if (curCol < 2) return;
-        emt.upFlag = true;
-        emt.dnFlag = false;
-        emt.col = curCol;
-        emt.row = curRow + 1;
-        emt.graphType =  verticalLine2;
-        m_graphTable->InsertGraphElement(emt);
-        m_graphTable->InsertRecordOpt(emt, Insert, &isNew);
-        emt.upFlag = false;
-        emt.dnFlag = true;
-        break;
-    case OutputNode:
-    {
-        for(int i=curCol;i<MAX_COL;i++){
-            emt={0,0,0,0,0,false,false,"",""};
-            emt.col = i;
-            emt.row = curRow;
-            emt.graphType =  HorizontalLine;
-            m_graphTable->InsertGraphElement(emt);
-            m_graphTable->InsertRecordOpt(emt, Insert, &isNew);
-        }
-        curRow = m_graphTable->currentRow();
-        curCol = m_graphTable->currentColumn();
-        break;
-    }
-    default:
-        break;
-    }
-    emt.col = curCol;
-    emt.row = curRow;
-    emt.name = name;
-    emt.index = index;
-    emt.graphType = type;
-    emt.mark = mark;
-    m_graphTable->InsertGraphElement(emt);
-    m_graphTable->InsertRecordOpt(emt, Insert, &isNew);
-
-}
 
 void GraphWindow::BuildGraph()
 {
     //打印
-    for (int i=0;i<m_graphTable->m_emtList.count();i++){
-        qDebug()<<m_graphTable->m_emtList[i].row
-                <<m_graphTable->m_emtList[i].col
-                <<m_graphTable->m_emtList[i].upFlag
-                <<m_graphTable->m_emtList[i].dnFlag
-                <<m_graphTable->m_emtList[i].graphType;
-    }
     m_graphTable->BuildGraph();
 }
 void GraphWindow::OpenGraph(QString name)
@@ -517,12 +471,14 @@ void GraphWindow::OpenGraph(QString name)
     fileRead.open(QIODevice::ReadOnly);
     QDataStream  readDataStream(&fileRead);
     Element pEmt;
-    m_graphTable->m_emtList.clear();
+    m_graphTable->m_graphList.clear();
     m_graphTable->clear();
     m_graphTable->InitTable();
     while(!fileRead.atEnd()){
         readDataStream  >> pEmt.row
                         >> pEmt.col
+                        >> pEmt.width
+                        >> pEmt.height
                         >> pEmt.graphType
                         >> pEmt.funInsType
                         >> pEmt.index
@@ -530,8 +486,7 @@ void GraphWindow::OpenGraph(QString name)
                         >> pEmt.dnFlag
                         >> pEmt.name
                         >> pEmt.mark;
-        m_graphTable->m_emtList.append(pEmt);
-        m_graphTable->InsertGraphElement(pEmt);
+        m_graphTable->InsertGraph(pEmt);
 
     }
     fileRead.close();
@@ -544,10 +499,12 @@ void GraphWindow::SaveGraph(QString name)
     fileWrite.open(QIODevice::WriteOnly);
     QDataStream  writeDataStream(&fileWrite);
     Element pEmt;
-    for (int i=0;i<m_graphTable->m_emtList.count();i++){
-        pEmt =  m_graphTable->m_emtList[i];
+    for (int i=0;i<m_graphTable->m_graphList.count();i++){
+        pEmt =  m_graphTable->m_graphList[i]->emt;
         writeDataStream << pEmt.row
                         << pEmt.col
+                        << pEmt.width
+                        << pEmt.height
                         << pEmt.graphType
                         << pEmt.funInsType
                         << pEmt.index

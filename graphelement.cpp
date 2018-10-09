@@ -7,15 +7,17 @@ QPixmap GraphElement::DrawPixMap(QPixmap pix)
     QPainter painterPix(&pix);
     painterPix.setRenderHint(QPainter::Antialiasing, true);
 
+    painterPix.setPen(Qt::red);
     if (element.dnFlag){
         painterPix.drawLine(1, UNIT_HEIGH-UNIT_HEIGH/UNIT_H_FACTOR,
                             1, UNIT_HEIGH);
     }
-    if (element.upFlag){
+    if (element.upFlag){ 
         painterPix.drawLine(1, 0,
                             1, UNIT_HEIGH-UNIT_HEIGH/UNIT_H_FACTOR);
     }
     //画功能图
+    painterPix.setPen(Qt::black);
     switch (element.graphType) {
     case NumLine:
         painterPix.drawLine(UNIT_WIDTH-1, 0, UNIT_WIDTH-1, UNIT_HEIGH);

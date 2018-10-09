@@ -11,17 +11,22 @@ Copyright (c) 2018 PLT. All Rights Reserved.
 #ifndef GRAPHFB_H
 #define GRAPHFB_H
 #include <QPixmap>
+#include <QPainter>
+#include "common.h"
+
 class GraphFB
 {
 public:
-    GraphFB();
+    GraphFB(Element element);
+    GraphFB(int row, int col);
     virtual ~GraphFB();
-protected:
-    virtual void draw();
+    void reDraw();
 public:
-    int FBtype;     //用来标识不通的功能指令
-    QPoint point;   //绘制图元的起点坐标
-    QPixmap *pix2;  //用作绘图设备
+    Element emt;
+    QPixmap pixMap;  //用作绘图设备
+private:
+    QColor conColor;
+    QColor entColor;
 };
 
 #endif // GRAPHFB_H

@@ -16,7 +16,7 @@
 #include <QApplication>
 #include "common.h"
 #include "graphelement.h"
-
+#include "graphfb.h"
 
 class GraphItemDelegate : public QStyledItemDelegate
 {
@@ -76,27 +76,26 @@ public:
     virtual ~ GraphTable(){}
     void InitTable();
     void InitParament();
-    void InsertRowGraph(int row);
+
     void InsertRecordOpt(Element emt, OptType type, bool *isNew);
 
-    void InsertGraphElement(Element emt);
-    void RemoveGraphElement(int row, int col);
-    void InsertSplitLine(int row);
-
+    void InsertGraph(Element emt);
     void BuildGraph();
-    int DealNode(int row, int col);
-protected:
-    void keyPressEvent(QKeyEvent *event);
 
 signals:
     void sig_InsertBottomRowText(QString text);
-private:
-    void SetItemPixmap(GraphElement *graph);
-    void RecordGraph(GraphElement *graph);
 
-private slots:
-    void SelectionChanged();
+private:
+    void InsertSplitLine(int row);
+    void InsertNewRow(int row, int col);
+    void RecordGraph(GraphFB *graph);
+    void RemoveGraph(int row, int col);
+    GraphFB *GetGraph(int row, int col);
+    void DrawGraph(GraphFB *graph);
+    void SetCurrentGraph(int row, int col);
+    int DealNode(int row, int col);
 public slots:
+    void slt_inputPara(QString name, int index, QString mark, int type);
     void redo();
     void undo();
     void copy();
@@ -105,13 +104,12 @@ public slots:
     void remove();
 
 public:
-    QList<Element> m_emtList;
-    QList<QPoint> m_buildTrail;
+    QList<GraphFB *> m_graphList;
 
-    QList<QPoint> m_editTrail;
 private:
     int buildPos[MAX_ROW];
     int buildPreRow;
+    QList<QPoint> m_buildTrail;
 
     struct RecordBorad{
         int curStep;
@@ -136,7 +134,7 @@ public:
 signals:
 
 public slots:
-    void slt_inputPara(QString name, int index, QString mark, int type);
+
     void BuildGraph();
     void SaveGraph(QString name);
     void OpenGraph(QString name);
