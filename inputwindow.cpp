@@ -14,7 +14,7 @@ InputWindow::InputWindow(QWidget *parent) :
     m_nameCom->setFixedWidth(50);
     m_indexSpi = new QSpinBox();
     m_indexSpi->setFixedWidth(50);
-    m_indexSpi->setFixedHeight(40);
+    m_indexSpi->setFixedHeight(30);
     m_nameLabel = new  QLabel();
     m_indexLabel = new  QLabel();
     m_indexLabel->setStyleSheet("color: red;");
@@ -52,6 +52,8 @@ InputWindow::InputWindow(QWidget *parent) :
     connect(key_Esc, SIGNAL(activated()), m_cancelBtn, SIGNAL(clicked()));    //连接到指定槽函数
 
     ReadInputDeviceInfo();
+
+    m_indexSpi->setFocus();
 }
 
 void InputWindow::SetCurrentName(int index)

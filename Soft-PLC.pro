@@ -14,13 +14,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    graphelement.cpp \
     graphfb.cpp \
     graphwindow.cpp \
     inputwindow.cpp
 
 HEADERS  += mainwindow.h \
-    graphelement.h \
     graphfb.h \
     common.h \
     graphwindow.h \

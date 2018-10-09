@@ -1,5 +1,8 @@
 ﻿#include "graphfb.h"
 
+int GraphFB::g_unitWidth = UNIT_WIDTH;
+int GraphFB::g_unitHeight = UNIT_HEIGH;
+
 GraphFB::GraphFB(Element element) : emt(element)
 {
 
@@ -19,14 +22,15 @@ GraphFB::~GraphFB()
 
 void GraphFB::reDraw()
 {
-    int width = UNIT_WIDTH * emt.width;
-    int height = UNIT_HEIGH * emt.height;
+    int width = g_unitWidth * emt.width;
+    int height = g_unitHeight * emt.height;
 
-    QPixmap pix(UNIT_WIDTH * emt.width, UNIT_HEIGH * emt.height);
+    QPixmap pix(width, height);
     pix.fill(Qt::white);
 
     QPainter painter(&pix);
-    painter.setPen(entColor);
+    painter.setPen(QPen(entColor, g_unitWidth/UNIT_WIDTH));
+    //painter.setPen(entColor);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
     //竖直线
@@ -42,6 +46,14 @@ void GraphFB::reDraw()
     int fw = width/UNIT_W_FACTOR;
     int fh = height/UNIT_H_FACTOR;
 
+    //写字，设置字体
+    QFontMetrics fm = painter.fontMetrics();
+    QString text = QString("%1%2").arg(emt.name).arg(emt.index);
+    QFont font;
+    font.setPixelSize(width/6); //80-10
+    painter.setFont(font);
+
+    //根据类别画相应的图形
     QPointF p1(0, height-fh);
     QPointF p2(width, height-fh);
 
@@ -56,8 +68,9 @@ void GraphFB::reDraw()
     case ReverseLogic:
     {
         QPointF offset(width/6, height/6);
+        QPointF p0(width/2, height-fh);
         painter.drawLine(p1, p2);
-        painter.drawLine(p1-offset, p2+offset);
+        painter.drawLine(p0-offset, p0+offset);
         break;
     }
     case InputOpen:
@@ -80,16 +93,10 @@ void GraphFB::reDraw()
 
         if (emt.graphType == InputClose)
             painter.drawLine(p6 + offset, p7 - offset);
-        //写字
-        QFontMetrics fm = painter.fontMetrics();
-        QString text = QString("%1%2").arg(emt.name).arg(emt.index);
-        QPoint pt1(width/2-fm.width(text)/2-1, width/20);
-        QPoint pt2(width/2+fm.width(text)/2+1, 2*fh);
-        QRect rect(pt1, pt2);
-        QFont font;
-        font.setPointSize(width/8); //80-10
-        painter.setFont(font);
-        painter.drawText(rect, text);
+
+        QPoint pt((width-fm.width(text))/2,
+                  (height/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+        painter.drawText(pt, text);
         break;
     }
     case OutputNode:
@@ -116,16 +123,9 @@ void GraphFB::reDraw()
         painter.drawLine(p5, p7);
         painter.drawLine(p6, p8);
 
-        QFontMetrics fm = painter.fontMetrics();
-        QString text = QString("%1%2").arg(emt.name).arg(emt.index);
-        QPoint pt1(width/2-fm.width(text)/2-1, 2*fh+width/20);
-        QPoint pt2(width/2+fm.width(text)/2+1, 4*fh);
-        QRect rect(pt1, pt2);
-        QFont font;
-
-        font.setPointSize(width/8); //80-10
-        painter.setFont(font);
-        painter.drawText(rect, text);
+        QPoint pt((width-fm.width(text))/2,
+                  (height*3/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+        painter.drawText(pt, text);
     }
         break;
     default:

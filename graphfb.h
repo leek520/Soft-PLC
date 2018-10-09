@@ -16,12 +16,15 @@ Copyright (c) 2018 PLT. All Rights Reserved.
 
 class GraphFB
 {
+
 public:
     GraphFB(Element element);
     GraphFB(int row, int col);
     virtual ~GraphFB();
     void reDraw();
 public:
+    static int g_unitWidth;
+    static int g_unitHeight;
     Element emt;
     QPixmap pixMap;  //用作绘图设备
 private:

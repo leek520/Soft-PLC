@@ -57,6 +57,10 @@ private slots:
     void cut();
     void remove();
 
+    void zoomin();
+    void zoomout();
+    void find();
+
     void drawGraph();
 
     void buildGraph();
@@ -67,9 +71,11 @@ private :
     QMenu *editMenu;
     QMenu *helpMenu;
     QMenu *buildMenu;
+    QMenu *viewMenu;
 
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
+    QToolBar *viewToolBar;
     QToolBar *graphToolBar;
     QToolBar *buildToolBar;
 
@@ -85,6 +91,11 @@ private :
     QAction *copyAct;
     QAction *pasteAct;
     QAction *removeAct;
+
+    QAction *zoomInAct;
+    QAction *zoomOutAct;
+    QAction *findAct;
+
 
     QAction *aboutAct;
 
@@ -106,7 +117,7 @@ private :
 class ListWidget : public QListWidget
 {
 public:
-    ListWidget(QWidget *parent = 0) {}
+    ListWidget(QWidget *parent = 0) : QListWidget(parent) {}
     QSize sizeHint() const {
         return QSize(200, 500);
     }
@@ -114,7 +125,7 @@ public:
 class TextEdit : public QTextEdit
 {
 public:
-    TextEdit(QWidget *parent = 0) {}
+    TextEdit(QWidget *parent = 0) : QTextEdit(parent) {}
     QSize sizeHint() const {
         return QSize(200, 150);
     }

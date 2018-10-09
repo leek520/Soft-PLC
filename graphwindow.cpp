@@ -33,8 +33,9 @@ GraphTable::GraphTable(QWidget *parent) :
     horizontalHeader()->hide();
     verticalHeader()->hide();
 
-    verticalHeader()->setDefaultSectionSize(UNIT_HEIGH);
     horizontalHeader()->setDefaultSectionSize(UNIT_WIDTH);
+    verticalHeader()->setDefaultSectionSize(UNIT_HEIGH);
+
     setShowGrid(false);//隐藏表格线
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     //设置多选（可以Ctral+A全选Ctral+Shift多选）获取所选行号：
@@ -225,6 +226,7 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
         break;
     case InputOpen:
     case InputClose:
+    case ReverseLogic:
         graph = GetGraph(curRow, curCol);
         graph->emt.graphType =  type;
         graph->emt.name =  name;
@@ -371,6 +373,60 @@ void GraphTable::remove()
     int row = currentRow();
     int col = currentColumn();
     RemoveGraph(row, col);
+}
+
+void GraphTable::zoomin()
+{
+    if ((GraphFB::g_unitWidth / UNIT_WIDTH == 4) | (GraphFB::g_unitHeight / UNIT_HEIGH == 4)) return;
+    GraphFB::g_unitWidth = GraphFB::g_unitWidth * UNIT_ZOOM_FACTOR;
+    GraphFB::g_unitHeight = GraphFB::g_unitHeight * UNIT_ZOOM_FACTOR;
+
+    //设置表格默认的生成单元格尺寸
+    horizontalHeader()->setDefaultSectionSize(GraphFB::g_unitWidth);
+    verticalHeader()->setDefaultSectionSize(GraphFB::g_unitHeight);
+
+    //设置表格的行列大小
+    for (int i=0; i<columnCount();i++){
+        setColumnWidth(i, GraphFB::g_unitWidth);
+    }
+    for (int i=0; i<rowCount();i++){
+        setRowHeight(i, GraphFB::g_unitHeight);
+    }
+
+    //重绘所有graph
+    for (int i=0; i<m_graphList.count();i++){
+        DrawGraph(m_graphList[i]);
+    }
+}
+
+void GraphTable::zoomout()
+{
+    if ((UNIT_WIDTH / GraphFB::g_unitWidth >= 2) | (UNIT_HEIGH / GraphFB::g_unitHeight >= 2)) return;
+    GraphFB::g_unitWidth = GraphFB::g_unitWidth / UNIT_ZOOM_FACTOR;
+    GraphFB::g_unitHeight = GraphFB::g_unitHeight / UNIT_ZOOM_FACTOR;
+
+    //设置表格默认的生成单元格尺寸
+    horizontalHeader()->setDefaultSectionSize(GraphFB::g_unitWidth);
+    verticalHeader()->setDefaultSectionSize(GraphFB::g_unitHeight);
+
+    //设置表格的行列大小
+    for (int i=0; i<columnCount();i++){
+        setColumnWidth(i, GraphFB::g_unitWidth);
+    }
+    for (int i=0; i<rowCount();i++){
+        setRowHeight(i, GraphFB::g_unitHeight);
+    }
+
+    //重绘所有graph
+    for (int i=0; i<m_graphList.count();i++){
+        DrawGraph(m_graphList[i]);
+    }
+
+}
+
+void GraphTable::find()
+{
+
 }
 
 //此处传入的row和col不是窗口中的实际坐标，而是列-1。

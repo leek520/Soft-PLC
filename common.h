@@ -3,13 +3,14 @@
 
 #include <QString>
 
-#define SCREEN_WIDTH    1200
-#define SCREEN_HEIGHT   700
+#define SCREEN_WIDTH        1200
+#define SCREEN_HEIGHT       700
 
-#define UNIT_WIDTH      80
-#define UNIT_HEIGH      60
-#define UNIT_W_FACTOR   3
-#define UNIT_H_FACTOR   4       //这里确保该因子能被对应长度整除
+#define UNIT_WIDTH          80
+#define UNIT_HEIGH          60
+#define UNIT_ZOOM_FACTOR    1.2
+#define UNIT_W_FACTOR       3
+#define UNIT_H_FACTOR       4       //这里确保该因子能被对应长度整除
 
 #define MAX_COL         12
 #define MAX_ROW         1000
@@ -52,5 +53,7 @@ enum GraphType
     ReverseLogic,
 };
 enum OptType{Insert, Remove, CutPaste, CopyPaste};
+
+
 
 #endif // COMMON_H

@@ -86,10 +86,20 @@ void MainWindow::createActions()
 
     removeAct = new QAction(QIcon(":/images/remove.png"), tr("&Remove"), this);
     removeAct->setShortcuts(QKeySequence::Delete);
-    removeAct->setStatusTip(tr("Paste the clipboard's contents into the current "
-                              "selection"));
+    removeAct->setStatusTip(tr("Remove the current selection"));
     connect(removeAct, SIGNAL(triggered()), this, SLOT(remove()));
 
+    zoomInAct = new QAction(QIcon(":/images/zoomin.png"), tr("&ZoomIn"), this);
+    zoomInAct->setStatusTip(tr("Zoom in"));
+    connect(zoomInAct, SIGNAL(triggered()), this, SLOT(zoomin()));
+
+    zoomOutAct = new QAction(QIcon(":/images/zoomout.png"), tr("&ZoomOut"), this);
+    zoomOutAct->setStatusTip(tr("Zoom out"));
+    connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomout()));
+
+    findAct = new QAction(QIcon(":/images/find.png"), tr("&Find"), this);
+    findAct->setStatusTip(tr("find the graph"));
+    connect(findAct, SIGNAL(triggered()), this, SLOT(find()));
 
     aboutAct = new QAction(QIcon(":/images/about.png"), tr("&About"), this);
     aboutAct->setStatusTip(tr("Show the application's About box"));
@@ -174,6 +184,12 @@ void MainWindow::createMenus()
     buildMenu = menuBar()->addMenu(tr("&Build"));
     buildMenu->addAction(buildAct);
 
+
+    viewMenu = menuBar()->addMenu(tr("&View"));
+    viewMenu->addAction(findAct);
+    viewMenu->addAction(zoomInAct);
+    viewMenu->addAction(zoomOutAct);
+
     menuBar()->addSeparator();
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -196,6 +212,11 @@ void MainWindow::createToolBars()
     editToolBar->addAction(copyAct);
     editToolBar->addAction(pasteAct);
     editToolBar->addAction(removeAct);
+
+    viewToolBar = addToolBar(tr("View"));
+    viewToolBar->addAction(findAct);
+    viewToolBar->addAction(zoomInAct);
+    viewToolBar->addAction(zoomOutAct);
 
     buildToolBar = addToolBar(tr("Build"));
     buildToolBar->addAction(buildAct);
@@ -321,6 +342,21 @@ void MainWindow::remove()
 {
     if (this->focusWidget() != m_graphWid->m_graphTable) return;
     m_graphWid->m_graphTable->remove();
+}
+
+void MainWindow::zoomin()
+{
+    m_graphWid->m_graphTable->zoomin();
+}
+
+void MainWindow::zoomout()
+{
+    m_graphWid->m_graphTable->zoomout();
+}
+
+void MainWindow::find()
+{
+    m_graphWid->m_graphTable->find();
 }
 
 void MainWindow::drawGraph()

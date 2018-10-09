@@ -15,7 +15,6 @@
 #include <QMessageBox>
 #include <QApplication>
 #include "common.h"
-#include "graphelement.h"
 #include "graphfb.h"
 
 class GraphItemDelegate : public QStyledItemDelegate
@@ -94,6 +93,7 @@ private:
     void DrawGraph(GraphFB *graph);
     void SetCurrentGraph(int row, int col);
     int DealNode(int row, int col);
+
 public slots:
     void slt_inputPara(QString name, int index, QString mark, int type);
     void redo();
@@ -103,6 +103,9 @@ public slots:
     void cut();
     void remove();
 
+    void zoomin();
+    void zoomout();
+    void find();
 public:
     QList<GraphFB *> m_graphList;
 
