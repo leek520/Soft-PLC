@@ -65,7 +65,7 @@ void GraphTable::InitParament()
     m_recordBorad.record.clear();
     m_recordBorad.type.clear();
 
-    m_ClipBorad.type = 0;
+    m_ClipBorad.type = CopyPaste;
 }
 
 void GraphTable::InsertRecordOpt(Element emt, OptType type, bool *isNew)
@@ -302,7 +302,7 @@ void GraphTable::copy()
     QList<QTableWidgetSelectionRange> selectRange = this->selectedRanges();
     if (selectRange.count() == 1){
         m_ClipBorad.range = selectRange[0];
-        m_ClipBorad.type = 0;
+        m_ClipBorad.type = CopyPaste;
     }
 }
 
@@ -315,50 +315,55 @@ void GraphTable::paste()
     int i, j;
     for (i=m_ClipBorad.range.topRow();i<=m_ClipBorad.range.bottomRow();i++){
         for(j=m_ClipBorad.range.leftColumn();j<=m_ClipBorad.range.rightColumn();j++){
-            int idx = i*MAX_COL+j-1;
-//            if (idx >= m_emtList.count()){
-//                qDebug()<<"Paste blank";
-//                break;
-//            }
+            int idx = CalIdx(i, j);
+            if (idx >= m_graphList.count()){
+                qDebug()<<"Paste blank";
+                break;
+            }
             row = curRow + i - m_ClipBorad.range.topRow();
             col = curCol + j - m_ClipBorad.range.leftColumn();
+            if (col >= MAX_COL) break;
             qDebug()<<QString("Paste (%1,%2) to (%3,%4)").arg(i).arg(j).arg(row).arg(col);
-            //m_emtList[idx].row = row;
-            //m_emtList[idx].col = col;
-            //InsertGraphElement(m_emtList[idx]);
+
+            GraphFB *graph = GetGraph(row, col);
+            graph->emt = m_graphList[idx]->emt;
+            graph->emt.row = row;
+            graph->emt.col = col;
+            graph->emt.upFlag = false;  //upflag不复制
+            DrawGraph(graph);
+
+            if (graph->emt.dnFlag){
+                GraphFB *graph = GetGraph(row+1, col);
+                graph->emt.upFlag = true;
+                DrawGraph(graph);
+            }
 
             //如果是剪切，则删除原来位置内容
-            if (m_ClipBorad.type == 1){
-                Element emt={i,j,0,0,0,false,false,"",""};
-                //InsertGraphElement(emt);
-                if (j == columnCount()-1){
-                    setRangeSelected(QTableWidgetSelectionRange(i+1, 1, i+2, 2), false);
-                }else{
-                    setRangeSelected(QTableWidgetSelectionRange(i, j, i+1, j+1), false);
-                }
+            if (m_ClipBorad.type == CutPaste){
+                RemoveGraph(i, j);
             }
         }
     }
 
-    //重新设置当前选中区域
-    setCurrentCell(row, col);
-    if (col == columnCount()-1){
-        setRangeSelected(QTableWidgetSelectionRange(row+1, 1, row+2, 2), false);
-    }else{
-        setRangeSelected(QTableWidgetSelectionRange(row, col, row+1, col+1), false);
-    }
-    //设置粘贴后的区域全部选中
-    setRangeSelected(QTableWidgetSelectionRange(curRow, curCol, row, col), true);
+//    //重新设置当前选中区域
+//    setCurrentCell(row, col);
+//    if (col == columnCount()-1){
+//        setRangeSelected(QTableWidgetSelectionRange(row+1, 1, row+2, 2), false);
+//    }else{
+//        setRangeSelected(QTableWidgetSelectionRange(row, col, row+1, col+1), false);
+//    }
+//    //设置粘贴后的区域全部选中
+//    setRangeSelected(QTableWidgetSelectionRange(curRow, curCol, row, col), true);
 
-    if (m_ClipBorad.type == 1){
-        m_ClipBorad.type = 0;
+    if (m_ClipBorad.type == CutPaste){
+        m_ClipBorad.type = CopyPaste;
     }
 }
 
 void GraphTable::cut()
 {
     copy();
-    m_ClipBorad.type = 1;
+    m_ClipBorad.type = CutPaste;
 }
 void GraphTable::remove()
 {
