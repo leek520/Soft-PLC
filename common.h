@@ -2,9 +2,9 @@
 #define COMMON_H
 
 #include <QString>
-
-#define SCREEN_WIDTH        1200
-#define SCREEN_HEIGHT       700
+/*********主窗体************/
+#define SCREEN_WIDTH	1480						//屏幕宽
+#define SCREEN_HEIGHT	960							//屏幕高
 
 #define UNIT_WIDTH          80
 #define UNIT_HEIGH          60

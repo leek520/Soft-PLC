@@ -64,7 +64,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     //设置程序中文字的编码方式
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("GBK"));
+    QTextCodec *codec = QTextCodec::codecForName("UTF_8");
+    QTextCodec::setCodecForLocale(codec);
 
 
     //设置路径为应用程序启动路径:打包exe时使用

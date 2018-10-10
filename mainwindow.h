@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 #include "common.h"
 #include "graphwindow.h"
+#include "instswindow.h"
 #include "inputwindow.h"
 #include <QMainWindow>
+#include <QDesktopWidget>
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QMenuBar>
@@ -60,6 +62,8 @@ private slots:
     void zoomin();
     void zoomout();
     void find();
+    void reorderSubWindow();
+
 
     void drawGraph();
 
@@ -73,12 +77,15 @@ private :
     QMenu *helpMenu;
     QMenu *buildMenu;
     QMenu *viewMenu;
+    QMenu *windowMenu;
+
 
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
     QToolBar *viewToolBar;
     QToolBar *graphToolBar;
     QToolBar *buildToolBar;
+    QToolBar *windowToolBar;
 
     QAction *newAct;
     QAction *openAct;
@@ -97,6 +104,9 @@ private :
     QAction *zoomOutAct;
     QAction *findAct;
 
+    QAction *wstackAct;
+    QAction *whsideAct;
+    QAction *wvsideAct;
 
     QAction *aboutAct;
 
@@ -111,7 +121,8 @@ private :
     QMdiArea *m_mdiArea;
 
     GraphWindow *m_graphWid;
-    QWidget *m_cmdWid;
+    InstsWindow *m_instsWid;
+
     InputWindow *m_inputW;
 
 };

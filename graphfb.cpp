@@ -3,6 +3,11 @@
 int GraphFB::g_unitWidth = UNIT_WIDTH;
 int GraphFB::g_unitHeight = UNIT_HEIGH;
 
+GraphFB::GraphFB()
+{
+
+}
+
 GraphFB::GraphFB(Element element) : emt(element)
 {
     conColor = QColor(Qt::black);
@@ -135,4 +140,41 @@ void GraphFB::drawGraph()
         break;
     }
     pixMap = pix;
+}
+
+QDataStream & operator<<(QDataStream &stream, GraphFB &graph)
+{
+    Element pEmt = graph.emt;
+
+    stream  << pEmt.row
+            << pEmt.col
+            << pEmt.width
+            << pEmt.height
+            << pEmt.graphType
+            << pEmt.funInsType
+            << pEmt.index
+            << pEmt.upFlag
+            << pEmt.dnFlag
+            << pEmt.name
+            << pEmt.mark;
+
+    return stream;
+}
+
+QDataStream & operator>>(QDataStream &stream, GraphFB &graph)
+{
+    Element pEmt;
+    stream  >> pEmt.row
+            >> pEmt.col
+            >> pEmt.width
+            >> pEmt.height
+            >> pEmt.graphType
+            >> pEmt.funInsType
+            >> pEmt.index
+            >> pEmt.upFlag
+            >> pEmt.dnFlag
+            >> pEmt.name
+            >> pEmt.mark;
+    graph.emt = pEmt;
+    return stream;
 }

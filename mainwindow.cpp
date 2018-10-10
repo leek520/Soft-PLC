@@ -30,6 +30,7 @@ MainWindow::~MainWindow()
 }
 void MainWindow::createActions()
 {
+    /****file****/
     newAct = new QAction(QIcon(":/images/new.png"), tr("&New"), this);
     newAct->setShortcuts(QKeySequence::New);
     newAct->setStatusTip(tr("Create a new file"));
@@ -56,6 +57,7 @@ void MainWindow::createActions()
     exitAct->setStatusTip(tr("Exit the application"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
+    /****edit****/
     undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
     undoAct->setShortcuts(QKeySequence::Undo);
     undoAct->setStatusTip(tr("撤销(Ctrl+Z)"));
@@ -89,6 +91,7 @@ void MainWindow::createActions()
     removeAct->setStatusTip(tr("Remove the current selection"));
     connect(removeAct, SIGNAL(triggered()), this, SLOT(remove()));
 
+    /****view****/
     zoomInAct = new QAction(QIcon(":/images/zoomin.png"), tr("&ZoomIn"), this);
     zoomInAct->setStatusTip(tr("Zoom in"));
     connect(zoomInAct, SIGNAL(triggered()), this, SLOT(zoomin()));
@@ -106,7 +109,7 @@ void MainWindow::createActions()
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
 
-
+    /****graph****/
     QAction *act = new QAction(QIcon(":/images/graph/Btn0.bmp"), tr("常开开关"), this);
     act->setStatusTip(tr("常开开关"));
     connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
@@ -152,7 +155,7 @@ void MainWindow::createActions()
     connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
     m_graphActList.append(act);
 
-
+    /****build****/
     buildAct = new QAction(QIcon(":/images/build.png"), tr("Build"), this);
     buildAct->setStatusTip(tr("Build"));
     connect(buildAct, SIGNAL(triggered()), this, SLOT(buildGraph()));
@@ -162,6 +165,18 @@ void MainWindow::createActions()
     connect(runAct, SIGNAL(triggered()), this, SLOT(runGraph()));
     runAct->setCheckable(true);
 
+    /****window****/
+    wstackAct = new QAction(QIcon(":/images/wstack.png"), tr("WStack"), this);
+    wstackAct->setStatusTip(tr("WStack"));
+    connect(wstackAct, SIGNAL(triggered()), this, SLOT(reorderSubWindow()));
+
+    whsideAct = new QAction(QIcon(":/images/whside.png"), tr("WHSide"), this);
+    whsideAct->setStatusTip(tr("WHSide"));
+    connect(whsideAct, SIGNAL(triggered()), this, SLOT(reorderSubWindow()));
+
+    wvsideAct = new QAction(QIcon(":/images/wvside.png"), tr("WVSide"), this);
+    wvsideAct->setStatusTip(tr("WVSide"));
+    connect(wvsideAct, SIGNAL(triggered()), this, SLOT(reorderSubWindow()));
 }
 
 void MainWindow::createMenus()
@@ -196,6 +211,11 @@ void MainWindow::createMenus()
     viewMenu->addAction(zoomInAct);
     viewMenu->addAction(zoomOutAct);
 
+    windowMenu = menuBar()->addMenu(tr("&Window"));
+    windowMenu->addAction(wstackAct);
+    windowMenu->addAction(whsideAct);
+    windowMenu->addAction(wvsideAct);
+
     menuBar()->addSeparator();
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -223,6 +243,11 @@ void MainWindow::createToolBars()
     viewToolBar->addAction(findAct);
     viewToolBar->addAction(zoomInAct);
     viewToolBar->addAction(zoomOutAct);
+
+    windowToolBar = addToolBar(tr("Window"));
+    windowToolBar->addAction(wstackAct);
+    windowToolBar->addAction(whsideAct);
+    windowToolBar->addAction(wvsideAct);
 
     buildToolBar = addToolBar(tr("Build"));
     buildToolBar->addAction(buildAct);
@@ -263,18 +288,42 @@ void MainWindow::SetupUi()
     m_dockW->setWidget(m_bottomW);
     this->addDockWidget(Qt::BottomDockWidgetArea, m_dockW);//初始位置
 
+
+//    QDesktopWidget* desktopWidget = QApplication::desktop();
+//    //获取可用桌面大小
+//    QRect deskRect = desktopWidget->availableGeometry();
+//    // 如果分辨率已经在1920及以上，则不需要进行处理
+//    if(deskRect.width() >= SCREEN_WIDTH)
+//    {
+//        resize(SCREEN_WIDTH, SCREEN_HEIGHT);
+//        //居中显示
+//        move((QApplication::desktop()->width() - width())/2,
+//                (QApplication::desktop()->height() - height())/2-15);
+//    }
+//    else
+//    {
+//        resize(deskRect.width(), deskRect.height());
+//        move(0, 0);
+//    }
 }
 
 void MainWindow::SetupMdiArea()
 {
+    m_instsWid = new InstsWindow;
+    QMdiSubWindow *instsChild = m_mdiArea->addSubWindow(m_instsWid);
+    instsChild->setGeometry(0, 0, 1200, 600);
+    instsChild->setWindowIcon(QIcon(":/images/instswindow.png"));
+
     m_graphWid = new GraphWindow;
-    QMdiSubWindow *child = m_mdiArea->addSubWindow(m_graphWid);
+    QMdiSubWindow *graphChild = m_mdiArea->addSubWindow(m_graphWid);
+    graphChild->setGeometry(100, 60, 1200, 600);
+    graphChild->setWindowIcon(QIcon(":/images/graphwindow.png"));
+    //m_graphWid->setWindowState(Qt::WindowMaximized);
 
-    child->resize(700,400);
+    m_mdiArea->setActiveSubWindow(graphChild);
 
-    child->show();
-    m_graphWid->setWindowState(Qt::WindowMaximized);
-
+    m_mdiArea->tileSubWindows();   //SubWindows并列
+    //m_mdiArea->cascadeSubWindows();   //SubWindows重叠排列
 
 
 }
@@ -406,6 +455,19 @@ void MainWindow::runGraph()
         m_graphWid->m_graphTable->RunGraph(true);
     }else{
         m_graphWid->m_graphTable->RunGraph(false);
+    }
+}
+
+void MainWindow::reorderSubWindow()
+{
+    if (sender() == wstackAct){
+        m_mdiArea->cascadeSubWindows();
+        m_mdiArea->subWindowList()[0]->setGeometry(0,0,1200,600);
+        m_mdiArea->subWindowList()[1]->setGeometry(100,60,1200,600);
+    }else if (sender() == whsideAct){
+        m_mdiArea->tileSubWindows();
+    }else if (sender() == wvsideAct){
+
     }
 }
 

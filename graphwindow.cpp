@@ -531,7 +531,6 @@ void GraphTable::RunGraph(bool enable)
 GraphWindow::GraphWindow(QWidget *parent) :
     QWidget(parent)
 {
-    setMouseTracking(true);   //开启鼠标跟踪功能
     setWindowTitle("梯形图模式");
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(0,0,0,0);
@@ -549,24 +548,13 @@ void GraphWindow::OpenGraph(QString name)
     QFile fileRead(name);
     fileRead.open(QIODevice::ReadOnly);
     QDataStream  readDataStream(&fileRead);
-    Element pEmt;
+    GraphFB graph;
     m_graphTable->m_graphList.clear();
     m_graphTable->clear();
     m_graphTable->InitTable();
     while(!fileRead.atEnd()){
-        readDataStream  >> pEmt.row
-                        >> pEmt.col
-                        >> pEmt.width
-                        >> pEmt.height
-                        >> pEmt.graphType
-                        >> pEmt.funInsType
-                        >> pEmt.index
-                        >> pEmt.upFlag
-                        >> pEmt.dnFlag
-                        >> pEmt.name
-                        >> pEmt.mark;
-        m_graphTable->InsertGraph(pEmt);
-
+        readDataStream  >> graph;
+        m_graphTable->InsertGraph(graph.emt);
     }
     fileRead.close();
 
@@ -577,20 +565,12 @@ void GraphWindow::SaveGraph(QString name)
     QFile fileWrite(name);
     fileWrite.open(QIODevice::WriteOnly);
     QDataStream  writeDataStream(&fileWrite);
-    Element pEmt;
+    GraphFB graph;
     for (int i=0;i<m_graphTable->m_graphList.count();i++){
-        pEmt =  m_graphTable->m_graphList[i]->emt;
-        writeDataStream << pEmt.row
-                        << pEmt.col
-                        << pEmt.width
-                        << pEmt.height
-                        << pEmt.graphType
-                        << pEmt.funInsType
-                        << pEmt.index
-                        << pEmt.upFlag
-                        << pEmt.dnFlag
-                        << pEmt.name
-                        << pEmt.mark;
+        graph.emt = m_graphTable->m_graphList[i]->emt;
+        graph.entColor = m_graphTable->m_graphList[i]->entColor;
+        graph.conColor = m_graphTable->m_graphList[i]->conColor;
+        writeDataStream << graph;
     }
     fileWrite.close();
 }

@@ -30,5 +30,10 @@
         <file>images/zoomin.png</file>
         <file>images/zoomout.png</file>
         <file>images/run.png</file>
+        <file>images/graphwindow.png</file>
+        <file>images/instswindow.png</file>
+        <file>images/whside.png</file>
+        <file>images/wstack.png</file>
+        <file>images/wvside.png</file>
     </qresource>
 </RCC>

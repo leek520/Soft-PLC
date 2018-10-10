@@ -18,10 +18,16 @@ class GraphFB
 {
 
 public:
+    GraphFB();
     GraphFB(Element element);
     GraphFB(int row, int col);
     virtual ~GraphFB();
     void drawGraph();
+
+    //友元类，用来序列化结构体，保存/加载图元数据
+    friend QDataStream& operator<<(QDataStream&,GraphFB&);
+    friend QDataStream& operator>>(QDataStream&,GraphFB&);
+
 public:
     static int g_unitWidth;
     static int g_unitHeight;
