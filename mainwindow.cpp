@@ -311,16 +311,14 @@ void MainWindow::SetupMdiArea()
 {
     m_instsWid = new InstsWindow;
     QMdiSubWindow *instsChild = m_mdiArea->addSubWindow(m_instsWid);
-    instsChild->setGeometry(0, 0, 1200, 600);
     instsChild->setWindowIcon(QIcon(":/images/instswindow.png"));
 
     m_graphWid = new GraphWindow;
     QMdiSubWindow *graphChild = m_mdiArea->addSubWindow(m_graphWid);
-    graphChild->setGeometry(100, 60, 1200, 600);
     graphChild->setWindowIcon(QIcon(":/images/graphwindow.png"));
     //m_graphWid->setWindowState(Qt::WindowMaximized);
 
-    m_mdiArea->setActiveSubWindow(graphChild);
+    //m_mdiArea->setActiveSubWindow(graphChild);
 
     m_mdiArea->tileSubWindows();   //SubWindows并列
     //m_mdiArea->cascadeSubWindows();   //SubWindows重叠排列
@@ -402,12 +400,21 @@ void MainWindow::remove()
 
 void MainWindow::zoomin()
 {
+
+    if (!GraphFB::zoom(true)) return;
+
     m_graphWid->m_graphTable->zoomin();
+
+    m_instsWid->setZoom(GraphFB::g_factor);
 }
 
 void MainWindow::zoomout()
 {
+    if (!GraphFB::zoom(false)) return;
+
     m_graphWid->m_graphTable->zoomout();
+
+    m_instsWid->setZoom(GraphFB::g_factor);
 }
 
 void MainWindow::find()
@@ -460,14 +467,47 @@ void MainWindow::runGraph()
 
 void MainWindow::reorderSubWindow()
 {
+    int width = m_mdiArea->width();
+    int height = m_mdiArea->height();
+    QList<QMdiSubWindow *> subwinList = m_mdiArea->subWindowList();
     if (sender() == wstackAct){
         m_mdiArea->cascadeSubWindows();
-        m_mdiArea->subWindowList()[0]->setGeometry(0,0,1200,600);
-        m_mdiArea->subWindowList()[1]->setGeometry(100,60,1200,600);
-    }else if (sender() == whsideAct){
-        m_mdiArea->tileSubWindows();
-    }else if (sender() == wvsideAct){
+        switch (subwinList.count()) {
+        case 1:
+            subwinList[0]->setGeometry(0,0,width*3/4,height*3/4);
+            break;
+        case 2:
+            subwinList[0]->setGeometry(0,0,width*3/4,height*3/4);
+            subwinList[1]->setGeometry(100,80,width*3/4,height*3/4);
+            break;
+        default:
+            break;
+        }
 
+    }else if (sender() == whsideAct){
+        switch (subwinList.count()) {
+        case 1:
+            subwinList[0]->setGeometry(0,0,width,height);
+            break;
+        case 2:
+            subwinList[0]->setGeometry(0,0,width/2,height);
+            subwinList[1]->setGeometry(width/2,0,width/2,height);
+            break;
+        default:
+            break;
+        }
+    }else if (sender() == wvsideAct){
+        switch (subwinList.count()) {
+        case 1:
+            subwinList[0]->setGeometry(0,0,width,height);
+            break;
+        case 2:
+            subwinList[0]->setGeometry(0,0,width,height/2);
+            subwinList[1]->setGeometry(0,height/2,width,height/2);
+            break;
+        default:
+            break;
+        }
     }
 }
 

@@ -11,7 +11,7 @@
 #define UNIT_ZOOM_FACTOR    1.2
 #define UNIT_W_FACTOR       3
 #define UNIT_H_FACTOR       4       //这里确保该因子能被对应长度整除
-
+#define UNIT_INST_HEIGH     30
 #define MAX_COL         12
 #define MAX_ROW         1000
 #define INIT_ROW        12
@@ -51,6 +51,7 @@ enum GraphType
     StepNode,
     OutputNode,
     ReverseLogic,
+    EndGraph,
 };
 enum OptType{Insert, Remove, CutPaste, CopyPaste};
 

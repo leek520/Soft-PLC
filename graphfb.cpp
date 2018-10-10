@@ -1,5 +1,5 @@
 ﻿#include "graphfb.h"
-
+double GraphFB::g_factor = 1.0;
 int GraphFB::g_unitWidth = UNIT_WIDTH;
 int GraphFB::g_unitHeight = UNIT_HEIGH;
 
@@ -134,12 +134,50 @@ void GraphFB::drawGraph()
         QPoint pt((width-fm.width(text))/2,
                   (height*3/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
         painter.drawText(pt, text);
-    }
         break;
+    }
+
+    case EndGraph:
+    {
+        QPointF p1(1, height-2*fh);
+        QPointF p2(1, height-1);
+        QPointF p3(width-1, height-2*fh);
+        QPointF p4(width-1, height-1);
+        painter.drawLine(p1, p2);
+        painter.drawLine(p3, p4);
+        painter.drawLine(p1, p3);
+        painter.drawLine(p2, p4);
+
+        text = QString("%1").arg(emt.name);
+        QPoint pt((width-fm.width(text))/2,
+                  (height*3/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+        painter.drawText(pt, text);
+        break;
+    }
     default:
         break;
     }
     pixMap = pix;
+}
+
+bool GraphFB::zoom(bool in)
+{
+    if (in){    //放大
+        if ((g_unitWidth / UNIT_WIDTH >= 4) |
+           (g_unitHeight / UNIT_HEIGH >= 4))
+            return false;
+
+        g_unitWidth = g_unitWidth * UNIT_ZOOM_FACTOR;
+        g_unitHeight = g_unitHeight * UNIT_ZOOM_FACTOR;
+    }else{
+            if ((UNIT_WIDTH / g_unitWidth >= 2) |
+               (UNIT_HEIGH / g_unitHeight >= 2))
+                return false;
+        g_unitWidth = g_unitWidth / UNIT_ZOOM_FACTOR;
+        g_unitHeight = g_unitHeight / UNIT_ZOOM_FACTOR;
+    }
+    g_factor = (double)g_unitWidth / UNIT_WIDTH;
+    return true;
 }
 
 QDataStream & operator<<(QDataStream &stream, GraphFB &graph)

@@ -139,7 +139,7 @@ class TextEdit : public QTextEdit
 public:
     TextEdit(QWidget *parent = 0) : QTextEdit(parent) {}
     QSize sizeHint() const {
-        return QSize(200, 150);
+        return QSize(200, 80);
     }
 };
 #endif // MAINWINDOW_H

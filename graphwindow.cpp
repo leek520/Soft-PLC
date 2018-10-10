@@ -46,6 +46,8 @@ GraphTable::GraphTable(QWidget *parent) :
                   "QTableWidget::item:selected {background-color: rgb(0,0,255,100);}");
 
     setItemDelegate(new GraphItemDelegate());
+
+    createActions();
 }
 
 void GraphTable::InitTable()
@@ -102,9 +104,15 @@ void GraphTable::InsertSplitLine(int row)
     graph->emt.graphType = NumLine;
     ReDrawGraph(graph);
 }
+
+void GraphTable::InsertNewRow(int row)
+{
+    this->insertRow(row);
+    InsertSplitLine(row);
+}
 GraphFB *GraphTable::GetGraph(int row, int col)
 {
-    InsertNewRow(row, col);
+    RowGraphJudge(row, col);
 
     GraphFB *graph = NULL;
     int idx = CalIdx(row, col);
@@ -153,15 +161,14 @@ void GraphTable::SetCurrentGraph(int row, int col)
     }
 }
 
-void GraphTable::InsertNewRow(int row, int col)
+void GraphTable::RowGraphJudge(int row, int col)
 {
     if (col == 0) return;
     //始终末尾多两个空行
     int rowCnt = rowCount();
     if (row >= rowCnt - 2){
         for (int i=row;i<rowCnt-1;i++){
-            this->insertRow(i);
-            InsertSplitLine(i);
+            InsertNewRow(i);
         }
     }
 
@@ -243,6 +250,21 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
         break;
     case OutputNode:
         for(i=curCol;i<MAX_COL;i++){
+            graph = GetGraph(curRow, i);
+            graph->emt.graphType =  HorizontalLine;
+            ReDrawGraph(graph);
+        }
+        graph = GetGraph(curRow, i);
+        graph->emt.graphType =  type;
+        graph->emt.name =  name;
+        graph->emt.index =  index;
+        graph->emt.mark =  mark;
+        ReDrawGraph(graph);
+        SetCurrentGraph(curRow, i);
+        break;
+    case EndGraph:
+        curRow = m_graphList.count() / MAX_COL + 1;
+        for(i=1;i<MAX_COL;i++){
             graph = GetGraph(curRow, i);
             graph->emt.graphType =  HorizontalLine;
             ReDrawGraph(graph);
@@ -383,9 +405,6 @@ void GraphTable::remove()
 
 void GraphTable::zoomin()
 {
-    if ((GraphFB::g_unitWidth / UNIT_WIDTH == 4) | (GraphFB::g_unitHeight / UNIT_HEIGH == 4)) return;
-    GraphFB::g_unitWidth = GraphFB::g_unitWidth * UNIT_ZOOM_FACTOR;
-    GraphFB::g_unitHeight = GraphFB::g_unitHeight * UNIT_ZOOM_FACTOR;
 
     //设置表格默认的生成单元格尺寸
     horizontalHeader()->setDefaultSectionSize(GraphFB::g_unitWidth);
@@ -407,10 +426,6 @@ void GraphTable::zoomin()
 
 void GraphTable::zoomout()
 {
-    if ((UNIT_WIDTH / GraphFB::g_unitWidth >= 2) | (UNIT_HEIGH / GraphFB::g_unitHeight >= 2)) return;
-    GraphFB::g_unitWidth = GraphFB::g_unitWidth / UNIT_ZOOM_FACTOR;
-    GraphFB::g_unitHeight = GraphFB::g_unitHeight / UNIT_ZOOM_FACTOR;
-
     //设置表格默认的生成单元格尺寸
     horizontalHeader()->setDefaultSectionSize(GraphFB::g_unitWidth);
     verticalHeader()->setDefaultSectionSize(GraphFB::g_unitHeight);
@@ -433,6 +448,25 @@ void GraphTable::zoomout()
 void GraphTable::find()
 {
 
+}
+
+void GraphTable::insertRowGraph()
+{
+    int row = currentRow();
+    //在当前行的上一行添加新行
+    InsertNewRow(row);
+
+    //修改graph数组
+    int idx = CalIdx(row, 1);
+    for (int i=idx;i<m_graphList.count();i++){
+        m_graphList[i]->emt.row += 1;
+    }
+    //添加新行的graph列表
+    for (int i=1;i<MAX_COL+1;i++){
+        idx = CalIdx(row, i);
+        GraphFB *graph = new GraphFB(row, i);
+        m_graphList.insert(idx, graph);
+    }
 }
 
 //此处传入的row和col不是窗口中的实际坐标，而是列-1。
@@ -491,6 +525,10 @@ int GraphTable::DealNode(int row, int col)
 
 void GraphTable::BuildGraph()
 {
+    if (m_graphList.count()==0) return;
+    //第一步：先在最后一行加入END标志
+    slt_inputPara("END", 0, "", EndGraph);
+    //第二步：编译，生成序列
     int i = 0;
     int j = 0;
     buildPreRow = 0;
@@ -509,6 +547,9 @@ void GraphTable::BuildGraph()
         }
     }
 
+    //第三步：根据序列生成指令表
+
+
 }
 
 void GraphTable::RunGraph(bool enable)
@@ -526,6 +567,70 @@ void GraphTable::RunGraph(bool enable)
 
         ReDrawGraph(m_graphList[i]);
     }
+}
+
+void GraphTable::contextMenuEvent(QContextMenuEvent *event)
+{
+    pop_menu->clear(); //清除原有菜单
+    QPoint point = event->pos(); //得到窗口坐标
+
+    pop_menu->addAction(selectAllAct);
+    pop_menu->addSeparator();
+    pop_menu->addAction(undoAct);
+    pop_menu->addAction(redoAct);
+    pop_menu->addSeparator();
+    pop_menu->addAction(copyAct);
+    pop_menu->addAction(cutAct);
+    pop_menu->addAction(pasteAct);
+    pop_menu->addAction(removeAct);
+    pop_menu->addSeparator();
+    pop_menu->addAction(insertRowAct);
+    //菜单出现的位置为当前鼠标的位置
+    pop_menu->exec(QCursor::pos());
+    event->accept();
+
+    QTableWidgetItem *item = this->itemAt(point);
+    if(item != NULL){
+
+    }
+}
+
+void GraphTable::createActions()
+{
+    //创建菜单项
+    pop_menu = new QMenu();
+
+    selectAllAct = new QAction(tr("全选"), this);
+    selectAllAct->setShortcut(QKeySequence::SelectAll);
+    connect(selectAllAct, SIGNAL(triggered()), this, SLOT(selectAll()));
+
+    undoAct = new QAction(tr("撤销"), this);
+    undoAct->setShortcut(QKeySequence::Undo);
+    connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
+
+    redoAct = new QAction(tr("恢复"), this);
+    redoAct->setShortcut(QKeySequence::Redo);
+    connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
+
+    copyAct = new QAction(tr("复制"), this);
+    copyAct->setShortcut(QKeySequence::Copy);
+    connect(copyAct, SIGNAL(triggered()), this, SLOT(copy()));
+
+    pasteAct = new QAction(tr("粘贴"), this);
+    pasteAct->setShortcut(QKeySequence::Paste);
+    connect(pasteAct, SIGNAL(triggered()), this, SLOT(paste()));
+
+    cutAct = new QAction(tr("剪切"), this);
+    cutAct->setShortcut(QKeySequence::Cut);
+    connect(cutAct, SIGNAL(triggered()), this, SLOT(cut()));
+
+    removeAct = new QAction(tr("删除"), this);
+    removeAct->setShortcut(QKeySequence::Delete);
+    connect(removeAct, SIGNAL(triggered()), this, SLOT(remove()));
+
+    insertRowAct = new QAction(tr("插入新行"), this);
+    connect(insertRowAct, SIGNAL(triggered()), this, SLOT(insertRowGraph()));
+
 }
 
 GraphWindow::GraphWindow(QWidget *parent) :

@@ -27,8 +27,9 @@ public:
     //友元类，用来序列化结构体，保存/加载图元数据
     friend QDataStream& operator<<(QDataStream&,GraphFB&);
     friend QDataStream& operator>>(QDataStream&,GraphFB&);
-
+    static bool zoom(bool in);
 public:
+    static double g_factor;
     static int g_unitWidth;
     static int g_unitHeight;
     Element emt;

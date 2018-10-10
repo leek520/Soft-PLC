@@ -12,6 +12,7 @@
 #include <QPainter>
 #include <QSpinBox>
 #include <QDebug>
+#include <QMenu>
 #include <QMessageBox>
 #include <QApplication>
 #include "common.h"
@@ -82,12 +83,17 @@ public:
 
     void BuildGraph();
     void RunGraph(bool enable);
+protected:
+    void contextMenuEvent(QContextMenuEvent *event);
 signals:
     void sig_InsertBottomRowText(QString text);
 
 private:
+    void createActions();
+
     void InsertSplitLine(int row);
-    void InsertNewRow(int row, int col);
+    void InsertNewRow(int row);
+    void RowGraphJudge(int row, int col);
     void RecordGraph(GraphFB *graph);
     void RemoveGraph(int row, int col);
     GraphFB *GetGraph(int row, int col);
@@ -100,7 +106,12 @@ private:
     1.用户插入图形合法性校验
     2.编译时去除空白行
     3.编译时合法性校验
+
+    4.关闭时提示保存，新建时提示保存
+    5.软件打开时的无边框加载图
+    6.如何做类似word样式的菜单
     */
+
 public slots:
     void slt_inputPara(QString name, int index, QString mark, int type);
     void redo();
@@ -109,14 +120,26 @@ public slots:
     void paste();
     void cut();
     void remove();
-
     void zoomin();
     void zoomout();
     void find();
+
+    void insertRowGraph();
 public:
     QList<GraphFB *> m_graphList;
 
 private:
+    QMenu *pop_menu;
+    QAction *selectAllAct;
+    QAction *undoAct;
+    QAction *redoAct;
+    QAction *copyAct;
+    QAction *pasteAct;
+    QAction *cutAct;
+    QAction *removeAct;
+    QAction *insertRowAct;
+
+
     int buildPos[MAX_ROW];
     int buildPreRow;
     QList<QPoint> m_buildTrail;
