@@ -548,8 +548,8 @@ void GraphTable::BuildGraph()
     }
 
     //第三步：根据序列生成指令表
-
-
+    sig_IsertInst(0, "LD", "X0");
+    //https://wenku.baidu.com/view/f69bc79f8762caaedd33d428.html
 }
 
 void GraphTable::RunGraph(bool enable)

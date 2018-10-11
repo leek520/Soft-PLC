@@ -87,7 +87,7 @@ protected:
     void contextMenuEvent(QContextMenuEvent *event);
 signals:
     void sig_InsertBottomRowText(QString text);
-
+    void sig_IsertInst(int row, QString inst, QString opt);
 private:
     void createActions();
 

@@ -22,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
             m_graphWid->m_graphTable,SLOT(slt_inputPara(QString,int,QString,int)));
     connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertBottomRowText(QString)),
             this, SLOT(slt_InsertBottomRowText(QString)));
+
+    connect(m_graphWid->m_graphTable, SIGNAL(sig_IsertInst(int,QString,QString)),
+            m_instsWid, SLOT(slt_IsertInst(int,QString,QString)));
 }
 
 MainWindow::~MainWindow()
