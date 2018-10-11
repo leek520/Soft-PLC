@@ -522,7 +522,13 @@ int GraphTable::DealNode(int row, int col)
 
     }
 }
-
+/**********基于正向深度优先扫描的转换算法***
+ *
+ * 转换过程：梯形图--->树--->指令表
+ * 第一步：从左到右，从上到下，扫描所有梯形图，根据元件位置判断其在树中位置，构建树
+ * 树由三个数据结构组成，树（tree）,节点（node），表（list），分别对应根节点，主干节点和叶子节点
+ * 第二步：扫描树，生成指令表
+*/
 void GraphTable::BuildGraph()
 {
     if (m_graphList.count()==0) return;

@@ -17,14 +17,16 @@ SOURCES += main.cpp\
     graphfb.cpp \
     graphwindow.cpp \
     inputwindow.cpp \
-    instswindow.cpp
+    instswindow.cpp \
+    binarytree.cpp
 
 HEADERS  += mainwindow.h \
     graphfb.h \
     common.h \
     graphwindow.h \
     inputwindow.h \
-    instswindow.h
+    instswindow.h \
+    binarytree.h
 
 RESOURCES += \
     application.qrc

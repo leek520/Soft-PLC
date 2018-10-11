@@ -326,7 +326,6 @@ void MainWindow::SetupMdiArea()
     m_mdiArea->tileSubWindows();   //SubWindows并列
     //m_mdiArea->cascadeSubWindows();   //SubWindows重叠排列
 
-
 }
 
 void MainWindow::newFile()
@@ -473,7 +472,32 @@ void MainWindow::reorderSubWindow()
     int width = m_mdiArea->width();
     int height = m_mdiArea->height();
     QList<QMdiSubWindow *> subwinList = m_mdiArea->subWindowList();
-    if (sender() == wstackAct){
+
+    if (sender() == whsideAct){
+        switch (subwinList.count()) {
+        case 1:
+            subwinList[0]->setGeometry(0,0,width,height);
+            break;
+        case 2:
+            subwinList[1]->setGeometry(0,0,width*3/4,height);
+            subwinList[0]->setGeometry(width*3/4,0,width/4,height);
+            break;
+        default:
+            break;
+        }
+    }else if (sender() == wvsideAct){
+        switch (subwinList.count()) {
+        case 1:
+            subwinList[0]->setGeometry(0,0,width,height);
+            break;
+        case 2:
+            subwinList[1]->setGeometry(0,0,width,height/2);
+            subwinList[0]->setGeometry(0,height/2,width,height/2);
+            break;
+        default:
+            break;
+        }
+    }else{  //    if (sender() == wstackAct)
         m_mdiArea->cascadeSubWindows();
         switch (subwinList.count()) {
         case 1:
@@ -487,30 +511,6 @@ void MainWindow::reorderSubWindow()
             break;
         }
 
-    }else if (sender() == whsideAct){
-        switch (subwinList.count()) {
-        case 1:
-            subwinList[0]->setGeometry(0,0,width,height);
-            break;
-        case 2:
-            subwinList[0]->setGeometry(0,0,width/2,height);
-            subwinList[1]->setGeometry(width/2,0,width/2,height);
-            break;
-        default:
-            break;
-        }
-    }else if (sender() == wvsideAct){
-        switch (subwinList.count()) {
-        case 1:
-            subwinList[0]->setGeometry(0,0,width,height);
-            break;
-        case 2:
-            subwinList[0]->setGeometry(0,0,width,height/2);
-            subwinList[1]->setGeometry(0,height/2,width,height/2);
-            break;
-        default:
-            break;
-        }
     }
 }
 
