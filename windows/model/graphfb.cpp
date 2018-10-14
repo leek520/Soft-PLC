@@ -40,7 +40,13 @@ void GraphFB::drawGraph()
     int height = g_unitHeight * emt.height;
 
     QPixmap pix(width, height);
-    pix.fill(Qt::white);
+    if ((emt.graphType == NoneGraph) | (emt.graphType == NumLine)){
+        pix.fill(Qt::white);
+    }else{
+        //pix.fill(QColor(245, 245, 245));
+        pix.fill(Qt::white);
+    }
+
 
     QPainter painter(&pix);
     painter.setPen(QPen(entColor, g_unitWidth/UNIT_WIDTH));

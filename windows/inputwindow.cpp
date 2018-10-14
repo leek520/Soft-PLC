@@ -1,6 +1,6 @@
 ﻿#include "inputwindow.h"
 
-InputWindow::InputWindow(QWidget *parent) :
+InputGraphWindow::InputGraphWindow(QWidget *parent) :
     QWidget(parent)
 {
     setWindowFlags(windowFlags()&~Qt::WindowMaximizeButtonHint&~Qt::WindowMinimizeButtonHint);
@@ -57,7 +57,7 @@ InputWindow::InputWindow(QWidget *parent) :
     m_indexSpi->setFocus();
 }
 
-void InputWindow::SetCurrentName(int index)
+void InputGraphWindow::SetCurrentName(int index)
 {
 
     switch (index) {
@@ -98,7 +98,7 @@ void InputWindow::SetCurrentName(int index)
 
 }
 
-bool InputWindow::ReadInputDeviceInfo()
+bool InputGraphWindow::ReadInputDeviceInfo()
 {
     if (!m_deviceInfo.isEmpty()) return true;
 
@@ -144,7 +144,7 @@ bool InputWindow::ReadInputDeviceInfo()
 }
 
 
-void InputWindow::on_m_nameCom_triggered(QString idx)
+void InputGraphWindow::on_m_nameCom_triggered(QString idx)
 {
     m_nameLabel->setText(m_deviceInfo[idx][0]);
     m_indexLabel->setText(QString("范围：%1~%2")
@@ -154,7 +154,7 @@ void InputWindow::on_m_nameCom_triggered(QString idx)
 }
 
 
-void InputWindow::on_yesBtn_triggered()
+void InputGraphWindow::on_yesBtn_triggered()
 {
     emit sig_inputPara(m_nameCom->currentText(),
                        m_indexSpi->value(),
@@ -164,8 +164,44 @@ void InputWindow::on_yesBtn_triggered()
     m_indexSpi->setValue(0);
 }
 
-void InputWindow::on_cancelBtn_triggered()
+void InputGraphWindow::on_cancelBtn_triggered()
 {
     close();
     m_indexSpi->setValue(0);
+}
+
+InputInstsWindow::InputInstsWindow(QWidget *parent)
+{
+    setWindowFlags(Qt::FramelessWindowHint);
+    setWindowModality(Qt::ApplicationModal);    //设置为模态
+    setFixedSize(400, 60);
+    InitUi();
+}
+
+void InputInstsWindow::InitUi()
+{
+    QHBoxLayout *hbox = new QHBoxLayout(this);
+    lineEdit = new QLineEdit();
+    lineEdit->setFixedWidth(150);
+    okBtn = new QPushButton("确定");
+    cancelBtn = new QPushButton("取消");
+    hbox->addWidget(new QLabel("输入指令"));
+    hbox->addWidget(lineEdit);
+    hbox->addWidget(okBtn);
+    hbox->addWidget(cancelBtn);
+
+    connect(okBtn, SIGNAL(clicked(bool)),
+            this, SLOT(on_okBtn_triggerred()));
+    connect(cancelBtn, SIGNAL(clicked(bool)),
+            this, SLOT(on_cancelBtn_triggerred()));
+}
+
+void InputInstsWindow::on_okBtn_triggerred()
+{
+    close();
+}
+
+void InputInstsWindow::on_cancelBtn_triggerred()
+{
+    close();
 }

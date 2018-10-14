@@ -6,6 +6,7 @@
 #include <QHBoxLayout>
 #include <QGridLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QComboBox>
 #include <QSpinBox>
 #include <QPushButton>
@@ -15,11 +16,11 @@
 #include <QDebug>
 
 #include "common.h"
-class InputWindow : public QWidget
+class InputGraphWindow : public QWidget
 {
     Q_OBJECT
 public:
-    explicit InputWindow(QWidget *parent = 0);
+    explicit InputGraphWindow(QWidget *parent = 0);
     void SetCurrentName(int index);
 private:
     void InitUi();
@@ -41,5 +42,20 @@ private:
     QPushButton *m_yesBtn;
     QPushButton *m_cancelBtn;
 };
+class InputInstsWindow : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit InputInstsWindow(QWidget *parent = 0);
+private:
+    void InitUi();
+private slots:
+    void on_okBtn_triggerred();
+    void on_cancelBtn_triggerred();
+private:
+    QLineEdit *lineEdit;
+    QPushButton *okBtn;
+    QPushButton *cancelBtn;
 
+};
 #endif // INPUTWINDOW_H

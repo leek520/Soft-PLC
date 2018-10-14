@@ -15,11 +15,12 @@ MainWindow::MainWindow(QWidget *parent)
     SetupUi();
     SetupMdiArea();
 
-    m_inputW = new InputWindow();
+    m_inputGW = new InputGraphWindow();
+    m_inputIW = new InputInstsWindow();
     connect(this, SIGNAL(sig_inputPara(QString,int,QString,int)),
             m_graphWid->m_graphTable,SLOT(slt_inputPara(QString,int,QString,int)));
 
-    connect(m_inputW, SIGNAL(sig_inputPara(QString,int,QString,int)),
+    connect(m_inputGW, SIGNAL(sig_inputPara(QString,int,QString,int)),
             m_graphWid->m_graphTable,SLOT(slt_inputPara(QString,int,QString,int)));
 
     connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertBottomRowText(QString)),
@@ -36,6 +37,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(m_graphWid->m_graphTable, SIGNAL(sig_enableRedo(bool)),
             this, SLOT(slt_enableRedo(bool)));
+
+    connect(m_graphWid->m_graphTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
+            this, SLOT(slt_doubleClickTable(QTableWidgetItem *)));
 
     connect(m_graphWid->m_graphTable, SIGNAL(sig_IsertInst(int,QString,QString)),
             m_instsWid, SLOT(slt_IsertInst(int,QString,QString)));
@@ -308,6 +312,8 @@ void MainWindow::SetupUi()
     m_dockW->setWidget(m_bottomW);
     this->addDockWidget(Qt::BottomDockWidgetArea, m_dockW);//初始位置
 
+    m_graphWid = NULL;
+    m_instsWid = NULL;
 
 //    QDesktopWidget* desktopWidget = QApplication::desktop();
 //    //获取可用桌面大小
@@ -347,6 +353,21 @@ void MainWindow::SetupMdiArea()
 
 void MainWindow::newFile()
 {
+    //提示是否要保存
+    if (m_graphWid){
+        int result = QMessageBox::question(
+                    this, tr("QMessageBox::question()"),
+                    "是否将变更的文件保存至...？",
+                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+        if (result == QMessageBox::Yes){
+            //保存
+        }else if (result == QMessageBox::No){
+            //不保存
+        }else{
+            return;
+        }
+    }
     SetupMdiArea();
 }
 
@@ -447,8 +468,8 @@ void MainWindow::drawGraph()
     if (index < 0) return;
 
     if (index < 6){
-        m_inputW->SetCurrentName(index);
-        m_inputW->show();
+        m_inputGW->SetCurrentName(index);
+        m_inputGW->show();
     }else{
         switch (index) {
         case 6:
@@ -492,6 +513,11 @@ void MainWindow::slt_enableUndo(bool status)
 void MainWindow::slt_enableRedo(bool status)
 {
     redoAct->setEnabled(status);
+}
+
+void MainWindow::slt_doubleClickTable(QTableWidgetItem *item)
+{
+    m_inputIW->show();
 }
 
 void MainWindow::reorderSubWindow()

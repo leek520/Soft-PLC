@@ -60,6 +60,7 @@ void GraphTable::InitTable()
 
     for (int i=0;i<INIT_ROW;i++){
         InsertSplitLine(i);
+
     }
     setCurrentCell(0,1);
 }
@@ -131,6 +132,12 @@ void GraphTable::InsertNewRow(int row)
 *******************************************************************************/
 void GraphTable::InsertSplitLine(int row)
 {
+    //填充 item
+    for(int j=1;j<MAX_COL+1;j++){
+        QTableWidgetItem *item = new QTableWidgetItem();
+        setItem(row, j, item);
+    }
+
     GraphFB graph(row, 0);
     graph.emt.graphType = NumLine;
     ReDrawGraph(&graph);
@@ -790,9 +797,12 @@ void GraphTable::BuildGraph()
 //        }
 //    }
 
-//    //第三步：根据序列生成指令表
-//    sig_IsertInst(0, "LD", "X0");
-//    //https://wenku.baidu.com/view/f69bc79f8762caaedd33d428.html
+    //编译过的部分加底色显示
+
+
+    //第三步：根据序列生成指令表
+    sig_IsertInst(0, "LD", "X0");
+    //https://wenku.baidu.com/view/f69bc79f8762caaedd33d428.html
 }
 
 void GraphTable::RunGraph(bool enable)
@@ -809,8 +819,9 @@ void GraphTable::RunGraph(bool enable)
 //        }
 
 //        ReDrawGraph(m_graphList[i]);
-//    }
+    //    }
 }
+
 void GraphTable::wheelEvent(QWheelEvent *event)
 {
     //首先检测是否按下CTRL

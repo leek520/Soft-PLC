@@ -109,14 +109,11 @@ private:
     void removeGraphVLine(int row, int col);
     void insertGraphVLine(int row, int col);
     void doOptChcek();
+
     //To do:
     /*
     1.用户插入图形合法性校验
     2.编译时去除空白行；
-    3.编译时合法性校验，如画竖线时，检测下方是否为有效图形，如果不是，则不允许画竖线
-    4.用户插入到的行，底色区别显示，编译过的部分，去掉底色，用户再编辑的图形区域，再插入底色
-
-    4.关闭时提示保存，新建时提示保存，保存或不保存后弹出新建项目的对话框
     5.软件打开时的无边框加载图
     6.如何做类似word样式的菜单
     */
@@ -126,7 +123,6 @@ public slots:
     void slt_removeGraphVLine();
     void slt_insertGraphRow();
     void slt_removeGraphRow();
-
 
     void redo();
     void undo();

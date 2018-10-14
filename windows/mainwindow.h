@@ -71,6 +71,8 @@ private slots:
 
     void slt_enableUndo(bool status);
     void slt_enableRedo(bool status);
+
+    void slt_doubleClickTable(QTableWidgetItem *item);
     void slt_InsertBottomRowText(QString text);
 private :
     QMenu *fileMenu;
@@ -124,7 +126,8 @@ private :
     GraphWindow *m_graphWid;
     InstsWindow *m_instsWid;
 
-    InputWindow *m_inputW;
+    InputGraphWindow *m_inputGW;
+    InputInstsWindow *m_inputIW;
 
 };
 class ListWidget : public QListWidget
