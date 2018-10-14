@@ -1,0 +1,15 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\graphwindow.o
+./release\inputwindow.o
+./release\instswindow.o
+./release\graphfb.o
+./release\binarytree.o
+./release\graphmodel.o
+./release\qrc_application.o
+./release\moc_mainwindow.o
+./release\moc_graphwindow.o
+./release\moc_inputwindow.o
+./release\moc_instswindow.o
+);

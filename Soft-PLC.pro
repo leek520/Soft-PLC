@@ -11,24 +11,28 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Soft-PLC
 TEMPLATE = app
 
+INCLUDEPATH += ./include/
+INCLUDEPATH += ./windows/
+INCLUDEPATH += ./windows/model/
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    graphfb.cpp \
-    graphwindow.cpp \
-    inputwindow.cpp \
-    instswindow.cpp \
-    binarytree.cpp
+SOURCES +=  main.cpp\
+            windows/mainwindow.cpp \
+            windows/graphwindow.cpp \
+            windows/inputwindow.cpp \
+            windows/instswindow.cpp \
+            windows/model/graphfb.cpp \
+            windows/model/binarytree.cpp \
+    windows/model/graphmodel.cpp
 
-HEADERS  += mainwindow.h \
-    graphfb.h \
-    common.h \
-    graphwindow.h \
-    inputwindow.h \
-    instswindow.h \
-    binarytree.h
+HEADERS  += include/common.h \
+            windows/mainwindow.h \
+            windows/graphwindow.h \
+            windows/inputwindow.h \
+            windows/instswindow.h \
+            windows/model/graphfb.h \
+            windows/model/binarytree.h \
+    windows/model/graphmodel.h
 
-RESOURCES += \
-    application.qrc
+RESOURCES += application.qrc
 
 RC_ICONS = mamtool.ico
