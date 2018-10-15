@@ -31,132 +31,42 @@
 */
 
 //http://blog.51cto.com/9291927/2083190
+//https://www.cnblogs.com/ljwTiey/p/4284784.html
+
 #include <QObject>
-enum BTNodePos
-{
-    Any,
-    Left,
-    Right
-};
 template <typename T>
-class TreeNode
+class BTreeNode
 {
 public:
-    T value;
-    TreeNode<T>* parent;
-    TreeNode()
-    {
-      parent = NULL;
-    }
-    virtual ~TreeNode() = 0;
+    T data;
+    BTreeNode<T>* left;   //左子结点
+    BTreeNode<T>* right;  //右子结点
+    BTreeNode<T>* parent;   //父节点
+
+    BTreeNode();
+    BTreeNode(const T &value,
+              BTreeNode<T>* pleft=NULL,
+              BTreeNode<T>* pright=NULL);
+
+    BTreeNode<T> &operator =(const BTreeNode<T> &copy);
 };
+
+
 template <typename T>
-class Tree:public Object
+class BTree
 {
 protected:
-    TreeNode<T>* m_root;//根结点
-public:
-Tree(){m_root = NULL;}
-//插入结点
-virtual bool insert(TreeNode<T>* node) = 0;
-virtual bool insert(const T& value, TreeNode<T>* parent) = 0;
-//删除结点
-virtual QSharedPointer< Tree<T> > remove(const T& value) = 0;
-virtual QSharedPointer< Tree<T> > remove(TreeNode<T>* node) = 0;
-//查找结点
-virtual TreeNode<T>* find(const T& value)const = 0;
-virtual TreeNode<T>* find(TreeNode<T>* node)const = 0;
-//根结点访问函数
-virtual TreeNode<T>* root()const = 0;
-//树的度访问函数
-virtual int degree()const = 0;
-//树的高度访问函数
-virtual int height()const = 0;
-//树的结点数目访问函数
-virtual int count()const = 0;
-//清空树
-virtual void clear() = 0;
-};
-template <typename T>
-TreeNode<T>::~TreeNode()
-{
-}
-template <typename T>
-class BTreeNode:public TreeNode<T>
-{
-public:
-    BTreeNode<T>* m_left;//左子结点
-    BTreeNode<T>* m_right;//右子结点
-    BTreeNode()
-    {
-        m_left = NULL;
-        m_right = NULL;
-    }
+    BTreeNode<T>* root;   //根节点
 
-    //工厂方法，创建堆空间的结点
-    static BTreeNode<T>* NewNode()
-    {
-      BTreeNode<T>* ret = new BTreeNode<T>();
-      if(ret != NULL)
-      {
-          //堆空间的结点标识为true
-          ret->m_flag = true;
-      }
-      return ret;
-    }
-    virtual BTreeNode<T>* find(BTreeNode<T>* node, const T& value) const;
-    BTreeNode<T>* find(const T& value) const;
+public:
 
-    virtual bool insert(BTreeNode<T>* newnode, BTreeNode<T>* node, BTNodePos pos);
-    bool insert(TreeNode<T>* node);
-    virtual bool insert(const T& value, TreeNode<T>* parent, BTNodePos pos);
+    BTree(){ root = NULL; }     //无参构造
+    BTree(const T &value);      //建立以value元素为值的二叉树
+    BTree(BTreeNode<T>* r);      //建立以r为根的二叉树
+    ~BTree();
 
 };
-template <typename T>
-BTreeNode<T> *BTreeNode<T>::find(BTreeNode<T> *node, const T &value) const
-{
-    BTreeNode<T>* ret = NULL;
-    //如果根节点node
-    if(node != NULL)
-    {
-        if(node->value == value)
-        {
-            ret = node;
-        }
-        else
-        {
-            //查找左子树
-            if(ret == NULL)
-            {
-                ret = find(node->m_left, value);
-            }
-            //如果左子树没有找到，ret返回NULL，查找右子树
-            if(ret == NULL)
-            {
-                ret = find(node->m_right, value);
-            }
-        }
-    }
-    return ret;
-}
-template <typename T>
-BTreeNode<T> *BTreeNode<T>::find(const T &value) const
-{
-    return find(root(), value);
-}
-template <typename T>
-bool BTreeNode<T>::insert(BTreeNode<T> *newnode, BTreeNode<T> *node, BTNodePos pos)
-{
 
-}
-template <typename T>
-bool BTreeNode<T>::insert(TreeNode<T> *node)
-{
 
-}
-template <typename T>
-bool BTreeNode<T>::insert(const T &value, TreeNode<T> *parent, BTNodePos pos)
-{
 
-}
 #endif // BINARYTREE_H

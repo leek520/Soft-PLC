@@ -197,5 +197,5 @@ bool GraphModel::checkGraph(int row, int col, int type)
 */
 void GraphModel::buildGraph()
 {
-
+    BTree<int> *tree = new BTree<int>();
 }

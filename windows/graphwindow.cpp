@@ -663,6 +663,7 @@ void GraphTable::slt_removeGraphRow()
 
 void GraphTable::BuildGraph()
 {
+    GM->buildGraph();
     int maxIdx = GM->getCount();
     if (maxIdx == 0) return;
     //第一步：先在最后一行加入END标志

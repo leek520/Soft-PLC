@@ -9,7 +9,7 @@ Copyright (c) 2018 PLT. All Rights Reserved.
     *@description：
 */
 #include "graphfb.h"
-
+#include "binarytree.h"
 #define GM (GraphModel::GetInstance())
 
 class GraphModel
