@@ -1,6 +1,13 @@
 ﻿#ifndef GRAPHWINDOW_H
 #define GRAPHWINDOW_H
-
+/**
+Copyright (c) 2018 PLT. All Rights Reserved.
+    *@file：
+    *@brief： 梯形图编辑窗口
+    *@author ：李奎
+    *@date ：2018/10/01
+    *@description：
+*/
 #include <QTableWidget>
 #include <QTableView>
 #include <QHeaderView>
@@ -26,46 +33,6 @@ public:
     virtual void paint(QPainter *painter,
                        const QStyleOptionViewItem &option,
                        const QModelIndex &index) const;
-//    //创建编辑器，当视图需要一个编辑器时，它通知委托来为被修改的项目提供一个编辑器部件
-//    QWidget *createEditor(QWidget *parent,
-//                          const QStyleOptionViewItem &/* option */,
-//                          const QModelIndex &/* index */) const
-
-//    {
-//        QSpinBox *editor = new QSpinBox(parent);
-//        editor->setMinimum(0);
-//        editor->setMaximum(100);
-//        return editor;
-//    }
-//    //为编辑器设置数据
-//    void setEditorData(QWidget *editor, const QModelIndex &index) const
-//    {
-//        int value = index.model()->data(index,Qt::EditRole).toInt();
-//        QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-//        spinBox->setValue(value);
-//    }
-
-//    //将数据写入模型中
-//    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
-//    {
-//        QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
-//        spinBox->interpretText();//确保获得的是QSpinBox中最近更新的数值，标准的QItemDelegate会在完成编辑后发射closeEdit信号
-//        int value = spinBox->value();
-//        model->setData(index,value,Qt::EditRole);
-//    }
-
-
-//    //更新编辑器的几何布局
-//    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const
-//    {
-//        editor->setGeometry(option.rect);
-//    }
-
-     bool editorEvent(QEvent *event,
-                      QAbstractItemModel *model,
-                      const QStyleOptionViewItem &option,
-                      const QModelIndex &index);
-
 
 };
 class GraphTable : public QTableWidget

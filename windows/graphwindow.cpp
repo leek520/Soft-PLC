@@ -7,26 +7,9 @@ void GraphItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opt
         painter->drawPixmap(option.rect,pix);
     }
     QStyledItemDelegate::paint(painter, option, index);
-//    QStyleOptionViewItem viewOption(option);
-//    initStyleOption(&viewOption, index);
-//    if (option.state.testFlag(QStyle::State_Selected))
-//    {
-//        viewOption.state = viewOption.state ^ QStyle::State_Selected;
-//    }
-//    QStyledItemDelegate::paint(painter, viewOption, index);
 
 }
 
-bool GraphItemDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
-{
-    if(index.data(Qt::DisplayRole).canConvert<QPixmap>())
-    {
-        QPixmap pix = index.data(Qt::DisplayRole).value<QPixmap>();
-    }
-
-
-   //QStyledItemDelegate::editorEvent(event, model, option, index);
-}
 GraphTable::GraphTable(QWidget *parent) :
     QTableWidget(parent)
 {
@@ -71,9 +54,13 @@ void GraphTable::InitParament()
     m_OperationBorad.record.clear();
     m_OperationBorad.type.clear();
 
-    m_ClipBorad.type = CopyPaste;
+    m_ClipBorad.type = RedoCopyPaste;
 }
-
+/******************************************************************************
+* @brief: 记录用户操作，以便撤销和恢复功能使用
+* @author:leek
+* @date 2018/10/10
+*******************************************************************************/
 void GraphTable::RecordOperation(bool *isNew,
                                  GraphFB *graph,
                                  OptType type,
@@ -279,7 +266,7 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
     //如果要画竖直线，则分两步，先画下一行
     case verticalLine:
         insertGraphVLine(curRow, curCol);
-        RecordOperation(&isNew, GM->getUnit(curRow, curCol), VLineInsert, range);
+        RecordOperation(&isNew, GM->getUnit(curRow, curCol), RedoVLineInsert, range);
         SetCurrentUnit(curRow, curCol-1);
         break;
     case HorizontalLine:
@@ -292,7 +279,7 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
         graph->emt.index =  index;
         graph->emt.mark =  mark;
         ReDrawGraph(graph);
-        RecordOperation(&isNew, graph, GraphInsert, range);
+        RecordOperation(&isNew, graph, RedoGraphInsert, range);
         SetCurrentUnit(curRow, curCol);
         break;
     case OutputNode:
@@ -300,7 +287,7 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
             ReDrawGraph(graph);
-            RecordOperation(&isNew, graph, GraphInsert, range);
+            RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
         graph = GM->getUnit(curRow, i);
         graph->emt.graphType =  type;
@@ -308,7 +295,7 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
         graph->emt.index =  index;
         graph->emt.mark =  mark;
         ReDrawGraph(graph);
-        RecordOperation(&isNew, graph, GraphInsert, range);
+        RecordOperation(&isNew, graph, RedoGraphInsert, range);
         SetCurrentUnit(curRow, i);
         break;
     case EndGraph:
@@ -343,84 +330,33 @@ void GraphTable::redo()
     GraphFB *graph = NULL;
     QList<Element> *optList =  m_OperationBorad.record[step];
     switch (m_OperationBorad.type[step]) {
-    case GraphInsert:
-        for (int i=0;i<optList->count();i++){
-            emt = optList->at(i);
-            graph = GM->getUnit(emt.row, emt.col);
-            graph->clearEelment();
-            ReDrawGraph(graph);
-        }
-        m_OperationBorad.type[step] = GraphRemove;
-        break;
-    case GraphRemove:
+    case UndoGraphInsert:
         for (int i=0;i<optList->count();i++){
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
             ReDrawGraph(graph);
         }
-        m_OperationBorad.type[step] = GraphInsert;
+        m_OperationBorad.type[step] = RedoGraphInsert;
         SetCurrentUnit(emt.row, emt.col, true);
         break;
-    case VLineInsert:
-        for (int i=0;i<optList->count();i++){
-            emt = optList->at(i);
-            removeGraphVLine(emt.row, emt.col);
-        }
-        m_OperationBorad.type[step] = VLineRemove;
-        SetCurrentUnit(emt.row, emt.col, true);
-        break;
-    case VLineRemove:
+    case UnVLineInsert:
         for (int i=0;i<optList->count();i++){
             emt = optList->at(i);
             insertGraphVLine(emt.row, emt.col);
         }
-        m_OperationBorad.type[step] = VLineInsert;
+        m_OperationBorad.type[step] = RedoVLineInsert;
         break;
-    case CopyPaste:
-        for (int i=0;i<optList->count();i=i+2){
-            emt = optList->at(i);
-            graph = GM->getUnit(emt.row, emt.col);
-            graph->setEelment(emt);
-            ReDrawGraph(graph);
-        }
-        m_OperationBorad.type[step] = CopyRemove;
-        break;
-    case CopyRemove:
+    case UndoCopyPaste:
         for (int i=0;i<optList->count();i=i+2){
             emt = optList->at(i+1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
             ReDrawGraph(graph);
         }
-        m_OperationBorad.type[step] = CopyPaste;
+        m_OperationBorad.type[step] = RedoCopyPaste;
         break;
-    case CutPaste:
-    {
-        int startRow = m_OperationBorad.recordRange[step]->topRow();
-        int startCol = m_OperationBorad.recordRange[step]->leftColumn();
-        int width = m_OperationBorad.recordRange[step]->rightColumn()-
-                    m_OperationBorad.recordRange[step]->leftColumn() + 1;
-        for (int i=0;i<optList->count();i=i+2){
-            //先把dst还原src
-            int srcRow = startRow + (i / 2) / width;
-            int srcCol = startCol + (i / 2) % width;
-            emt = optList->at(i+1);
-            emt.row = srcRow;
-            emt.col = srcCol;
-            graph = GM->getUnit(srcRow, srcCol);
-            graph->setEelment(emt);
-            ReDrawGraph(graph);
-            //再把old放到dst
-            emt = optList->at(i);
-            graph = GM->getUnit(emt.row, emt.col);
-            graph->setEelment(emt);
-            ReDrawGraph(graph);
-        }
-        m_OperationBorad.type[step] = CutRemove;
-        break;
-    }
-    case CutRemove:
+    case UndoCutPaste:
     {
         int startRow = m_OperationBorad.recordRange[step]->topRow();
         int startCol = m_OperationBorad.recordRange[step]->leftColumn();
@@ -439,7 +375,7 @@ void GraphTable::redo()
             graph->setEelment(emt);
             ReDrawGraph(graph);
         }
-        m_OperationBorad.type[step] = CutPaste;
+        m_OperationBorad.type[step] = RedoCutPaste;
         break;
     }
     default:
@@ -459,57 +395,32 @@ void GraphTable::undo()
     QList<Element> *optList =  m_OperationBorad.record[step];
 
     switch (m_OperationBorad.type[step]) {
-    case GraphInsert:
+    case RedoGraphInsert:
         for (int i=optList->count()-1;i>-1;i--){
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->clearEelment();
             ReDrawGraph(graph);
         }
-        m_OperationBorad.type[step] = GraphRemove;
+        m_OperationBorad.type[step] = UndoGraphInsert;
         break;
-    case GraphRemove:
-        for (int i=optList->count()-1;i>-1;i--){
-            emt = optList->at(i);
-            graph = GM->getUnit(emt.row, emt.col);
-            graph->setEelment(emt);
-            ReDrawGraph(graph);
-        }
-        m_OperationBorad.type[step] = GraphInsert;
-        break;
-    case VLineInsert:
+    case RedoVLineInsert:
         for (int i=optList->count()-1;i>-1;i--){
             emt = optList->at(i);
             removeGraphVLine(emt.row, emt.col);
         }
-        m_OperationBorad.type[step] = VLineRemove;
+        m_OperationBorad.type[step] = UnVLineInsert;
         break;
-    case VLineRemove:
-        for (int i=optList->count()-1;i>-1;i--){
-            emt = optList->at(i);
-            insertGraphVLine(emt.row, emt.col);
-        }
-        m_OperationBorad.type[step] = VLineInsert;
-        break;
-    case CopyPaste:
+    case RedoCopyPaste:
         for (int i=optList->count()-1;i>-1;i=i-2){
             emt = optList->at(i-1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
             ReDrawGraph(graph);
         }
-        m_OperationBorad.type[step] = CopyRemove;
+        m_OperationBorad.type[step] = UndoCopyPaste;
         break;
-    case CopyRemove:
-        for (int i=optList->count()-1;i>-1;i=i-2){
-            emt = optList->at(i);
-            graph = GM->getUnit(emt.row, emt.col);
-            graph->setEelment(emt);
-            ReDrawGraph(graph);
-        }
-        m_OperationBorad.type[step] = CopyPaste;
-        break;
-    case CutPaste:
+    case RedoCutPaste:
     {
         int startRow = m_OperationBorad.recordRange[step]->topRow();
         int startCol = m_OperationBorad.recordRange[step]->leftColumn();
@@ -531,29 +442,7 @@ void GraphTable::undo()
             graph->setEelment(emt);
             ReDrawGraph(graph);
         }
-        m_OperationBorad.type[step] = CutRemove;
-        break;
-    }
-    case CutRemove:
-    {
-        int startRow = m_OperationBorad.recordRange[step]->topRow();
-        int startCol = m_OperationBorad.recordRange[step]->leftColumn();
-        int width = m_OperationBorad.recordRange[step]->rightColumn()-
-                    m_OperationBorad.recordRange[step]->leftColumn() + 1;
-        for (int i=optList->count()-1;i>-1;i=i-2){
-            //先把src清空
-            int srcRow = startRow + (i / 2) / width;
-            int srcCol = startCol + (i / 2) % width;
-            graph = GM->getUnit(srcRow, srcCol);
-            graph->clearAll();
-            ReDrawGraph(graph);
-            //src放到dst
-            emt = optList->at(i);
-            graph = GM->getUnit(emt.row, emt.col);
-            graph->setEelment(emt);
-            ReDrawGraph(graph);
-        }
-        m_OperationBorad.type[step] = CutPaste;
+        m_OperationBorad.type[step] = UndoCutPaste;
         break;
     }
     default:
@@ -569,7 +458,7 @@ void GraphTable::copy()
     QList<QTableWidgetSelectionRange> selectRange = this->selectedRanges();
     if (selectRange.count() == 1){
         m_ClipBorad.range = selectRange[0];
-        m_ClipBorad.type = CopyPaste;
+        m_ClipBorad.type = RedoCopyPaste;
     }
 }
 
@@ -606,7 +495,7 @@ void GraphTable::paste()
             ReDrawGraph(dstGraph);
 
             //如果是剪切，则删除原来位置内容
-            if (m_ClipBorad.type == CutPaste){
+            if (m_ClipBorad.type == RedoCutPaste){
                 srcGraph->clearAll();
                 ReDrawGraph(srcGraph);
             }
@@ -615,18 +504,19 @@ void GraphTable::paste()
 
         }
     }
-    if (m_ClipBorad.type == CutPaste){
-        m_ClipBorad.type = CopyPaste;
+    if (m_ClipBorad.type == RedoCutPaste){
+        m_ClipBorad.type = RedoCopyPaste;
     }
 }
 
 void GraphTable::cut()
 {
     copy();
-    m_ClipBorad.type = CutPaste;
+    m_ClipBorad.type = RedoCutPaste;
 }
 void GraphTable::remove()
 {
+    bool isNew = true;
     //获取当前选定的区域
     GraphFB *graph = NULL;
     QList<QTableWidgetSelectionRange> selectRange = this->selectedRanges();
@@ -636,6 +526,7 @@ void GraphTable::remove()
                 graph = GM->getUnit(j, k);
                 graph->clearAll();
                 ReDrawGraph(graph);
+                RecordOperation(&isNew, graph, UndoGraphInsert, &selectRange[0]);
             }
         }
     }

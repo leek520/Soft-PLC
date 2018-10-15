@@ -10,6 +10,14 @@ Copyright (c) 2018 PLT. All Rights Reserved.
 */
 #ifndef GRAPHFB_H
 #define GRAPHFB_H
+/**
+Copyright (c) 2018 PLT. All Rights Reserved.
+    *@file：
+    *@brief： 图元数据类，处理一个图元数据
+    *@author ：李奎
+    *@date ：2018/10/01
+    *@description：
+*/
 #include <QPixmap>
 #include <QPainter>
 #include "common.h"

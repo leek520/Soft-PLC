@@ -14,7 +14,7 @@
 #define UNIT_INST_HEIGH     30
 #define MAX_COL         14
 #define MAX_ROW         1000
-#define INIT_ROW        12
+#define INIT_ROW        14
 
 #define CalIdx(row, col) (row) * MAX_COL + (col) -1
 /*****************************
@@ -53,11 +53,14 @@ enum GraphType
     ReverseLogic,
     EndGraph,
 };
-enum OptType{GraphInsert=0, GraphRemove,
-             VLineInsert, VLineRemove,
-             RowInsert, RowRemove,
-             CutPaste, CopyPaste,
-             CutRemove, CopyRemove,};
+
+enum OptType{RedoGraphInsert=0, UndoGraphInsert,    //插入删除图形
+             RedoVLineInsert, UnVLineInsert,      //插入删除竖直线
+             RedoRowInsert, UndoRowInsert,          //插入删除行
+             RedoGraphDelete, UndoGraphDelete,      //删除添加图形（delete键）
+             RedoCutPaste, UndoCutPaste,           //剪贴
+             RedoCopyPaste, UndoCopyPaste,         //复制
+             RedoDelete, UndoDelete};              //删除
 
 
 

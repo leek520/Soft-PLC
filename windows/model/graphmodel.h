@@ -1,5 +1,13 @@
-#ifndef GRAPHMODEL_H
+﻿#ifndef GRAPHMODEL_H
 #define GRAPHMODEL_H
+/**
+Copyright (c) 2018 PLT. All Rights Reserved.
+    *@file：
+    *@brief： 梯形图数据模型，负责增删一个单元格/一行单元格等
+    *@author ：李奎
+    *@date ：2018/10/01
+    *@description：
+*/
 #include "graphfb.h"
 
 #define GM (GraphModel::GetInstance())

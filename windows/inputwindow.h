@@ -1,6 +1,13 @@
 ﻿#ifndef INPUTWINDOW_H
 #define INPUTWINDOW_H
-
+/**
+Copyright (c) 2018 PLT. All Rights Reserved.
+    *@file：
+    *@brief： 输入装置窗口
+    *@author ：李奎
+    *@date ：2018/10/01
+    *@description：
+*/
 #include <QWidget>
 #include <QTextEdit>
 #include <QHBoxLayout>

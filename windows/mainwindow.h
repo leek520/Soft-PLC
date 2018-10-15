@@ -1,5 +1,13 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+/**
+Copyright (c) 2018 PLT. All Rights Reserved.
+    *@file：
+    *@brief： 主界面窗口
+    *@author ：李奎
+    *@date ：2018/10/01
+    *@description：
+*/
 #include "common.h"
 #include "graphwindow.h"
 #include "instswindow.h"

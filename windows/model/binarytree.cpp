@@ -1,12 +1,4 @@
-#include "binarytree.h"
+﻿#include "binarytree.h"
 
-BinaryTree::BinaryTree()
-{
 
-}
-
-BinaryTree::~BinaryTree()
-{
-
-}
 

@@ -1,6 +1,13 @@
 ﻿#ifndef INSTSWINDOW_H
 #define INSTSWINDOW_H
-
+/**
+Copyright (c) 2018 PLT. All Rights Reserved.
+    *@file：
+    *@brief： 指令模式窗口
+    *@author ：李奎
+    *@date ：2018/10/01
+    *@description：
+*/
 #include <QTableWidget>
 #include <QTableView>
 #include <QHeaderView>
