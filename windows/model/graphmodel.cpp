@@ -1,4 +1,4 @@
-#include "graphmodel.h"
+﻿#include "graphmodel.h"
 
 GraphModel* GraphModel::m_instance;
 GraphModel::GraphModel()
@@ -197,5 +197,112 @@ bool GraphModel::checkGraph(int row, int col, int type)
 */
 void GraphModel::buildGraph()
 {
-    BTree<int> *tree = new BTree<int>();
+    clearBuild();
+
+    //第二步：编译，生成序列
+    int row = 0;
+    while(row < MAX_ROW)
+    {
+        row = m_buildInfo.startRow;
+        int ret = dealNode(row);
+        m_buildInfo.startRow++;
+        if (ret == -1){
+            break;
+        }
+    }
+//    BTreeNode<int> *tree = new BTreeNode<int>(0);
+//    tree->insert(1, tree, Left);
+//    tree->clear();
+}
+int GraphModel::dealNode(int row)
+{
+    int col = m_buildInfo.start[row];
+    int idx = GraIdx(row, col);
+    if (idx >= m_graphList.count()) return -1;
+    if ((row >= MAX_ROW) | (row < 0)) return -1;
+    if ((col >= MAX_COL) | (col < 0)) return -1;
+
+
+    //是否为空
+    if (m_graphList[idx]->isEmpty()){
+        m_buildInfo.depth = 0;
+        dealNode(row-1);
+        return 1;
+    }
+
+    //是否要转上一行：条件=upflag和已经处理完
+    if (m_graphList[idx]->isUp()){
+        if (m_buildInfo.start[row-1] <= col){
+            m_buildInfo.depth = 0;
+            qDebug()<<"OR";
+            dealNode(row-1);
+            if (m_buildInfo.start[row-1] > col){
+                return 1;
+            }
+        }
+    }
+    //水平线直接转右
+    if (m_graphList[idx]->getType() == HorizontalLine){
+        m_buildInfo.start[row] += 1;
+        dealNode(row);
+        return 1;
+    }
+
+    QString opt = QString("%3%4")
+            .arg(m_graphList[idx]->getName())
+            .arg(m_graphList[idx]->getIndex());
+
+    if (m_buildInfo.depth == 0){
+        if (m_graphList[idx+1]->isDown()){
+            qDebug()<<QString("OR %1").arg(opt);
+        }else{
+            qDebug()<<QString("LD %1").arg(opt);
+        }
+    }else{
+        if (col == MAX_COL-1){
+            qDebug()<<QString("OUT %1").arg(opt);
+        }else{
+            qDebug()<<QString("AND %1").arg(opt);
+        }
+    }
+    m_buildInfo.start[row] += 1;
+    m_buildTrail.append(QPoint(row, col));
+    QString text = QString("Pos:(%1,%2), %3%4")
+                    .arg(row).arg(col)
+                    .arg(m_graphList[idx]->emt.name)
+                    .arg(m_graphList[idx]->emt.index);
+    //qDebug()<<text;
+
+
+    if  (col == MAX_COL-1){//如果处理到当前行的最后一列，则直接转下一列
+        m_buildInfo.end[row+1] = MAX_COL;
+        m_buildInfo.depth = 0;
+        dealNode(row+1);
+        return 1;
+    }
+
+    if (idx+1 >= m_graphList.count()) return 1;
+
+    if (m_graphList[idx+1]->isDown()){
+        if (row > m_buildInfo.startRow){
+            m_buildInfo.startRow = row + 1;
+        }
+        m_buildInfo.end[row+1] = m_buildInfo.start[row];
+
+        m_buildInfo.depth = 0;
+        dealNode(row+1);
+
+    }else{
+        m_buildInfo.depth++;
+        dealNode(row);
+
+    }
+}
+void GraphModel::clearBuild()
+{
+    memset(m_buildInfo.start, 0, MAX_ROW * sizeof(uchar));
+    memset(m_buildInfo.end, MAX_COL, MAX_ROW * sizeof(uchar));
+    m_buildInfo.startRow = 0;
+    m_buildInfo.depth = 0;
+    m_buildInfo.stackParallel.clear();
 }

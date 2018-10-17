@@ -8,15 +8,26 @@ Copyright (c) 2018 PLT. All Rights Reserved.
     *@date ：2018/10/01
     *@description：
 */
+#include <QDebug>
 #include "graphfb.h"
 #include "binarytree.h"
 #define GM (GraphModel::GetInstance())
 
+
+struct BuildInfo
+{
+    uchar start[MAX_ROW];
+    uchar end[MAX_ROW];
+    int startRow;
+    int depth;
+    QStringList stackParallel;
+};
 class GraphModel
 {
 private:
     static GraphModel *m_instance;
     GraphModel();
+
 public:
     //GetInstance是获得此类实例的唯一全局访问点
     static GraphModel* GetInstance() {
@@ -51,7 +62,12 @@ public:
     bool checkGraph(int row, int col, int type);
     void buildGraph();
 private:
+    void clearBuild();
+    int dealNode(int row);
+private:
     QList<GraphFB *> m_graphList;
+    QList<QPoint> m_buildTrail;
+    BuildInfo m_buildInfo;
 };
 
 #endif // GRAPHMODEL_H

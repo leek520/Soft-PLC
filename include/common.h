@@ -17,6 +17,7 @@
 #define INIT_ROW        14
 
 #define CalIdx(row, col) (row) * MAX_COL + (col) -1
+#define GraIdx(row, col) (row) * MAX_COL + (col)
 /*****************************
  * 图元数据结构：梯形图梯级的存储结构采用两个层次的双向链表结构
 *****************************/

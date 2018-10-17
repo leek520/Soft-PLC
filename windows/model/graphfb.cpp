@@ -250,6 +250,41 @@ void GraphFB::clearVdnLine()
 {
     emt.dnFlag = false;
 }
+
+bool GraphFB::isDown()
+{
+    return emt.dnFlag;
+}
+
+bool GraphFB::isUp()
+{
+    return emt.upFlag;
+}
+
+bool GraphFB::isEmpty()
+{
+    if (emt.dnFlag || emt.upFlag || emt.graphType){
+        return false;
+    }else{
+        return true;
+    }
+
+}
+
+int GraphFB::getType()
+{
+    return emt.graphType;
+}
+
+QString GraphFB::getName()
+{
+    return emt.name;
+}
+
+int GraphFB::getIndex()
+{
+    return emt.index;
+}
 /******************************************************************************
 * @brief: 放大缩小函数，计算比例尺，in=true为放大，否则缩小
 * @author:leek

@@ -378,6 +378,15 @@ void GraphTable::redo()
         m_OperationBorad.type[step] = RedoCutPaste;
         break;
     }
+    case UndoDelete:
+        for (int i=0;i<optList->count();i++){
+            emt = optList->at(i);
+            graph = GM->getUnit(emt.row, emt.col);
+            graph->clearAll();
+            ReDrawGraph(graph);
+        }
+        m_OperationBorad.type[step] = UnVLineInsert;
+        break;
     default:
         break;
     }
@@ -445,6 +454,15 @@ void GraphTable::undo()
         m_OperationBorad.type[step] = UndoCutPaste;
         break;
     }
+    case RedoDelete:
+        for (int i=optList->count()-1;i>-1;i--){
+            emt = optList->at(i);
+            graph = GM->getUnit(emt.row, emt.col);
+            graph->setEelment(emt);
+            ReDrawGraph(graph);
+        }
+        m_OperationBorad.type[step] = UnVLineInsert;
+        break;
     default:
         break;
     }
@@ -522,11 +540,11 @@ void GraphTable::remove()
     QList<QTableWidgetSelectionRange> selectRange = this->selectedRanges();
     for(int i=0;i<selectRange.count();i++){
         for (int j=selectRange[i].topRow();j<=selectRange[i].bottomRow();j++){
-            for(int k=selectRange[i].leftColumn();k<=selectRange[i].rightColumn();k++){
+            for(int k=selectRange[i].leftColumn();k<=selectRange[i].rightColumn();k++){              
                 graph = GM->getUnit(j, k);
+                RecordOperation(&isNew, graph, RedoDelete, &selectRange[0]);
                 graph->clearAll();
                 ReDrawGraph(graph);
-                RecordOperation(&isNew, graph, UndoGraphInsert, &selectRange[0]);
             }
         }
     }
