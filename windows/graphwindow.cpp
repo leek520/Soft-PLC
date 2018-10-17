@@ -169,6 +169,8 @@ void GraphTable::ReDrawGraph(GraphFB *graph)
                   QVariant::fromValue<QPixmap>(graph->pixMap));
     item->setToolTip(mark);
 
+    if (col == 0) return;
+    MaxRowGraphJudge();
 }
 /******************************************************************************
 * @brief: 绘图完成后自动转下一个单元格
@@ -205,6 +207,7 @@ void GraphTable::removeGraphVLine(int row, int col)
     graph = GM->getUnit(row+1, col);
     graph->clearVupLine();
     ReDrawGraph(graph);
+
 }
 
 void GraphTable::insertGraphVLine(int row, int col)
@@ -213,12 +216,13 @@ void GraphTable::insertGraphVLine(int row, int col)
     if (col < 2) return;
     //插入下半部分
     graph = GM->getUnit(row+1, col);
-    graph->emt.upFlag = true;
+    graph->setVupLine();
     ReDrawGraph(graph);
     //插入上半部分
     graph = GM->getUnit(row, col);
-    graph->emt.dnFlag = true;
+    graph->setVdnLine();
     ReDrawGraph(graph);
+
 
 }
 
@@ -316,8 +320,6 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
     default:
         break;
     }
-
-    MaxRowGraphJudge();
 }
 
 
@@ -340,7 +342,7 @@ void GraphTable::redo()
         m_OperationBorad.type[step] = RedoGraphInsert;
         SetCurrentUnit(emt.row, emt.col, true);
         break;
-    case UnVLineInsert:
+    case UndoVLineInsert:
         for (int i=0;i<optList->count();i++){
             emt = optList->at(i);
             insertGraphVLine(emt.row, emt.col);
@@ -382,10 +384,17 @@ void GraphTable::redo()
         for (int i=0;i<optList->count();i++){
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
-            graph->clearAll();
+            graph->clearEelment();
             ReDrawGraph(graph);
         }
-        m_OperationBorad.type[step] = UnVLineInsert;
+        m_OperationBorad.type[step] = RedoDelete;
+        break;
+    case UndoDeleteVLine:
+        for (int i=0;i<optList->count();i++){
+            emt = optList->at(i);
+            removeGraphVLine(emt.row, emt.col);
+        }
+        m_OperationBorad.type[step] = RedoDeleteVLine;
         break;
     default:
         break;
@@ -418,7 +427,7 @@ void GraphTable::undo()
             emt = optList->at(i);
             removeGraphVLine(emt.row, emt.col);
         }
-        m_OperationBorad.type[step] = UnVLineInsert;
+        m_OperationBorad.type[step] = UndoVLineInsert;
         break;
     case RedoCopyPaste:
         for (int i=optList->count()-1;i>-1;i=i-2){
@@ -461,7 +470,14 @@ void GraphTable::undo()
             graph->setEelment(emt);
             ReDrawGraph(graph);
         }
-        m_OperationBorad.type[step] = UnVLineInsert;
+        m_OperationBorad.type[step] = UndoDelete;
+        break;
+    case RedoDeleteVLine:
+        for (int i=optList->count()-1;i>-1;i--){
+            emt = optList->at(i);
+            insertGraphVLine(emt.row, emt.col);
+        }
+        m_OperationBorad.type[step] = UndoDeleteVLine;
         break;
     default:
         break;
@@ -543,7 +559,13 @@ void GraphTable::remove()
             for(int k=selectRange[i].leftColumn();k<=selectRange[i].rightColumn();k++){              
                 graph = GM->getUnit(j, k);
                 RecordOperation(&isNew, graph, RedoDelete, &selectRange[0]);
-                graph->clearAll();
+                if ((graph->column() > selectRange[i].leftColumn()) &&
+                    (graph->isDown() || graph->isUp())){
+                    graph->clearAll();
+                }else{
+                    graph->clearEelment();
+                }
+
                 ReDrawGraph(graph);
             }
         }
@@ -582,12 +604,16 @@ void GraphTable::find()
 *******************************************************************************/
 void GraphTable::slt_removeGraphVLine()
 {
+    GraphFB *graph = NULL;
+    bool isNew = true;
     //获取当前选定的区域
     QList<QTableWidgetSelectionRange> selectRange = this->selectedRanges();
     for(int i=0;i<selectRange.count();i++){
         for (int j=selectRange[i].topRow();j<=selectRange[i].bottomRow();j++){
             for(int k=selectRange[i].leftColumn();k<=selectRange[i].rightColumn();k++){
-                removeGraphVLine(j, k);
+                graph = GM->getUnit(j, k);
+                RecordOperation(&isNew, graph, RedoDeleteVLine, &selectRange[0]);
+                removeGraphVLine(j, k);            
             }
         }
     }

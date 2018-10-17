@@ -251,6 +251,16 @@ void GraphFB::clearVdnLine()
     emt.dnFlag = false;
 }
 
+void GraphFB::setVupLine(bool status)
+{
+    emt.upFlag = status;
+}
+
+void GraphFB::setVdnLine(bool status)
+{
+    emt.dnFlag = status;
+}
+
 bool GraphFB::isDown()
 {
     return emt.dnFlag;
@@ -284,6 +294,16 @@ QString GraphFB::getName()
 int GraphFB::getIndex()
 {
     return emt.index;
+}
+
+int GraphFB::row()
+{
+    return emt.row;
+}
+
+int GraphFB::column()
+{
+    return emt.col;
 }
 /******************************************************************************
 * @brief: 放大缩小函数，计算比例尺，in=true为放大，否则缩小

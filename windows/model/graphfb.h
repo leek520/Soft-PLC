@@ -37,13 +37,16 @@ public:
     void clearEelment();
     void clearVupLine();
     void clearVdnLine();
-
+    void setVupLine(bool status=true);
+    void setVdnLine(bool status=true);
     bool isDown();
     bool isUp();
     bool isEmpty();
     int getType();
     QString getName();
     int getIndex();
+    int row();
+    int column();
     //友元类，用来序列化结构体，保存/加载图元数据
     friend QDataStream& operator<<(QDataStream&,GraphFB&);
     friend QDataStream& operator>>(QDataStream&,GraphFB&);

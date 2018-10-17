@@ -56,12 +56,13 @@ enum GraphType
 };
 
 enum OptType{RedoGraphInsert=0, UndoGraphInsert,    //插入删除图形
-             RedoVLineInsert, UnVLineInsert,      //插入删除竖直线
+             RedoVLineInsert, UndoVLineInsert,      //插入删除竖直线
              RedoRowInsert, UndoRowInsert,          //插入删除行
              RedoGraphDelete, UndoGraphDelete,      //删除添加图形（delete键）
              RedoCutPaste, UndoCutPaste,           //剪贴
              RedoCopyPaste, UndoCopyPaste,         //复制
-             RedoDelete, UndoDelete};              //删除
+             RedoDelete, UndoDelete,
+             RedoDeleteVLine, UndoDeleteVLine};              //删除
 
 
 
