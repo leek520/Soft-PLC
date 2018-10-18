@@ -30,9 +30,8 @@
 
 */
 
-//http://blog.51cto.com/9291927/2083190
-//https://www.cnblogs.com/ljwTiey/p/4284784.html
 
+//https://www.xzbu.com/8/view-8721464.htm
 #include <QObject>
 
 enum BTNodePos

@@ -82,7 +82,7 @@ void GraphFB::drawGraph()
     QFontMetrics fm = painter.fontMetrics();
     QString text = QString("%1%2").arg(emt.name).arg(emt.index);
     QFont font;
-    font.setPixelSize(width/6); //80-10
+    font.setPixelSize(height/4); //80-10
     painter.setFont(font);
 
     //根据类别画相应的图形
@@ -164,7 +164,23 @@ void GraphFB::drawGraph()
         painter.drawText(pt, text);
         break;
     }
+    case LogicGraph:
+    {
+        QPointF p1(1, height-2*fh);
+        QPointF p2(1, height-1);
+        QPointF p3(width-1, height-2*fh);
+        QPointF p4(width-1, height-1);
+        painter.drawLine(p3, p4);
+        painter.drawLine(p1, p2);
+        painter.drawLine(p1, p3);
+        painter.drawLine(p2, p4);
 
+        text = QString("%1").arg(emt.mark);
+        QPoint pt((width-fm.width(text))/2,
+                  (height*3/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+        painter.drawText(pt, text);
+        break;
+    }
     case EndGraph:
     {
         QPointF p1(1, height-2*fh);

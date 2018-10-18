@@ -159,7 +159,11 @@ int GraphModel::getCount()
 *******************************************************************************/
 int GraphModel::getMaxRow()
 {
-    return  m_graphList.last()->emt.row;
+    if (getCount()>0){
+        return  m_graphList.last()->emt.row;
+    }else{
+        return -1;
+    }
 }
 /******************************************************************************
 * @brief: 清除图元记录链表
@@ -204,7 +208,7 @@ void GraphModel::buildGraph()
     while(row < MAX_ROW)
     {
         row = m_buildInfo.startRow;
-        int ret = dealNode(row);
+        int ret = dealNode(row, TurnNone);
         m_buildInfo.startRow++;
         if (ret == -1){
             break;
@@ -214,7 +218,7 @@ void GraphModel::buildGraph()
 //    tree->insert(1, tree, Left);
 //    tree->clear();
 }
-int GraphModel::dealNode(int row)
+int GraphModel::dealNode(int row, Direction dir)
 {
     int col = m_buildInfo.start[row];
     int idx = GraIdx(row, col);
@@ -234,7 +238,6 @@ int GraphModel::dealNode(int row)
     if (m_graphList[idx]->isUp()){
         if (m_buildInfo.start[row-1] <= col){
             m_buildInfo.depth = 0;
-            qDebug()<<"OR";
             dealNode(row-1);
             if (m_buildInfo.start[row-1] > col){
                 return 1;
@@ -252,19 +255,20 @@ int GraphModel::dealNode(int row)
             .arg(m_graphList[idx]->getName())
             .arg(m_graphList[idx]->getIndex());
 
-    if (m_buildInfo.depth == 0){
-        if (m_graphList[idx+1]->isDown()){
-            qDebug()<<QString("OR %1").arg(opt);
-        }else{
-            qDebug()<<QString("LD %1").arg(opt);
-        }
-    }else{
+    if (dir == TurnLeft){
         if (col == MAX_COL-1){
             qDebug()<<QString("OUT %1").arg(opt);
         }else{
             qDebug()<<QString("AND %1").arg(opt);
         }
+    }else if (dir == TurnDown){
+        if (m_graphList[idx+1]->isDown()){
+            qDebug()<<QString("OR %1").arg(opt);
+        }else{
+            qDebug()<<QString("LD %1").arg(opt);
+        }
     }
+
     m_buildInfo.start[row] += 1;
     m_buildTrail.append(QPoint(row, col));
     QString text = QString("Pos:(%1,%2), %3%4")
@@ -290,11 +294,11 @@ int GraphModel::dealNode(int row)
         m_buildInfo.end[row+1] = m_buildInfo.start[row];
 
         m_buildInfo.depth = 0;
-        dealNode(row+1);
+        dealNode(row+1, TurnRight);
 
     }else{
         m_buildInfo.depth++;
-        dealNode(row);
+        dealNode(row, TurnLeft);
 
     }
 }

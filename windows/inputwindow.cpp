@@ -156,10 +156,14 @@ void InputGraphWindow::on_m_nameCom_triggered(QString idx)
 
 void InputGraphWindow::on_yesBtn_triggered()
 {
-    emit sig_inputPara(m_nameCom->currentText(),
-                       m_indexSpi->value(),
-                       m_textEdit->toPlainText(),
-                       m_type);
+    Element emt;
+    emt.graphType = m_type;
+    emt.name = m_nameCom->currentText();
+    emt.index = m_indexSpi->value();
+    emt.mark = m_textEdit->toPlainText();
+
+    emit sig_inputPara(emt);
+
     close();
     m_indexSpi->setValue(0);
 }
@@ -170,12 +174,15 @@ void InputGraphWindow::on_cancelBtn_triggered()
     m_indexSpi->setValue(0);
 }
 
-InputInstsWindow::InputInstsWindow(QWidget *parent)
+InputInstsWindow::InputInstsWindow(QWidget *parent) : QFrame(parent)
 {
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowModality(Qt::ApplicationModal);    //设置为模态
     setFixedSize(400, 60);
+    setObjectName("InputInstsWindow");
+    setStyleSheet("QWidget#InputInstsWindow{border: 1px solid black; border-radius: 5px;}");
     InitUi();
+
 }
 
 void InputInstsWindow::InitUi()
@@ -194,10 +201,64 @@ void InputInstsWindow::InitUi()
             this, SLOT(on_okBtn_triggerred()));
     connect(cancelBtn, SIGNAL(clicked(bool)),
             this, SLOT(on_cancelBtn_triggerred()));
+
+
+    //快捷键
+    QShortcut *key_Return=new QShortcut(QKeySequence(Qt::Key_Return), this);    //创建一个快捷键"Key_Return"键
+    connect(key_Return, SIGNAL(activated()), okBtn, SIGNAL(clicked()));    //连接到指定槽函数
+    QShortcut *key_Enter=new QShortcut(QKeySequence(Qt::Key_Enter), this);    //创建一个快捷键"Key_Return"键
+    connect(key_Enter, SIGNAL(activated()), okBtn, SIGNAL(clicked()));    //连接到指定槽函数
+
+    QShortcut *key_Esc=new QShortcut(QKeySequence(Qt::Key_Escape), this);    //创建一个快捷键"Key_Return"键
+    connect(key_Esc, SIGNAL(activated()), cancelBtn, SIGNAL(clicked()));    //连接到指定槽函数
+
+}
+
+int InputInstsWindow::InstsDecoder()
+{
+    Element emt;
+    QString str = lineEdit->text();
+    str = str.toUpper();
+    QStringList instsStr = str.split(" ");
+    int cnt = instsStr.count();
+    QString inst = instsStr[0];
+    if (inst.indexOf("LD") > -1){
+        if (cnt < 2) return -1;
+        QRegExp re("^[XYMSTC][0-9]{1,3}");
+        if (instsStr[1].indexOf(re) > -1){
+            emt.graphType = InputOpen;
+            emt.name = instsStr[1][0];
+            emt.index = instsStr[1].mid(1).toInt();
+            emt.mark = str;
+            emit sig_inputPara(emt);
+        }
+    }else if (inst.indexOf("LDI") > -1){
+        if (cnt < 2) return -1;
+        QRegExp re("^[XYMSTC][0-9]{1,3}");
+        if (instsStr[1].indexOf(re) > -1){
+            emt.graphType = InputClose;
+            emt.name = instsStr[1][0];
+            emt.index = instsStr[1].mid(1).toInt();
+            emt.mark = str;
+            emit sig_inputPara(emt);
+        }
+    }else if (inst.indexOf("ADD") > -1){
+        if (cnt < 2) return -1;
+        emt.graphType = LogicGraph;
+        emt.mark = str;
+        emit sig_inputPara(emt);
+    }
+}
+
+void InputInstsWindow::showEvent(QShowEvent *event)
+{
+    lineEdit->clear();
+    QWidget::showEvent(event);
 }
 
 void InputInstsWindow::on_okBtn_triggerred()
 {
+    InstsDecoder();
     close();
 }
 

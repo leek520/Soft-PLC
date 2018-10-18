@@ -248,6 +248,11 @@ void GraphTable::doOptChcek()
     }
 }
 
+void GraphTable::spanUnit(int row, int col, int num)
+{
+    setSpan(row, col, 1, num);
+}
+
 
 
 /******************************************************************************
@@ -255,7 +260,7 @@ void GraphTable::doOptChcek()
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
+void GraphTable::slt_inputPara(Element emt)
 {
     int i = 0;
     int curRow = currentRow();
@@ -264,9 +269,9 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
     QTableWidgetSelectionRange *range = new QTableWidgetSelectionRange();
     bool isNew = true;
     //画图check，如果该处不允许画图，则退出
-    if (!GM->checkGraph(curRow, curCol, type)) return;
+    if (!GM->checkGraph(curRow, curCol, emt.graphType)) return;
 
-    switch (type) {
+    switch (emt.graphType) {
     //如果要画竖直线，则分两步，先画下一行
     case verticalLine:
         insertGraphVLine(curRow, curCol);
@@ -278,10 +283,11 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
     case InputClose:
     case ReverseLogic:
         graph = GM->getUnit(curRow, curCol);
-        graph->emt.graphType =  type;
-        graph->emt.name =  name;
-        graph->emt.index =  index;
-        graph->emt.mark =  mark;
+        graph->emt.graphType = emt.graphType;
+        graph->emt.funInsType = emt.funInsType;
+        graph->emt.name = emt.name;
+        graph->emt.index = emt.index;
+        graph->emt.mark = emt.mark;
         ReDrawGraph(graph);
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
         SetCurrentUnit(curRow, curCol);
@@ -293,15 +299,42 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
             ReDrawGraph(graph);
             RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
-        graph = GM->getUnit(curRow, i);
-        graph->emt.graphType =  type;
-        graph->emt.name =  name;
-        graph->emt.index =  index;
-        graph->emt.mark =  mark;
+
+        graph = GM->getUnit(curRow, MAX_COL-1);
+        graph->emt.graphType = emt.graphType;
+        graph->emt.funInsType = emt.funInsType;
+        graph->emt.name = emt.name;
+        graph->emt.index = emt.index;
+        graph->emt.mark = emt.mark;
         ReDrawGraph(graph);
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
         SetCurrentUnit(curRow, i);
         break;
+    case LogicGraph:
+    {
+        for(i=curCol;i<MAX_COL-1;i++){
+            graph = GM->getUnit(curRow, i);
+            graph->emt.graphType =  HorizontalLine;
+            ReDrawGraph(graph);
+            RecordOperation(&isNew, graph, RedoGraphInsert, range);
+        }
+        int spanCol = 2;
+        spanUnit(curRow, MAX_COL-1, spanCol);
+        graph = GM->getUnit(curRow, MAX_COL);
+        graph->emt.graphType = CompGraph;
+        graph = GM->getUnit(curRow, MAX_COL-1);
+        graph->emt.width = spanCol;
+        graph->emt.height = 1;
+        graph->emt.graphType = emt.graphType;
+        graph->emt.funInsType = emt.funInsType;
+        graph->emt.name = emt.name;
+        graph->emt.index = emt.index;
+        graph->emt.mark = emt.mark;
+        ReDrawGraph(graph);
+        RecordOperation(&isNew, graph, RedoGraphInsert, range);
+        SetCurrentUnit(curRow, i);
+        break;
+    }
     case EndGraph:
         curRow = GM->getMaxRow() + 1;
         for(i=1;i<MAX_COL;i++){
@@ -310,10 +343,11 @@ void GraphTable::slt_inputPara(QString name, int index, QString mark, int type)
             ReDrawGraph(graph);
         }
         graph = GM->getUnit(curRow, i);
-        graph->emt.graphType =  type;
-        graph->emt.name =  name;
-        graph->emt.index =  index;
-        graph->emt.mark =  mark;
+        graph->emt.graphType = emt.graphType;
+        graph->emt.funInsType = emt.funInsType;
+        graph->emt.name = emt.name;
+        graph->emt.index = emt.index;
+        graph->emt.mark = emt.mark;
         ReDrawGraph(graph);
         SetCurrentUnit(curRow, i);
         break;
@@ -712,7 +746,10 @@ void GraphTable::BuildGraph()
     if (maxIdx == 0) return;
     //第一步：先在最后一行加入END标志
     if (GM->getUnit(maxIdx-1)->emt.graphType != EndGraph){
-        slt_inputPara("END", 0, "", EndGraph);
+        Element emt;
+        emt.graphType = EndGraph;
+        emt.name = "END";
+        slt_inputPara(emt);
     }
 //    //第二步：编译，生成序列
 //    int i = 0;

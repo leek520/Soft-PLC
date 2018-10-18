@@ -33,7 +33,7 @@ private:
     void InitUi();
     bool ReadInputDeviceInfo();
 signals:
-    void sig_inputPara(QString name, int index, QString mark, int type);
+    void sig_inputPara(Element emt);
 private slots:
     void on_m_nameCom_triggered(QString idx);
     void on_yesBtn_triggered();
@@ -49,13 +49,18 @@ private:
     QPushButton *m_yesBtn;
     QPushButton *m_cancelBtn;
 };
-class InputInstsWindow : public QWidget
+class InputInstsWindow : public QFrame
 {
     Q_OBJECT
 public:
     explicit InputInstsWindow(QWidget *parent = 0);
 private:
     void InitUi();
+    int InstsDecoder();
+protected:
+    void showEvent(QShowEvent *event);
+signals:
+    void sig_inputPara(Element emt);
 private slots:
     void on_okBtn_triggerred();
     void on_cancelBtn_triggerred();

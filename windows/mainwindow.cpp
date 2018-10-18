@@ -17,11 +17,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_inputGW = new InputGraphWindow();
     m_inputIW = new InputInstsWindow();
-    connect(this, SIGNAL(sig_inputPara(QString,int,QString,int)),
-            m_graphWid->m_graphTable,SLOT(slt_inputPara(QString,int,QString,int)));
+    connect(this, SIGNAL(sig_inputPara(Element)),
+            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
 
-    connect(m_inputGW, SIGNAL(sig_inputPara(QString,int,QString,int)),
-            m_graphWid->m_graphTable,SLOT(slt_inputPara(QString,int,QString,int)));
+    connect(m_inputGW, SIGNAL(sig_inputPara(Element)),
+            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
+
+    connect(m_inputIW, SIGNAL(sig_inputPara(Element)),
+            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
+
 
     connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertBottomRowText(QString)),
             this, SLOT(slt_InsertBottomRowText(QString)));
@@ -464,6 +468,7 @@ void MainWindow::find()
 
 void MainWindow::drawGraph()
 {
+    Element emt;
     int index = m_graphActList.indexOf((QAction *)sender());
     if (index < 0) return;
 
@@ -471,15 +476,22 @@ void MainWindow::drawGraph()
         m_inputGW->SetCurrentName(index);
         m_inputGW->show();
     }else{
+        emt.name = "";
+        emt.index = 0;
+        emt.mark = "";
+
         switch (index) {
         case 6:
-            emit sig_inputPara("", 0, "", HorizontalLine);
+            emt.graphType = HorizontalLine;
+            emit sig_inputPara(emt);
             break;
         case 7:
-            emit sig_inputPara("", 0, "", verticalLine);
+            emt.graphType = verticalLine;
+            emit sig_inputPara(emt);
             break;
         case 8:
-            emit sig_inputPara("", 0, "", ReverseLogic);
+            emt.graphType = ReverseLogic;
+            emit sig_inputPara(emt);
             break;
         default:
             break;

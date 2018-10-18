@@ -40,10 +40,12 @@ enum GraphType
 {
     NoneGraph,
     NumLine,
-
     verticalLine,
-
     HorizontalLine,
+
+    //加线条在该区域
+    CompGraph,
+
 
     InputOpen = 10,
     InputClose,
@@ -52,9 +54,16 @@ enum GraphType
     StepNode,
     OutputNode,
     ReverseLogic,
+    LogicGraph,
     EndGraph,
 };
-
+enum Direction{
+    TurnNone,
+    TurnDown,
+    TurnUp,
+    TurnLeft,
+    TurnRight,
+};
 enum OptType{RedoGraphInsert=0, UndoGraphInsert,    //插入删除图形
              RedoVLineInsert, UndoVLineInsert,      //插入删除竖直线
              RedoRowInsert, UndoRowInsert,          //插入删除行

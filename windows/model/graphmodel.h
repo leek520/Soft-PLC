@@ -63,7 +63,7 @@ public:
     void buildGraph();
 private:
     void clearBuild();
-    int dealNode(int row);
+    int dealNode(int row, Direction dir=TurnNone);
 private:
     QList<GraphFB *> m_graphList;
     QList<QPoint> m_buildTrail;

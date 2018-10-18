@@ -76,7 +76,7 @@ private:
     void removeGraphVLine(int row, int col);
     void insertGraphVLine(int row, int col);
     void doOptChcek();
-
+    void spanUnit(int row, int col, int num=1);
     //To do:
     /*
     1.用户插入图形合法性校验
@@ -86,7 +86,7 @@ private:
     */
 
 public slots:
-    void slt_inputPara(QString name, int index, QString mark, int type);
+    void slt_inputPara(Element emt);
     void slt_removeGraphVLine();
     void slt_insertGraphRow();
     void slt_removeGraphRow();
