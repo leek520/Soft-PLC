@@ -33,7 +33,8 @@
 
 //https://www.xzbu.com/8/view-8721464.htm
 #include <QObject>
-
+#define ADD_NODE    -1
+#define OR_NODE     -2
 enum BTNodePos
 {
   Any,
@@ -41,287 +42,44 @@ enum BTNodePos
   Right
 };
 
-template <typename T>
+
 class BTreeNode
 {
 protected:
-    T value;
-    BTreeNode<T>* left;   //左子结点
-    BTreeNode<T>* right;  //右子结点
-    BTreeNode<T>* parent; //父节点
+    int value;
+    BTreeNode* left;   //左子结点
+    BTreeNode* right;  //右子结点
+    BTreeNode* parent; //父节点
 public:
 
     BTreeNode();             //无参构造
-    BTreeNode(const T &data,
-              BTreeNode<T>* pleft=NULL,
-              BTreeNode<T>* pright=NULL);
+    BTreeNode(const int &data,
+              BTreeNode* pleft=NULL,
+              BTreeNode* pright=NULL);
     ~BTreeNode();
 
-    BTreeNode<T> &operator =(const BTreeNode<T> &copy);
+    BTreeNode &operator =(const BTreeNode &copy);
 
-    BTreeNode<T>* root()const;
+    BTreeNode* root()const;
 
-    BTreeNode<T>* find(BTreeNode<T>* node, const T& value)const;
-    BTreeNode<T>* find(const T& value)const;
-    BTreeNode<T>* find(BTreeNode<T>* node, BTreeNode<T>* obj)const;
-    BTreeNode<T>* find(BTreeNode<T>* node)const;
+    BTreeNode* find(BTreeNode* node, const int& value)const;
+    BTreeNode* find(const int& value)const;
+    BTreeNode* find(BTreeNode* node, BTreeNode* obj)const;
+    BTreeNode* find(BTreeNode* node)const;
 
 
-    bool insert(BTreeNode<T>* newnode, BTreeNode<T>* node, BTNodePos pos=Any);
-    bool insert(BTreeNode<T>* node, BTNodePos pos=Any);
+    static bool insert(BTreeNode* newnode, BTreeNode* node, BTNodePos pos=Any);
+    bool insert(BTreeNode* node, BTNodePos pos=Any);
 
-    bool insert(const T& value, BTreeNode<T>* parent, BTNodePos pos=Any);
+    bool insert(const int& value, BTreeNode* parent, BTNodePos pos=Any);
 
-    void free(BTreeNode<T>* node);
+    void free(BTreeNode* node);
     void clear();
 
 };
 
-template <typename T>
-BTreeNode<T>::BTreeNode()
-{
-    left = NULL;
-    right = NULL;
-    parent = NULL;
-}
-
-template <typename T>
-BTreeNode<T>::BTreeNode(const T &data, BTreeNode<T> *pleft, BTreeNode<T> *pright)
-{
-    value = data;
-    left = pleft;
-    right = pright;
-    parent = NULL;
-}
-template <typename T>
-BTreeNode<T>::~BTreeNode()
-{
-
-}
-
-template <typename T>
-BTreeNode<T> &BTreeNode<T>::operator =(const BTreeNode<T> &copy)
-{
-    value = copy.value;
-    left = copy.left;
-    right = copy.right;
-    parent = copy.parent;
-}
 
 
-template <typename T>
-BTreeNode<T> *BTreeNode<T>::root() const
-{
-    if (this->parent == NULL){
-        return this->parent;
-    }else{
-        this->root();
-    }
-}
-template <typename T>
-BTreeNode<T> *BTreeNode<T>::find(BTreeNode<T> *node, const T &value) const
-{
-    BTreeNode<T>* ret = NULL;
-    //如果根节点node
-    if(node != NULL)
-    {
-        if(node->value == value)
-        {
-            ret = node;
-        }
-        else
-        {
-            //查找左子树
-            if(ret == NULL)
-            {
-                ret = find(node->left, value);
-            }
-            //如果左子树没有找到，ret返回NULL，查找右子树
-            if(ret == NULL)
-            {
-                ret = find(node->right, value);
-            }
-        }
-    }
-    return ret;
-}
-template <typename T>
-BTreeNode<T> *BTreeNode<T>::find(const T &value) const
-{
-    return find(root(), value);
-}
-template <typename T>
-BTreeNode<T> *BTreeNode<T>::find(BTreeNode<T> *node, BTreeNode<T> *obj) const
-{
-    BTreeNode<T>* ret = NULL;
-    if(node != NULL)
-    {
-        //根节点node为目标结点
-        if(node == obj)
-        {
-            ret = node;
-        }
-        else
-        {
-            //查找左子树
-            if(ret == NULL)
-            {
-                ret = find(node->left, obj);
-            }
-            //如果左子树没有找到，ret返回NULL，继续查找右子树
-            if(ret == NULL)
-            {
-                ret = find(node->right, obj);
-            }
-        }
-    }
-    return ret;
-}
-template <typename T>
-BTreeNode<T> *BTreeNode<T>::find(BTreeNode<T> *node) const
-{
-    return find(this->root(), node);
-}
-/******************************************************************************
-* @brief: 在node节点的指定位置插入新节点
-* @author:leek
-* @date 2018/10/10
-*******************************************************************************/
-template <typename T>
-bool BTreeNode<T>::insert(BTreeNode<T> *newnode, BTreeNode<T> *node, BTNodePos pos)
-{
-    bool ret = true;
-    //插入的位置为Any
-    if(pos == Any)
-    {
-        //如果没有左子结点，插入结点作为左子结点
-        if(node->left == NULL)
-        {
-            node->left = newnode;
-        }
-        //如果有左子结点，没有右子结点，插入结点作为右子结点
-        else if(node->right == NULL)
-        {
-            node->right = newnode;
-        }
-        //如果node结点的左右子结点不为空，插入失败
-        else
-        {
-            ret = false;
-        }
-    }
-    else if(pos == Left)
-    {
-        //如果指定插入左子结点，如果没有左子结点，插入结点
-        if(node->left == NULL)
-        {
-            node->left = newnode;
-        }
-        else
-        {
-            ret = false;
-        }
-    }
-    else if(pos == Right)
-    {
-        //如果指定插入右子结点，如果没有右子结点，插入结点
-        if(node->right == NULL)
-        {
-            node->right = newnode;
-        }
-        else
-        {
-            ret = false;
-        }
-    }
-    else
-    {
-        ret = false;
-    }
-    return ret;
-}
-/******************************************************************************
-* @brief: 在当前节点的父节点的指定位置插入节点
-* @author:leek
-* @date 2018/10/10
-*******************************************************************************/
-template <typename T>
-bool BTreeNode<T>::insert(BTreeNode<T> *node, BTNodePos pos)
-{
-    bool ret = true;
-    if(node != NULL)
-    {
-        if(this->parent == NULL)
-        {
-            node->parent = NULL;
-            this->parent = node;
-        }
-        else
-        {
-           BTreeNode<T>* np = find(node->parent);
-           if(np != NULL)
-           {
-               ret = insert(node, np, pos);
-           }
-           else
-           {
-               //THROW_EXCEPTION(InvalidParameterException, "Parameter invalid...");
-           }
-        }
-    }
-    else
-    {
-        //THROW_EXCEPTION(InvalidParameterException, "Parameter invalid...");
-    }
-    return ret;
-
-}
-
-/******************************************************************************
-* @brief: 在parent的pos位置插入值为value的节点
-* @author:leek
-* @date 2018/10/10
-*******************************************************************************/
-template <typename T>
-bool BTreeNode<T>::insert(const T &value, BTreeNode<T> *parent, BTNodePos pos)
-{
-    bool ret = true;
-    BTreeNode<T>* node = new BTreeNode<T>();
-    if(node != NULL)
-    {
-        node->parent = parent;
-        node->value = value;
-        ret = insert(node, pos);
-        if(!ret)
-        {
-            delete node;
-        }
-    }
-    else
-    {
-        //THROW_EXCEPTION(NoEnoughMemoryException, "No enough memory...");
-    }
-
-    return ret;
-
-}
-
-template <typename T>
-void BTreeNode<T>::free(BTreeNode<T> *node)
-{
-    if(node != NULL)
-    {
-        free(node->left);
-        free(node->right);
-    }
-    delete node;
-}
-template <typename T>
-void BTreeNode<T>::clear()
-{
-    free(root());
-    this->parent = NULL;
-}
 
 
 

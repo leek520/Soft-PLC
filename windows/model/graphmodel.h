@@ -20,7 +20,6 @@ struct BuildInfo
     uchar end[MAX_ROW];
     int startRow;
     int depth;
-    QStringList stackParallel;
 };
 class GraphModel
 {
@@ -64,8 +63,10 @@ public:
 private:
     void clearBuild();
     int dealNode(int row, Direction dir=TurnNone);
+    int createBTree(int row);
 private:
     QList<GraphFB *> m_graphList;
+    QList<BTreeNode *> m_buildTree;
     QList<QPoint> m_buildTrail;
     BuildInfo m_buildInfo;
 };
