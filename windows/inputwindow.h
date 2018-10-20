@@ -29,6 +29,8 @@ class InputGraphWindow : public QWidget
 public:
     explicit InputGraphWindow(QWidget *parent = 0);
     void SetCurrentName(int index);
+protected:
+    void showEvent(QShowEvent *event);
 private:
     void InitUi();
     bool ReadInputDeviceInfo();

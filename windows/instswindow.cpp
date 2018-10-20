@@ -13,15 +13,7 @@ InstsWindow::InstsWindow(QWidget *parent) :
     setSelectionBehavior(QAbstractItemView::SelectRows);
     horizontalHeader()->setStretchLastSection(true);//最后一列自适应
 
-    setColumnCount(4);
-
-    for(int i=0;i<INIT_ROW;i++){
-        slt_IsertInst(i);
-    }
-    for (int i=0; i<columnCount()-1;i++){
-        setColumnWidth(0, UNIT_WIDTH);
-    }
-
+    initTable();
     setZoom(1);
 }
 
@@ -44,6 +36,24 @@ void InstsWindow::setZoom(double factor)
     verticalHeader()->setDefaultSectionSize(height);
 }
 
+void InstsWindow::buildInsts()
+{
+    initTable();
+}
+
+void InstsWindow::initTable()
+{
+    clearContents();
+    setColumnCount(4);
+
+    for(int i=0;i<INIT_ROW;i++){
+        slt_InsertInst(i);
+    }
+    for (int i=0; i<columnCount()-1;i++){
+        setColumnWidth(0, UNIT_WIDTH);
+    }
+}
+
 void InstsWindow::setItemFormat(int row, int col)
 {
     QTableWidgetItem *unit = item(row, col);
@@ -55,8 +65,9 @@ void InstsWindow::setItemFormat(int row, int col)
     unit->setFont(font);
 }
 
-void InstsWindow::slt_IsertInst(int row, QString inst, QString opt)
+void InstsWindow::slt_InsertInst(int row, QString inst)
 {
+    QStringList instStr = inst.split(" ");
     if (row >= rowCount()){
         insertRow(row);
     }
@@ -68,12 +79,14 @@ void InstsWindow::slt_IsertInst(int row, QString inst, QString opt)
     setItem(row, 0, item);
     setItemFormat(row, 0);
 
-    item = new QTableWidgetItem(inst);
+    item = new QTableWidgetItem(instStr[0]);
     setItem(row, 1, item);
     setItemFormat(row, 1);
 
-    item = new QTableWidgetItem(opt);
-    setItem(row, 2, item);
-    setItemFormat(row, 2);
+    if (instStr.count() >= 2){
+        item = new QTableWidgetItem(instStr[1]);
+        setItem(row, 2, item);
+        setItemFormat(row, 2);
+    }
 }
 

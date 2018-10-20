@@ -300,7 +300,7 @@ void GraphTable::slt_inputPara(Element emt)
             RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
 
-        graph = GM->getUnit(curRow, MAX_COL-1);
+        graph = GM->getUnit(curRow, MAX_COL);
         graph->emt.graphType = emt.graphType;
         graph->emt.funInsType = emt.funInsType;
         graph->emt.name = emt.name;
@@ -685,96 +685,22 @@ void GraphTable::slt_removeGraphRow()
     }
 }
 
-////此处传入的row和col不是窗口中的实际坐标，而是列-1。
-//int GraphTable::DealNode(int row, int col)
-//{
-//    int idx = row * MAX_COL + col;
-//    if (idx >= m_graphList.count()) return -1;
-//    if ((row >= MAX_ROW) | (row < 0)) return -1;
-//    if ((col >= MAX_COL) | (col < 0)) return -1;
-
-
-//    //是否为结尾
-//    if (m_graphList[idx]->emt.graphType == 0){
-//        DealNode(row-1, buildPos[row-1]);
-//        return 1;
-//    }
-
-//    //是否要转上一行：条件=upflag和已经处理完
-//    if (m_graphList[idx]->emt.upFlag){
-//        if (buildPos[row-1] <= col){
-//            DealNode(row-1, buildPos[row-1]);
-//            if (buildPos[row-1] > col){
-//                return 1;
-//            }
-//        }
-//    }
-
-
-//    buildPos[row] += 1;
-//    m_buildTrail.append(QPoint(row, col));
-//    QString text = QString("Pos:(%1,%2), %3%4")
-//                    .arg(row).arg(col)
-//                    .arg(m_graphList[idx]->emt.name)
-//                    .arg(m_graphList[idx]->emt.index);
-//    qDebug()<<text;
-
-//    emit sig_InsertBottomRowText(text + "\n");
-//    qApp->processEvents();
-
-
-//    if  (col == MAX_COL-1){//如果处理到当前行的最后一列，则直接转下一列
-//        DealNode(row+1, buildPos[row+1]);
-//        return 1;
-//    }
-
-//    if (idx+1 >= m_graphList.count()) return 1;
-
-//    if (m_graphList[idx+1]->emt.dnFlag){
-//        buildPreRow = row+1;
-//        DealNode(row+1, buildPos[row+1]);
-//    }else{
-//        DealNode(row, buildPos[row]);
-
-//    }
-//}
 
 void GraphTable::BuildGraph()
 {
     GM->buildGraph();
+    QStringList insts = GM->getInsts();
+    for(int i=0;i<insts.count();i++){
+        emit sig_InsertInst(i, insts[i]);
+    }
+
+
     int maxIdx = GM->getCount();
     if (maxIdx == 0) return;
-    //第一步：先在最后一行加入END标志
-    if (GM->getUnit(maxIdx-1)->emt.graphType != EndGraph){
-        Element emt;
-        emt.graphType = EndGraph;
-        emt.name = "END";
-        slt_inputPara(emt);
-    }
-//    //第二步：编译，生成序列
-//    int i = 0;
-//    int j = 0;
-//    buildPreRow = 0;
-//    memset(buildPos, 0, MAX_ROW * sizeof(int));
-//    while(i < MAX_ROW)
-//    {
-//        int ret = DealNode(i, buildPos[i]);
-//        if (ret == -1){
-//            break;
-//        }
-//        for(j=0;j<MAX_ROW;j++){
-//            if (buildPos[j] == 0){
-//                i = j;
-//                break;
-//            }
-//        }
-//    }
+
 
     //编译过的部分加底色显示
 
-
-    //第三步：根据序列生成指令表
-    sig_IsertInst(0, "LD", "X0");
     //https://wenku.baidu.com/view/f69bc79f8762caaedd33d428.html
 }
 

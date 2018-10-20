@@ -45,8 +45,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_graphWid->m_graphTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
             this, SLOT(slt_doubleClickTable(QTableWidgetItem *)));
 
-    connect(m_graphWid->m_graphTable, SIGNAL(sig_IsertInst(int,QString,QString)),
-            m_instsWid, SLOT(slt_IsertInst(int,QString,QString)));
+    connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertInst(int,QString)),
+            m_instsWid, SLOT(slt_InsertInst(int,QString)));
 }
 
 MainWindow::~MainWindow()
@@ -140,11 +140,13 @@ void MainWindow::createActions()
     /****graph****/
     QAction *act = new QAction(QIcon(":/images/graph/Btn0.bmp"), tr("常开开关"), this);
     act->setStatusTip(tr("常开开关"));
+    act->setShortcut(Qt::Key_F3);
     connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
     m_graphActList.append(act);
 
     act = new QAction(QIcon(":/images/graph/Btn1.bmp"), tr("常闭开关"), this);
     act->setStatusTip(tr("常闭开关"));
+    act->setShortcut(Qt::Key_F4);
     connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
     m_graphActList.append(act);
 
@@ -346,13 +348,15 @@ void MainWindow::SetupMdiArea()
     m_graphWid = new GraphWindow;
     QMdiSubWindow *graphChild = m_mdiArea->addSubWindow(m_graphWid);
     graphChild->setWindowIcon(QIcon(":/images/graphwindow.png"));
-    m_graphWid->setWindowState(Qt::WindowMaximized);
+    //m_graphWid->setWindowState(Qt::WindowMaximized);
 
     m_mdiArea->setActiveSubWindow(graphChild);
 
     //m_mdiArea->tileSubWindows();   //SubWindows并列
     //m_mdiArea->cascadeSubWindows();   //SubWindows重叠排列
 
+    //release下500可缩短为200
+    QTimer::singleShot(500, this, SLOT(reorderSubWindow()));
 }
 
 void MainWindow::newFile()
@@ -505,6 +509,7 @@ void MainWindow::drawGraph()
 void MainWindow::buildGraph()
 {
     m_bottomW->clear();
+    m_instsWid->buildInsts();
     m_graphWid->m_graphTable->BuildGraph();
 }
 
@@ -532,13 +537,13 @@ void MainWindow::slt_doubleClickTable(QTableWidgetItem *item)
     m_inputIW->show();
 }
 
-void MainWindow::reorderSubWindow()
+void MainWindow::reorderSubWindow(int type)
 {
     int width = m_mdiArea->width();
     int height = m_mdiArea->height();
     QList<QMdiSubWindow *> subwinList = m_mdiArea->subWindowList();
 
-    if (sender() == whsideAct){
+    if ((sender() == whsideAct) || (type == 0)){
         switch (subwinList.count()) {
         case 1:
             subwinList[0]->setGeometry(0,0,width,height);
@@ -550,7 +555,7 @@ void MainWindow::reorderSubWindow()
         default:
             break;
         }
-    }else if (sender() == wvsideAct){
+    }else if ((sender() == wvsideAct) || (type == 1)){
         switch (subwinList.count()) {
         case 1:
             subwinList[0]->setGeometry(0,0,width,height);

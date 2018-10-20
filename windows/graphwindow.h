@@ -59,7 +59,7 @@ protected:
     void contextMenuEvent(QContextMenuEvent *event);
 signals:
     void sig_InsertBottomRowText(QString text);
-    void sig_IsertInst(int row, QString inst, QString opt);
+    void sig_InsertInst(int row, QString inst);
     void sig_zoomin();
     void sig_zoomout();
     void sig_enableUndo(bool status);

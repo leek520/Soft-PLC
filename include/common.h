@@ -58,7 +58,7 @@ enum GraphType
     EndGraph,
 };
 enum Direction{
-    TurnNone,
+    TurnStart,
     TurnDown,
     TurnUp,
     TurnLeft,

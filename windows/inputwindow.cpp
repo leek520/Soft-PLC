@@ -165,15 +165,20 @@ void InputGraphWindow::on_yesBtn_triggered()
     emit sig_inputPara(emt);
 
     close();
-    m_indexSpi->setValue(0);
+    m_indexSpi->setValue(m_indexSpi->value()+1);
 }
 
 void InputGraphWindow::on_cancelBtn_triggered()
 {
     close();
-    m_indexSpi->setValue(0);
-}
 
+}
+void InputGraphWindow::showEvent(QShowEvent *event)
+{
+
+    m_indexSpi->selectAll();
+    QWidget::showEvent(event);
+}
 InputInstsWindow::InputInstsWindow(QWidget *parent) : QFrame(parent)
 {
     setWindowFlags(Qt::FramelessWindowHint);
@@ -226,17 +231,11 @@ int InputInstsWindow::InstsDecoder()
         if (cnt < 2) return -1;
         QRegExp re("^[XYMSTC][0-9]{1,3}");
         if (instsStr[1].indexOf(re) > -1){
-            emt.graphType = InputOpen;
-            emt.name = instsStr[1][0];
-            emt.index = instsStr[1].mid(1).toInt();
-            emt.mark = str;
-            emit sig_inputPara(emt);
-        }
-    }else if (inst.indexOf("LDI") > -1){
-        if (cnt < 2) return -1;
-        QRegExp re("^[XYMSTC][0-9]{1,3}");
-        if (instsStr[1].indexOf(re) > -1){
-            emt.graphType = InputClose;
+            if (inst.indexOf("LDI") > -1){
+                emt.graphType = InputClose;
+            }else{
+                emt.graphType = InputOpen;
+            }
             emt.name = instsStr[1][0];
             emt.index = instsStr[1].mid(1).toInt();
             emt.mark = str;

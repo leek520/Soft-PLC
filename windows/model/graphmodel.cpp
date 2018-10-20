@@ -203,172 +203,298 @@ void GraphModel::buildGraph()
 {
     clearBuild();
 
-    //第二步：编译，生成序列
-    int row = 0;
-    while(row < MAX_ROW)
+    createBTree();
+
+    createInsts();
+}
+/******************************************************************************
+* @brief: 获取该模型编译好的指令集
+* @author:leek
+* @date 2018/10/10
+*******************************************************************************/
+QStringList GraphModel::getInsts()
+{
+    return m_instsList;
+}
+/******************************************************************************
+* @brief: 递归处理节点
+* @author:leek
+* @date 2018/10/10
+*******************************************************************************/
+//此处传入的row和col不是窗口中的实际坐标，而是列-1。
+int GraphModel::dealBTreeNode(int row, Direction dir, BTreeNode *node)
+{
+    BTreeNode *parentNode = node;
+    BTreeNode *rightNode = NULL;
+    int col = m_buildInfo.start[row];
+    int idx = GraIdx(row, col);
+    if (idx >= m_graphList.count()) return -1;
+    if ((row >= MAX_ROW) | (row < 0)) return -1;
+    if ((col >= MAX_COL) | (col < 0)) return -1;
+
+    //qDebug()<< "cur pos:" <<row << m_buildInfo.start[row];
+    //是否为空
+    if (m_graphList[idx]->isEmpty()){
+        dealBTreeNode(row-1);
+        return 1;
+    }
+
+    //是否要转上一行：条件=upflag和已经处理完，即上一行处理到尾部了
+    if ((m_graphList[idx]->isUp()) &&
+        (m_buildInfo.start[row-1] < MAX_COL)){
+        return 1;
+    }
+    //水平线直接转右
+    if ((m_graphList[idx]->getType() == HorizontalLine) ||
+        (m_graphList[idx]->getType() == NoneGraph)){
+        m_buildInfo.start[row] += 1;
+        dealBTreeNode(row, TurnRight, parentNode);
+        return 1;
+    }
+
+    //建立节点
+    if (dir == TurnRight){
+        //右转到最后一列时，保存当前节点和out的对应关系
+        if (col == MAX_COL-1){
+            m_OutNode.insert(idx, node);
+        }else{
+
+            parentNode = new BTreeNode(idx, SerialNode);
+            rightNode = new BTreeNode(idx, LeafNode);
+            parentNode->insert(node->root(), Left);
+            parentNode->insert(rightNode, Right);
+        }
+    }
+
+    m_buildInfo.start[row] += 1;
+    m_buildTrail.append(QPoint(row, col));
+    QString text = QString("Pos:(%1,%2), %3%4")
+                    .arg(row).arg(col)
+                    .arg(m_graphList[idx]->emt.name)
+                    .arg(m_graphList[idx]->emt.index);
+    qDebug()<<text;
+
+
+    if  (col == MAX_COL-1){//如果处理到当前行的最后一列，则直接转下一列
+        m_buildInfo.end[row+1] = MAX_COL;
+        //当该行扫描到最后一个输出时，如果下行没有扫描过，说明这两行没有竖直线连接
+        if (m_buildInfo.start[row+1] == 0){
+            return 1;
+        }else{
+            //这里一行处理到out转下一行类似于右转，所有为TurnRight****
+            dealBTreeNode(row+1, TurnRight, parentNode);
+        }
+
+        return 1;
+    }
+
+    if (idx+1 >= m_graphList.count()) return 1;
+
+    if (m_graphList[idx+1]->isDown()){
+        //此处记录本次梯级可以扫描到的最大行数
+        if (row >= m_buildInfo.startRow){
+            m_buildInfo.startRow = row + 1;
+        }
+        //设置转下一行扫描时可以达到的最大列数，为转下时的列位置
+        m_buildInfo.end[row+1] = m_buildInfo.start[row];
+
+
+        parentNode = new BTreeNode(idx, ParallelNode);
+
+        //计算下一行要处理的idx
+        idx = GraIdx(row+1, m_buildInfo.start[row+1]);
+        rightNode = new BTreeNode(idx, LeafNode);
+        //如果OR节点后只有一个节点，则直接优先使用OR
+        if (m_graphList[idx+1]->isUp()){
+            //新建并联右节点，处理完后重新赋值二叉树节点进行下一次
+            if (node->root() == node){
+                parentNode->insert(node, Left);
+            }else{
+                //这种情况下，下次递归start未执行+1，所以这里提前执行
+                m_buildInfo.start[row+1] += 1;
+
+                parentNode->insert(node->root()->right, Left);
+                node->root()->right = parentNode;
+                parentNode->parent = node->root();
+            }
+
+            parentNode->insert(rightNode, Right);
+            //转下一行
+            dealBTreeNode(row+1, TurnDown, parentNode);
+        }else{
+            dealBTreeNode(row+1, TurnDown, rightNode);
+            //新建并联右节点，处理完后重新赋值二叉树节点进行下一次
+            parentNode->insert(node->root(), Left);
+            parentNode->insert(rightNode->root(), Right);
+        }
+
+    }
+
+    //右转
+    dealBTreeNode(row, TurnRight, parentNode);
+}
+
+/******************************************************************************
+* @brief: 二叉树的中序遍历
+* @author:leek
+* @date 2018/10/10
+*******************************************************************************/
+void GraphModel::inOrderTraversal(BTreeNode *node)
+{
+    QString inst = "";
+    GraphFB *graph = NULL;
+    BTNodePos pos;
+    if(node != NULL)
     {
-        row = m_buildInfo.startRow;
-        //int ret = dealNode(row, TurnNone);
+        //是叶子节点
+        if (node->type == LeafNode){
+            graph = getUnit(node->value);
+            //先判断是否有父节点，如果没有默认为左叶子节点，如果有，判断左右
+            if (node->parent == NULL){
+                pos = Left;
+            }else{
+              if (node->parent->left == node){    //左叶子
+                  pos = Left;
+              }else{
+                  pos = Right;
+              }
+            }
 
-        int ret = createBTree(row);
-        m_buildInfo.startRow++;
-        if (ret == -1){
-            break;
-        }
-    }
-//    BTreeNode<int> *tree = new BTreeNode<int>(0);
-//    tree->insert(1, tree, Left);
-//    tree->clear();
-}
-int GraphModel::dealNode(int row, Direction dir)
-{
-    int col = m_buildInfo.start[row];
-    int idx = GraIdx(row, col);
-    if (idx >= m_graphList.count()) return -1;
-    if ((row >= MAX_ROW) | (row < 0)) return -1;
-    if ((col >= MAX_COL) | (col < 0)) return -1;
+            //左右叶子节点分开处理
+            if (pos == Left){    //左叶子
+                if (graph->getType() == InputOpen){
+                    inst = "LD";
+                }else if (graph->getType() == InputClose){
+                    inst = "LDI";
+                }
+            }else{      //右叶子
+                if (node->parent->type == SerialNode){
+                    if (graph->getType() == InputOpen){
+                        inst = "AND";
+                    }else if (graph->getType() == InputClose){
+                        inst = "ANI";
+                    }
+                }else if (node->parent->type == ParallelNode){
+                    if (graph->getType() == InputOpen){
+                        inst = "OR";
+                    }else if (graph->getType() == InputClose){
+                        inst = "ORI";
+                    }
+                }
+            }
+            //生成指令
+            m_instsList.append(QString("%1 %2%3")
+                               .arg(inst)
+                               .arg(graph->getName())
+                               .arg(graph->getIndex()));
+        }else{
+            //并联或者串联节点的遍历
+            //先遍历左节点
+            inOrderTraversal(node->left);
 
-    qDebug()<< "cur pos:" <<row << m_buildInfo.start[row];
-    //是否为空
-    if (m_graphList[idx]->isEmpty()){
-        m_buildInfo.depth = 0;
-        dealNode(row-1);
-        return 1;
-    }
+            //再遍历右节点
+            inOrderTraversal(node->right);
 
-    //是否要转上一行：条件=upflag和已经处理完
-    if (m_graphList[idx]->isUp()){
-        if (m_buildInfo.start[row-1] <= col){
-            m_buildInfo.depth = 0;
-            dealNode(row-1);
-            if (m_buildInfo.start[row-1] > col){
-                return 1;
+            //如果右节点不是叶子节点，则需要额外输出串并联指令
+            if (node->right->type != LeafNode){
+                if (node->type == SerialNode){
+                    m_instsList.append(QString("ANB"));
+                }else{
+                    m_instsList.append(QString("ORB"));
+                }
             }
         }
-    }
-    //水平线直接转右
-    if (m_graphList[idx]->getType() == HorizontalLine){
-        m_buildInfo.start[row] += 1;
-        dealNode(row);
-        return 1;
+        //判断该节点是否为输出节点
+        dealOutNode(node);
     }
 
-//    QString opt = QString("%3%4")
-//            .arg(m_graphList[idx]->getName())
-//            .arg(m_graphList[idx]->getIndex());
-
-//    if (dir == TurnLeft){
-//        if (col == MAX_COL-1){
-//            qDebug()<<QString("OUT %1").arg(opt);
-//        }else{
-//            qDebug()<<QString("AND %1").arg(opt);
-//        }
-//    }else if (dir == TurnDown){
-//        if (m_graphList[idx+1]->isDown()){
-//            qDebug()<<QString("OR %1").arg(opt);
-//        }else{
-//            qDebug()<<QString("LD %1").arg(opt);
-//        }
-//    }
-
-    m_buildInfo.start[row] += 1;
-    m_buildTrail.append(QPoint(row, col));
-    QString text = QString("Pos:(%1,%2), %3%4")
-                    .arg(row).arg(col)
-                    .arg(m_graphList[idx]->emt.name)
-                    .arg(m_graphList[idx]->emt.index);
-    //qDebug()<<text;
-
-
-    if  (col == MAX_COL-1){//如果处理到当前行的最后一列，则直接转下一列
-        m_buildInfo.end[row+1] = MAX_COL;
-        m_buildInfo.depth = 0;
-        dealNode(row+1);
-        return 1;
-    }
-
-    if (idx+1 >= m_graphList.count()) return 1;
-
-    if (m_graphList[idx+1]->isDown()){
-        if (row > m_buildInfo.startRow){
-            m_buildInfo.startRow = row + 1;
-        }
-        m_buildInfo.end[row+1] = m_buildInfo.start[row];
-
-        m_buildInfo.depth = 0;
-        dealNode(row+1, TurnDown);
-
-    }else{
-        m_buildInfo.depth++;
-        dealNode(row, TurnLeft);
-
-    }
 }
-
-int GraphModel::createBTree(int row)
+/******************************************************************************
+* @brief: 输出节点处理
+* @author:leek
+* @date 2018/10/10
+*******************************************************************************/
+void GraphModel::dealOutNode(BTreeNode *node)
 {
-    int col = m_buildInfo.start[row];
-    int idx = GraIdx(row, col);
-    if (idx >= m_graphList.count()) return -1;
-    if ((row >= MAX_ROW) | (row < 0)) return -1;
-    if ((col >= MAX_COL) | (col < 0)) return -1;
+    GraphFB *graph = NULL;
+    //判断是否要输出
+    QMap<int, BTreeNode *>::iterator iter = m_OutNode.begin();
+    while (iter != m_OutNode.end())
+    {
+        //判断是否需要MPS
+        //如果该节点有输出，则判断其父节点是否也有输出，并且该输出在本次输出的上方，需要MPS
 
-    qDebug()<< "cur pos:" <<row << m_buildInfo.start[row];
-    //是否为空
-    if (m_graphList[idx]->isEmpty()){
-        dealNode(row-1);
-        return 1;
-    }
+        //TODO
+        //输出节点加入的不对，见eg-11
 
-    //是否要转上一行：条件=upflag和已经处理完
-    if (m_graphList[idx]->isUp()){
-        if (m_buildInfo.start[row-1] <= col){
-            dealNode(row-1);
-            if (m_buildInfo.start[row-1] > col){
-                return 1;
-            }
+        //输出OUT
+        if (node == iter.value()){
+            graph = getUnit(iter.key());
+            m_instsList.append(QString("OUT %1%2")
+                               .arg(graph->getName())
+                               .arg(graph->getIndex()));
         }
-    }
-    //水平线直接转右
-    if (m_graphList[idx]->getType() == HorizontalLine){
-        m_buildInfo.start[row] += 1;
-        dealNode(row);
-        return 1;
-    }
-
-
-    m_buildInfo.start[row] += 1;
-    m_buildTrail.append(QPoint(row, col));
-    QString text = QString("Pos:(%1,%2), %3%4")
-                    .arg(row).arg(col)
-                    .arg(m_graphList[idx]->emt.name)
-                    .arg(m_graphList[idx]->emt.index);
-    //qDebug()<<text;
-
-
-    if  (col == MAX_COL-1){//如果处理到当前行的最后一列，则直接转下一列
-        m_buildInfo.end[row+1] = MAX_COL;
-        dealNode(row+1);
-        return 1;
-    }
-
-    if (idx+1 >= m_graphList.count()) return 1;
-
-    if (m_graphList[idx+1]->isDown()){
-        if (row > m_buildInfo.startRow){
-            m_buildInfo.startRow = row + 1;
-        }
-        m_buildInfo.end[row+1] = m_buildInfo.start[row];
-        dealNode(row+1);
-
-    }else{
-        dealNode(row);
-
+        iter++;
     }
 }
+/******************************************************************************
+* @brief: 编译前清理相关变量
+* @author:leek
+* @date 2018/10/10
+*******************************************************************************/
 void GraphModel::clearBuild()
 {
     memset(m_buildInfo.start, 0, MAX_ROW * sizeof(uchar));
     memset(m_buildInfo.end, MAX_COL, MAX_ROW * sizeof(uchar));
     m_buildInfo.startRow = 0;
+
+    m_buildTrail.clear();
+    m_HeadNode.clear();
+    m_OutNode.clear();
+    m_headNodePos.clear();
+    m_instsList.clear();
+}
+/******************************************************************************
+* @brief: 根据梯形图链表生成二叉树森林
+* @author:leek
+* @date 2018/10/10
+*******************************************************************************/
+void GraphModel::createBTree()
+{
+    //编译，生成二叉树森铃
+    int ret = 0;
+    int row = 0;
+    while(row < MAX_ROW)
+    {
+        //本次梯级递归起始行号为上次扫描到的最大行号
+        row = m_buildInfo.startRow;
+        if (row <= getMaxRow()){
+            //记录本次梯级第一个叶子节点,value为idx
+            BTreeNode *firstNode = new BTreeNode(GraIdx(row, 0), LeafNode);
+            m_HeadNode.append(firstNode);
+            //记录梯级行号和本梯级内输出节点个数的对应关系
+            m_headNodePos.insert(row, m_OutNode.count());
+            //递归处理本次梯级
+            ret = dealBTreeNode(row, TurnStart, firstNode);
+            //该梯级处理完成后自动转下一行
+            m_buildInfo.startRow++;
+            if (ret == -1){
+                break;
+            }
+        }else{
+            break;
+        }
+    }
+    m_headNodePos.insert(getMaxRow(), m_OutNode.count());
+}
+/******************************************************************************
+* @brief: 根据二叉树森林，利用中序遍历，生成指令集
+* @author:leek
+* @date 2018/10/10
+*******************************************************************************/
+int GraphModel::createInsts()
+{
+    for(int i=0;i<m_HeadNode.count();i++){
+        inOrderTraversal(m_HeadNode[i]->root());
+    }
 }

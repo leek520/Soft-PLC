@@ -33,20 +33,25 @@
 
 //https://www.xzbu.com/8/view-8721464.htm
 #include <QObject>
-#define ADD_NODE    -1
-#define OR_NODE     -2
 enum BTNodePos
 {
   Any,
   Left,
-  Right
+  Right,
 };
-
+enum BTNodeTyep
+{
+  SerialNode,
+  ParallelNode,
+  LeafNode,
+  OutNode,
+};
 
 class BTreeNode
 {
-protected:
+public:
     int value;
+    BTNodeTyep type;
     BTreeNode* left;   //左子结点
     BTreeNode* right;  //右子结点
     BTreeNode* parent; //父节点
@@ -54,20 +59,21 @@ public:
 
     BTreeNode();             //无参构造
     BTreeNode(const int &data,
+              BTNodeTyep type=LeafNode,
               BTreeNode* pleft=NULL,
               BTreeNode* pright=NULL);
     ~BTreeNode();
 
     BTreeNode &operator =(const BTreeNode &copy);
 
-    BTreeNode* root()const;
+    BTreeNode* root();
 
-    BTreeNode* find(BTreeNode* node, const int& value)const;
-    BTreeNode* find(const int& value)const;
-    BTreeNode* find(BTreeNode* node, BTreeNode* obj)const;
-    BTreeNode* find(BTreeNode* node)const;
+    BTreeNode* find(BTreeNode* node, const int& pos);
+    BTreeNode* find(const int& pos);
+    BTreeNode* find(BTreeNode* node, BTreeNode* obj);
+    BTreeNode* find(BTreeNode* node);
 
-
+    bool hasNode(BTreeNode* node);
     static bool insert(BTreeNode* newnode, BTreeNode* node, BTNodePos pos=Any);
     bool insert(BTreeNode* node, BTNodePos pos=Any);
 
@@ -75,7 +81,6 @@ public:
 
     void free(BTreeNode* node);
     void clear();
-
 };
 
 

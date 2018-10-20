@@ -29,6 +29,7 @@ Copyright (c) 2018 PLT. All Rights Reserved.
 #include <QDockWidget>
 #include <QLabel>
 #include <QComboBox>
+#include <QTimer>
 #include <QDir>
 #include <QMutex>
 #include <QDateTime>
@@ -69,7 +70,8 @@ private slots:
     void zoomin();
     void zoomout();
     void find();
-    void reorderSubWindow();
+    //type=0：默认打开水平排列，type=1：默认打开数值排列，type=其他值：默认打开层叠排列
+    void reorderSubWindow(int type = 0);
 
 
     void drawGraph();

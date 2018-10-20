@@ -60,14 +60,21 @@ public:
 
     bool checkGraph(int row, int col, int type);
     void buildGraph();
+    QStringList getInsts();
 private:
     void clearBuild();
-    int dealNode(int row, Direction dir=TurnNone);
-    int createBTree(int row);
+    void createBTree();
+    int createInsts();
+    int dealBTreeNode(int row, Direction dir = TurnStart,BTreeNode *node = NULL);
+    void inOrderTraversal(BTreeNode* node); //中序遍历
+    void dealOutNode(BTreeNode *node);
 private:
     QList<GraphFB *> m_graphList;
-    QList<BTreeNode *> m_buildTree;
+    QList<BTreeNode *> m_HeadNode;
+    QMap<int, BTreeNode *> m_OutNode;
+    QMap<int, int> m_headNodePos;
     QList<QPoint> m_buildTrail;
+    QStringList m_instsList;
     BuildInfo m_buildInfo;
 };
 

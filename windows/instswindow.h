@@ -19,12 +19,14 @@ class InstsWindow : public QTableWidget
 public:
     explicit InstsWindow(QWidget *parent = 0);
     void setZoom(double factor);
+    void buildInsts();
 signals:
 
 private:
+    void initTable();
     void setItemFormat(int row, int col);
 public slots:
-    void slt_IsertInst(int row, QString inst="NOP", QString opt="");
+    void slt_InsertInst(int row, QString inst="NOP");
 };
 
 #endif // INSTSWINDOW_H
