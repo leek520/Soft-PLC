@@ -52,7 +52,7 @@ enum GraphType
     InputPedge,
     InputNedge,
     StepNode,
-    OutputNode,
+    OutputGraph,
     ReverseLogic,
     LogicGraph,
     EndGraph,

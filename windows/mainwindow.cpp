@@ -537,13 +537,16 @@ void MainWindow::slt_doubleClickTable(QTableWidgetItem *item)
     m_inputIW->show();
 }
 
-void MainWindow::reorderSubWindow(int type)
+void MainWindow::reorderSubWindow()
 {
     int width = m_mdiArea->width();
     int height = m_mdiArea->height();
     QList<QMdiSubWindow *> subwinList = m_mdiArea->subWindowList();
 
-    if ((sender() == whsideAct) || (type == 0)){
+    //这里设置软件打开的默认排列方式 = whsideAct
+    if ((sender() != whsideAct) &&
+        (sender() != wvsideAct) &&
+        (sender() != wstackAct)){
         switch (subwinList.count()) {
         case 1:
             subwinList[0]->setGeometry(0,0,width,height);
@@ -555,32 +558,45 @@ void MainWindow::reorderSubWindow(int type)
         default:
             break;
         }
-    }else if ((sender() == wvsideAct) || (type == 1)){
-        switch (subwinList.count()) {
-        case 1:
-            subwinList[0]->setGeometry(0,0,width,height);
-            break;
-        case 2:
-            subwinList[1]->setGeometry(0,0,width,height/2);
-            subwinList[0]->setGeometry(0,height/2,width,height/2);
-            break;
-        default:
-            break;
+    }else{
+        if (sender() == whsideAct){
+            switch (subwinList.count()) {
+            case 1:
+                subwinList[0]->setGeometry(0,0,width,height);
+                break;
+            case 2:
+                subwinList[1]->setGeometry(0,0,width*3/4,height);
+                subwinList[0]->setGeometry(width*3/4,0,width/4,height);
+                break;
+            default:
+                break;
+            }
+        }else if (sender() == wvsideAct){
+            switch (subwinList.count()) {
+            case 1:
+                subwinList[0]->setGeometry(0,0,width,height);
+                break;
+            case 2:
+                subwinList[1]->setGeometry(0,0,width,height/2);
+                subwinList[0]->setGeometry(0,height/2,width,height/2);
+                break;
+            default:
+                break;
+            }
+        }else{  //    if (sender() == wstackAct)
+            m_mdiArea->cascadeSubWindows();
+            switch (subwinList.count()) {
+            case 1:
+                subwinList[0]->setGeometry(0,0,width*3/4,height*3/4);
+                break;
+            case 2:
+                subwinList[0]->setGeometry(0,0,width*3/4,height*3/4);
+                subwinList[1]->setGeometry(100,80,width*3/4,height*3/4);
+                break;
+            default:
+                break;
+            }
         }
-    }else{  //    if (sender() == wstackAct)
-        m_mdiArea->cascadeSubWindows();
-        switch (subwinList.count()) {
-        case 1:
-            subwinList[0]->setGeometry(0,0,width*3/4,height*3/4);
-            break;
-        case 2:
-            subwinList[0]->setGeometry(0,0,width*3/4,height*3/4);
-            subwinList[1]->setGeometry(100,80,width*3/4,height*3/4);
-            break;
-        default:
-            break;
-        }
-
     }
 }
 

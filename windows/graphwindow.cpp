@@ -292,7 +292,7 @@ void GraphTable::slt_inputPara(Element emt)
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
         SetCurrentUnit(curRow, curCol);
         break;
-    case OutputNode:
+    case OutputGraph:
         for(i=curCol;i<MAX_COL;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;

@@ -135,7 +135,7 @@ void GraphFB::drawGraph()
         painter.drawText(pt, text);
         break;
     }
-    case OutputNode:
+    case OutputGraph:
     {
         int xof1 = width / 40;
         int xof2 = width / 20;

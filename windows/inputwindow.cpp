@@ -88,7 +88,7 @@ void InputGraphWindow::SetCurrentName(int index)
         m_nameCom->setCurrentIndex(3);
         break;
     case 5:
-        m_type = OutputNode;
+        m_type = OutputGraph;
         setWindowIcon(QIcon(":/images/graph/Btn5.bmp"));
         m_nameCom->setCurrentIndex(1);
         break;
@@ -244,6 +244,13 @@ int InputInstsWindow::InstsDecoder()
     }else if (inst.indexOf("ADD") > -1){
         if (cnt < 2) return -1;
         emt.graphType = LogicGraph;
+        emt.mark = str;
+        emit sig_inputPara(emt);
+    }else if (inst.indexOf("OUT") > -1){
+        if (cnt < 2) return -1;
+        emt.graphType = OutputGraph;
+        emt.name = instsStr[1][0];
+        emt.index = instsStr[1].mid(1).toInt();
         emt.mark = str;
         emit sig_inputPara(emt);
     }

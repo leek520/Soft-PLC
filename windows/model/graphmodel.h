@@ -19,7 +19,7 @@ struct BuildInfo
     uchar start[MAX_ROW];
     uchar end[MAX_ROW];
     int startRow;
-    int depth;
+    QList<bool> outStatus;
 };
 class GraphModel
 {
@@ -66,13 +66,16 @@ private:
     void createBTree();
     int createInsts();
     int dealBTreeNode(int row, Direction dir = TurnStart,BTreeNode *node = NULL);
-    void inOrderTraversal(BTreeNode* node); //中序遍历
-    void dealOutNode(BTreeNode *node);
+    void inOrderTraversal(BTreeNode* node, int index); //中序遍历
+    void dealMultOutNode_MPP(BTreeNode *node, int index);
+    void dealMultOutNode_MPS(BTreeNode *node, int index);
 private:
     QList<GraphFB *> m_graphList;
     QList<BTreeNode *> m_HeadNode;
-    QMap<int, BTreeNode *> m_OutNode;
-    QMap<int, int> m_headNodePos;
+
+    QList<QMap<int, BTreeNode *>* > m_OutTree;
+    QMap<int, BTreeNode *> *m_OutNode;
+
     QList<QPoint> m_buildTrail;
     QStringList m_instsList;
     BuildInfo m_buildInfo;

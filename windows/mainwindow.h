@@ -71,7 +71,7 @@ private slots:
     void zoomout();
     void find();
     //type=0：默认打开水平排列，type=1：默认打开数值排列，type=其他值：默认打开层叠排列
-    void reorderSubWindow(int type = 0);
+    void reorderSubWindow();
 
 
     void drawGraph();

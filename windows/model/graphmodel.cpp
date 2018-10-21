@@ -256,7 +256,35 @@ int GraphModel::dealBTreeNode(int row, Direction dir, BTreeNode *node)
     if (dir == TurnRight){
         //右转到最后一列时，保存当前节点和out的对应关系
         if (col == MAX_COL-1){
-            m_OutNode.insert(idx, node);
+            // 查找输出的节点位置
+            //从最后一列往左查找up位置
+            BTreeNode *outNodeTmp = NULL;
+            for(int i=MAX_COL-2;i>0;i--){
+                int dnIndex = GraIdx(row, i);
+                //如果向上标志，则上移一行，继续判断（这里可能是连续竖直向上线）
+                int t=0;
+                while(m_graphList[dnIndex-t*MAX_COL]->isUp()){
+                    t++;
+                }
+                if (t>0){
+                    //找到之后从up位置的上一行往右查找第一个有效图元
+                    for(int k=0;k<MAX_COL-i;k++){
+                        int upIndex = dnIndex+k-t*MAX_COL;
+                        if (m_graphList[upIndex]->getType()>=InputOpen){
+                            outNodeTmp = node->find(upIndex, LeafNode);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            if (outNodeTmp != NULL){
+                m_OutNode->insert(idx, outNodeTmp->root()->left);
+            }else{
+                m_OutNode->insert(idx, node->root());
+            }
+
         }else{
 
             parentNode = new BTreeNode(idx, SerialNode);
@@ -339,7 +367,7 @@ int GraphModel::dealBTreeNode(int row, Direction dir, BTreeNode *node)
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-void GraphModel::inOrderTraversal(BTreeNode *node)
+void GraphModel::inOrderTraversal(BTreeNode *node, int index)
 {
     QString inst = "";
     GraphFB *graph = NULL;
@@ -390,10 +418,10 @@ void GraphModel::inOrderTraversal(BTreeNode *node)
         }else{
             //并联或者串联节点的遍历
             //先遍历左节点
-            inOrderTraversal(node->left);
+            inOrderTraversal(node->left, index);
 
             //再遍历右节点
-            inOrderTraversal(node->right);
+            inOrderTraversal(node->right, index);
 
             //如果右节点不是叶子节点，则需要额外输出串并联指令
             if (node->right->type != LeafNode){
@@ -404,38 +432,66 @@ void GraphModel::inOrderTraversal(BTreeNode *node)
                 }
             }
         }
-        //判断该节点是否为输出节点
-        dealOutNode(node);
+        dealMultOutNode_MPP(node, index);
     }
 
 }
+
 /******************************************************************************
 * @brief: 输出节点处理
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-void GraphModel::dealOutNode(BTreeNode *node)
+void GraphModel::dealMultOutNode_MPP(BTreeNode *node, int index)
 {
     GraphFB *graph = NULL;
     //判断是否要输出
-    QMap<int, BTreeNode *>::iterator iter = m_OutNode.begin();
-    while (iter != m_OutNode.end())
+
+    m_OutNode = m_OutTree[index];
+    QList<int> keys = m_OutNode->keys();
+    for(int i=0;i<keys.count();i++)
     {
-        //判断是否需要MPS
-        //如果该节点有输出，则判断其父节点是否也有输出，并且该输出在本次输出的上方，需要MPS
+//        判断是否需要MPS
+//        如果该节点有输出，则判断其父节点是否也有输出，并且该输出在本次输出的上方，需要MPS
+//        TODO
+//        输出节点加入的不对，见eg-11
+        if (node == m_OutNode->value(keys[i])){
+            //如果上一个输出节点还没有输出，则当前节点暂时不输出
+            if ((i != 0) && (m_buildInfo.outStatus[i-1] == false)){
+                if (m_OutNode->value(keys[i-1]) != m_OutNode->value(keys[i])){
+                    m_instsList.append(QString("MPS"));
+                }
+            }else{
+                m_buildInfo.outStatus[i] = true;
+                graph = getUnit(keys[i]);
+                m_instsList.append(QString("OUT %1%2")
+                                   .arg(graph->getName())
+                                   .arg(graph->getIndex()));
+            }
+        }
+    }
+}
 
-        //TODO
-        //输出节点加入的不对，见eg-11
-
-        //输出OUT
-        if (node == iter.value()){
-            graph = getUnit(iter.key());
+void GraphModel::dealMultOutNode_MPS(BTreeNode *node, int index)
+{
+    GraphFB *graph = NULL;
+    //判断是否要输出
+    m_OutNode = m_OutTree[index];
+    QList<int> keys = m_OutNode->keys();
+    for(int i=0;i<keys.count();i++)
+    {
+        if ((i != 0) &&(false == m_buildInfo.outStatus[i])){
+            //如果本次输出和上次输出的输出节点指向同一个节点，那么只用输出一次MPP
+            if (m_OutNode->value(keys[i-1]) != m_OutNode->value(keys[i])){
+                m_instsList.append(QString("MPP"));
+            }
+            graph = getUnit(keys[i]);
             m_instsList.append(QString("OUT %1%2")
                                .arg(graph->getName())
                                .arg(graph->getIndex()));
         }
-        iter++;
     }
+
 }
 /******************************************************************************
 * @brief: 编译前清理相关变量
@@ -447,12 +503,18 @@ void GraphModel::clearBuild()
     memset(m_buildInfo.start, 0, MAX_ROW * sizeof(uchar));
     memset(m_buildInfo.end, MAX_COL, MAX_ROW * sizeof(uchar));
     m_buildInfo.startRow = 0;
+    m_buildInfo.outStatus.clear();
+
 
     m_buildTrail.clear();
     m_HeadNode.clear();
-    m_OutNode.clear();
-    m_headNodePos.clear();
     m_instsList.clear();
+    m_OutNode = NULL;
+
+    for(int i=0;i<m_OutTree.count();i++){
+        delete m_OutTree[i];
+    }
+    m_OutTree.clear();
 }
 /******************************************************************************
 * @brief: 根据梯形图链表生成二叉树森林
@@ -469,15 +531,19 @@ void GraphModel::createBTree()
         //本次梯级递归起始行号为上次扫描到的最大行号
         row = m_buildInfo.startRow;
         if (row <= getMaxRow()){
+            m_OutNode = new QMap<int, BTreeNode *>();
             //记录本次梯级第一个叶子节点,value为idx
             BTreeNode *firstNode = new BTreeNode(GraIdx(row, 0), LeafNode);
             m_HeadNode.append(firstNode);
-            //记录梯级行号和本梯级内输出节点个数的对应关系
-            m_headNodePos.insert(row, m_OutNode.count());
             //递归处理本次梯级
             ret = dealBTreeNode(row, TurnStart, firstNode);
+
             //该梯级处理完成后自动转下一行
             m_buildInfo.startRow++;
+
+            //记录梯级行号和本梯级内输出节点个数的对应关系
+            m_OutTree.append(m_OutNode);
+
             if (ret == -1){
                 break;
             }
@@ -485,7 +551,6 @@ void GraphModel::createBTree()
             break;
         }
     }
-    m_headNodePos.insert(getMaxRow(), m_OutNode.count());
 }
 /******************************************************************************
 * @brief: 根据二叉树森林，利用中序遍历，生成指令集
@@ -495,6 +560,15 @@ void GraphModel::createBTree()
 int GraphModel::createInsts()
 {
     for(int i=0;i<m_HeadNode.count();i++){
-        inOrderTraversal(m_HeadNode[i]->root());
+        //生成指令前按照输出节点个数初始化变量
+        int j = m_OutTree[i]->count();
+        m_buildInfo.outStatus.clear();
+        while(j--){
+            m_buildInfo.outStatus.append(false);
+        }
+
+        BTreeNode *root = m_HeadNode[i]->root();
+        inOrderTraversal(root, i);
+        dealMultOutNode_MPS(m_HeadNode[i], i);
     }
 }

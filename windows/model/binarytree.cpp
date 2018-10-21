@@ -110,6 +110,33 @@ BTreeNode *BTreeNode::find(BTreeNode *node)
     return find(this->root(), node);
 }
 
+BTreeNode *BTreeNode::find(const int &value, BTNodeTyep type)
+{
+    BTreeNode* ret = NULL;
+    if(this != NULL)
+    {
+        //根节点node为目标结点
+        if((this->value == value) && (this->type == LeafNode))
+        {
+            ret = this;
+        }
+        else
+        {
+            //查找左子树
+            if(ret == NULL)
+            {
+                ret = this->left->find(value, type);
+            }
+            //如果左子树没有找到，ret返回NULL，继续查找右子树
+            if(ret == NULL)
+            {
+                ret = this->right->find(value, type);
+            }
+        }
+    }
+    return ret;
+}
+
 bool BTreeNode::hasNode(BTreeNode *node)
 {
     if (this == node) return false;

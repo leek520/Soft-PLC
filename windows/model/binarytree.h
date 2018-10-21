@@ -73,6 +73,8 @@ public:
     BTreeNode* find(BTreeNode* node, BTreeNode* obj);
     BTreeNode* find(BTreeNode* node);
 
+    BTreeNode* find(const int &value, BTNodeTyep type=LeafNode);
+
     bool hasNode(BTreeNode* node);
     static bool insert(BTreeNode* newnode, BTreeNode* node, BTNodePos pos=Any);
     bool insert(BTreeNode* node, BTNodePos pos=Any);
