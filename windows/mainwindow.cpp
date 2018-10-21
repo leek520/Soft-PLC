@@ -296,7 +296,19 @@ void MainWindow::createToolBars()
 }
 void MainWindow::createStatusBar()
 {
+    /*状态栏显示的信息分3种
+        1. 一般信息，用QLabel 代表
+        2.  永久信息，文本会一直显示在状态栏的最右边。
+        3. 临时信息，指定信息现实的时间。时间到即信息消失
+    */
+    stateBar = statusBar();
+    // 设置不显示label的边框
+    stateBar->setStyleSheet(QString("QStatusBar::item{border: 0px}"));
+    stateBar->setSizeGripEnabled(false); //设置是否显示右边的大小控制点
 
+    QLabel *per1 = new QLabel("Ready", this);
+    stateBar->addPermanentWidget(per1); //现实永久信息
+    stateBar->showMessage("Init success...", 3000); // 显示临时信息，时间3秒钟.
 }
 void MainWindow::SetupUi()
 {
@@ -511,6 +523,8 @@ void MainWindow::buildGraph()
     m_bottomW->clear();
     m_instsWid->buildInsts();
     m_graphWid->m_graphTable->BuildGraph();
+
+    stateBar->showMessage("Build success.", 3000); // 显示临时信息，时间3秒钟.
 }
 
 void MainWindow::runGraph()

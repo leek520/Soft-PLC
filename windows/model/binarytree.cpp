@@ -308,3 +308,52 @@ void BTreeNode::clear()
     free(root());
     this->parent = NULL;
 }
+
+void BTreeNode::print(BTreeNode *node)
+{
+    if (node != NULL){
+        if (node->type == LeafNode){
+            printStr(node);
+        }else{
+            print(node->left);
+
+            printStr(node);
+
+            print(node->right);
+
+            qDebug()<<"------------------------";
+            printStr(node);
+        }
+    }
+}
+
+void BTreeNode::printStr(BTreeNode *node)
+{
+    QString typeStr;
+    switch (node->type) {
+    case LeafNode:
+        typeStr = "LeafNode";
+        break;
+    case SerialNode:
+        typeStr = "SerialNode";
+        break;
+    case ParallelNode:
+        typeStr = "ParallelNode";
+        break;
+    default:
+        typeStr = "LeafNode";
+        break;
+    }
+
+    if ((node->parent != NULL) && (node == node->parent->right)){
+        qDebug()<<QString("addr: %1, idx: %2, type: %3, pos: Right")
+                  .arg((int)node)
+                  .arg(node->value)
+                  .arg(typeStr);
+    }else{
+        qDebug()<<QString("addr: %1, idx: %2, type: %3, pos: Left")
+                  .arg((int)node)
+                  .arg(node->value)
+                  .arg(typeStr);
+    }
+}

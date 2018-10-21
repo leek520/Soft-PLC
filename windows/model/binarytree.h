@@ -33,6 +33,7 @@
 
 //https://www.xzbu.com/8/view-8721464.htm
 #include <QObject>
+#include <QDebug>
 enum BTNodePos
 {
   Any,
@@ -83,6 +84,9 @@ public:
 
     void free(BTreeNode* node);
     void clear();
+
+    void print(BTreeNode* node);
+    void printStr(BTreeNode *node);
 };
 
 

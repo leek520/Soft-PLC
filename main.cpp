@@ -3,7 +3,8 @@
 //http://jz.docin.com/p-313859620.html
 
 #include <QTextCodec>
-
+#include <QSplashScreen>
+#include <QThread>
 void outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     // 加锁
@@ -63,6 +64,16 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    //加载并显示启动画面
+    QSplashScreen splash(QPixmap(":/images/splash.png"));
+    splash.setDisabled(true); //禁用用户的输入事件响应
+    splash.show();
+    splash.showMessage(QObject::tr("正在启动中...."),
+        Qt::AlignLeft|Qt::AlignBottom,Qt::green);
+
+    a.processEvents();              //使程序在显示启动画面的同时仍能响应鼠标等其他事件
+    QThread::sleep(5);
+
     //设置程序中文字的编码方式
     QTextCodec *codec = QTextCodec::codecForName("UTF_8");
     QTextCodec::setCodecForLocale(codec);
@@ -91,6 +102,8 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+
+    splash.finish(&w);              //主窗体初始化完成后，启动画面关闭
 
     return a.exec();
 }

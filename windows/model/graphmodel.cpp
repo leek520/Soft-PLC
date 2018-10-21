@@ -272,15 +272,23 @@ int GraphModel::dealBTreeNode(int row, Direction dir, BTreeNode *node)
                         int upIndex = dnIndex+k-t*MAX_COL;
                         if (m_graphList[upIndex]->getType()>=InputOpen){
                             outNodeTmp = node->find(upIndex, LeafNode);
+                            if (outNodeTmp != NULL){
+                                //如果右边图元有转下，即并联，则取其根节点，如果没有，即串联，取其父节点
+                                if (m_graphList[upIndex+1]->isDown()){
+                                    outNodeTmp = outNodeTmp->root();
+                                }else{
+                                    outNodeTmp = outNodeTmp->parent;
+                                }
+                            }
                             break;
                         }
                     }
                     break;
                 }
             }
-
+            //记录输出节点和索引的关系
             if (outNodeTmp != NULL){
-                m_OutNode->insert(idx, outNodeTmp->root()->left);
+                m_OutNode->insert(idx, outNodeTmp->left);
             }else{
                 m_OutNode->insert(idx, node->root());
             }
@@ -507,7 +515,6 @@ void GraphModel::clearBuild()
 
 
     m_buildTrail.clear();
-    m_HeadNode.clear();
     m_instsList.clear();
     m_OutNode = NULL;
 
@@ -515,6 +522,12 @@ void GraphModel::clearBuild()
         delete m_OutTree[i];
     }
     m_OutTree.clear();
+
+    //清理上次编译的二叉树森林
+    for(int i=0;i<m_HeadNode.count();i++){
+        m_HeadNode[i]->clear();
+    }
+    m_HeadNode.clear();
 }
 /******************************************************************************
 * @brief: 根据梯形图链表生成二叉树森林
@@ -570,5 +583,9 @@ int GraphModel::createInsts()
         BTreeNode *root = m_HeadNode[i]->root();
         inOrderTraversal(root, i);
         dealMultOutNode_MPS(m_HeadNode[i], i);
+
+        //打印
+        qDebug()<<QString("Tree index: %1").arg(i);
+        root->print(root);
     }
 }

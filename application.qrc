@@ -35,5 +35,6 @@
         <file>images/whside.png</file>
         <file>images/wstack.png</file>
         <file>images/wvside.png</file>
+        <file>images/splash.png</file>
     </qresource>
 </RCC>

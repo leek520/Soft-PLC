@@ -34,7 +34,6 @@ Copyright (c) 2018 PLT. All Rights Reserved.
 #include <QMutex>
 #include <QDateTime>
 #include <QFileDialog>
-
 class ListWidget;
 class TextEdit;
 class MainWindow : public QMainWindow
@@ -85,6 +84,7 @@ private slots:
     void slt_doubleClickTable(QTableWidgetItem *item);
     void slt_InsertBottomRowText(QString text);
 private :
+    QStatusBar *stateBar;
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *helpMenu;
