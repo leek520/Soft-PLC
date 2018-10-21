@@ -135,6 +135,72 @@ void GraphFB::drawGraph()
         painter.drawText(pt, text);
         break;
     }
+    case InputPedge:
+    case InputNedge:
+    {
+        QPointF p3(fw, height-fh);
+        QPointF p4(width-fw, height-fh);
+
+        QPointF p5(fw, height-2*fh);
+        QPointF p6(fw, height);
+        QPointF p7(width-fw, height-2*fh);
+        QPointF p8(width-fw, height);
+
+        QPointF p09(width/2, height-2*fh);
+        QPointF p10(width/2, height);
+
+        painter.setPen(QPen(conColor, g_unitWidth/UNIT_WIDTH));
+        painter.drawLine(p1, p3);
+        painter.drawLine(p2, p4);
+        painter.setPen(QPen(entColor, g_unitWidth/UNIT_WIDTH));
+        painter.drawLine(p5, p6);
+        painter.drawLine(p7, p8);
+
+        painter.drawLine(p09, p10);
+        if (emt.graphType == InputPedge){
+            painter.drawLine(p3 + QPointF(width/25, 1*height/20), p09);
+            painter.drawLine(p4 + QPointF(-width/25, 1*height/20), p09);
+        }else{
+            painter.drawLine(p3 + QPointF(width/25, -1*height/20), p10);
+            painter.drawLine(p4 + QPointF(-width/25, -1*height/20), p10);
+        }
+        QPoint pt((width-fm.width(text))/2,
+                  (height/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+        painter.drawText(pt, text);
+        break;
+    }
+    case StepGraph:
+    {
+        fw = width/5;
+        QPointF p3(fw, height-fh);
+        QPointF p4(width-fw, height-fh);
+
+        QPointF p5(2*fw, height-2*fh);
+        QPointF p6(2*fw, height);
+
+        QPointF p7(width-2*fw, height-2*fh);
+        QPointF p8(width-2*fw, height);
+
+
+        painter.drawLine(p1, p3);
+        painter.drawLine(p2, p4);
+
+        painter.drawLine(p3, p5);
+        painter.drawLine(p3, p6);
+
+        painter.drawLine(p4, p7);
+        painter.drawLine(p4, p8);
+
+        QPoint pt2((width-fm.width(text))/2,
+                  (height/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+        painter.drawText(pt2, text);
+
+        text = "S";
+        QPoint pt1((width-fm.width(text))/2,
+                  (height*3/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+        painter.drawText(pt1, text);
+        break;
+    }
     case OutputGraph:
     {
         int xof1 = width / 40;
@@ -166,9 +232,9 @@ void GraphFB::drawGraph()
     }
     case LogicGraph:
     {
-        QPointF p1(1, height-2*fh);
+        QPointF p1(1, height-3*fh);
         QPointF p2(1, height-1);
-        QPointF p3(width-1, height-2*fh);
+        QPointF p3(width-1, height-3*fh);
         QPointF p4(width-1, height-1);
         painter.drawLine(p3, p4);
         painter.drawLine(p1, p2);
@@ -176,8 +242,8 @@ void GraphFB::drawGraph()
         painter.drawLine(p2, p4);
 
         text = QString("%1").arg(emt.mark);
-        QPoint pt((width-fm.width(text))/2,
-                  (height*3/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+        QPoint pt((width-fm.width(text)*g_factor)/2,
+                  (height*4/3-(fm.ascent()+fm.descent()))/2+fm.ascent());
         painter.drawText(pt, text);
         break;
     }

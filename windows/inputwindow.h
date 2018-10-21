@@ -56,6 +56,7 @@ class InputInstsWindow : public QFrame
     Q_OBJECT
 public:
     explicit InputInstsWindow(QWidget *parent = 0);
+    void setInstText(QString inst);
 private:
     void InitUi();
     int InstsDecoder();

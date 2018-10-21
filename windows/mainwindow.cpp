@@ -3,7 +3,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    setWindowTitle(tr("Soft PLC"));//设置窗口标题
+    setWindowTitle(tr(SOFT_NAME));//设置窗口标题
     setWindowIcon(QIcon(":/mamtool.ico"));
     //resize(SCREEN_WIDTH,SCREEN_HEIGHT);
     setWindowState(Qt::WindowMaximized);
@@ -368,7 +368,7 @@ void MainWindow::SetupMdiArea()
     //m_mdiArea->cascadeSubWindows();   //SubWindows重叠排列
 
     //release下500可缩短为200
-    QTimer::singleShot(500, this, SLOT(reorderSubWindow()));
+    QTimer::singleShot(200, this, SLOT(reorderSubWindow()));
 }
 
 void MainWindow::newFile()
@@ -400,6 +400,9 @@ bool MainWindow::open()
     if (filename.isEmpty()) return false;
 
     m_graphWid->OpenGraph(filename);
+
+    QFileInfo file(filename);
+    setWindowTitle(QString("%1 [ %2 ]").arg(SOFT_NAME).arg(file.fileName()));//设置窗口标题
 }
 
 bool MainWindow::save()
@@ -548,6 +551,29 @@ void MainWindow::slt_enableRedo(bool status)
 
 void MainWindow::slt_doubleClickTable(QTableWidgetItem *item)
 {
+    int row = item->row();
+    int col = item->column();
+    GraphFB *graph = GM->getUnit(row, col);
+    QString text;
+    switch (graph->getType()) {
+    case InputOpen:
+        text = "LD";
+        break;
+    case InputClose:
+        text = "LDI";
+        break;
+    case OutputGraph:
+        text = "OUT";
+        break;
+    default:
+        break;
+    }
+    if (!text.isEmpty()){
+        text = QString("%1 %2%3").arg(text).arg(graph->getName()).arg(graph->getIndex());
+        m_inputIW->setInstText(text);
+    }else{
+        m_inputIW->setInstText("");
+    }
     m_inputIW->show();
 }
 

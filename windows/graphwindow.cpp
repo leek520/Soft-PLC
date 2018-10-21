@@ -281,6 +281,9 @@ void GraphTable::slt_inputPara(Element emt)
     case HorizontalLine:
     case InputOpen:
     case InputClose:
+    case InputPedge:
+    case StepGraph:
+    case InputNedge:
     case ReverseLogic:
         graph = GM->getUnit(curRow, curCol);
         graph->emt.graphType = emt.graphType;
@@ -591,6 +594,7 @@ void GraphTable::remove()
     for(int i=0;i<selectRange.count();i++){
         for (int j=selectRange[i].topRow();j<=selectRange[i].bottomRow();j++){
             for(int k=selectRange[i].leftColumn();k<=selectRange[i].rightColumn();k++){              
+                if (k == 0) continue;
                 graph = GM->getUnit(j, k);
                 RecordOperation(&isNew, graph, RedoDelete, &selectRange[0]);
                 if ((graph->column() > selectRange[i].leftColumn()) &&
@@ -662,6 +666,7 @@ void GraphTable::slt_insertGraphRow()
     int row = currentRow();
     //在当前行的上一行添加新行
     InsertNewRow(row);
+    if (row > GM->getMaxRow()) return;
     GM->insertRow(row);
     //刷新绘图
     for (int i=1;i<MAX_COL+1;i++){
@@ -678,6 +683,8 @@ void GraphTable::slt_removeGraphRow()
     int row = currentRow();
     this->removeRow(row);
 
+    if (row > GM->getMaxRow()) return;
+
     GM->removeRow(row);
     //刷新绘图
     for (int i=1;i<MAX_COL+1;i++){
@@ -692,6 +699,10 @@ void GraphTable::BuildGraph()
     QStringList insts = GM->getInsts();
     for(int i=0;i<insts.count();i++){
         emit sig_InsertInst(i, insts[i]);
+    }
+    BuildInfo *info = GM->getBuildInfo();
+    for(int i;i<info->blankRow.count();i++){
+        this->removeRow(info->blankRow[i]-i);
     }
 
 

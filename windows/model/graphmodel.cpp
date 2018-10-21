@@ -143,6 +143,18 @@ void GraphModel::removeRow(int row)
     }
 
 }
+
+bool GraphModel::isEmptyGraph(int row, int col)
+{
+    int idx = GraIdx(row, col);
+    if (idx >= getCount()) return true;
+
+    if (m_graphList[idx]->getType() == NoneGraph){
+        return true;
+    }else{
+        return false;
+    }
+}
 /******************************************************************************
 * @brief: 获取列表当前存储的单元数
 * @author:leek
@@ -200,8 +212,11 @@ bool GraphModel::checkGraph(int row, int col, int type)
  * 第二步：扫描树，生成指令表
 */
 void GraphModel::buildGraph()
-{
+{ 
+
     clearBuild();
+
+    if (!checkGraph()) return;
 
     createBTree();
 
@@ -215,6 +230,11 @@ void GraphModel::buildGraph()
 QStringList GraphModel::getInsts()
 {
     return m_instsList;
+}
+
+BuildInfo *GraphModel::getBuildInfo()
+{
+    return &m_buildInfo;
 }
 /******************************************************************************
 * @brief: 递归处理节点
@@ -327,41 +347,47 @@ int GraphModel::dealBTreeNode(int row, Direction dir, BTreeNode *node)
     if (idx+1 >= m_graphList.count()) return 1;
 
     if (m_graphList[idx+1]->isDown()){
-        //此处记录本次梯级可以扫描到的最大行数
-        if (row >= m_buildInfo.startRow){
-            m_buildInfo.startRow = row + 1;
-        }
-        //设置转下一行扫描时可以达到的最大列数，为转下时的列位置
-        m_buildInfo.end[row+1] = m_buildInfo.start[row];
-
-
-        parentNode = new BTreeNode(idx, ParallelNode);
-
-        //计算下一行要处理的idx
-        idx = GraIdx(row+1, m_buildInfo.start[row+1]);
-        rightNode = new BTreeNode(idx, LeafNode);
-        //如果OR节点后只有一个节点，则直接优先使用OR
-        if (m_graphList[idx+1]->isUp()){
-            //新建并联右节点，处理完后重新赋值二叉树节点进行下一次
-            if (node->root() == node){
-                parentNode->insert(node, Left);
-            }else{
-                //这种情况下，下次递归start未执行+1，所以这里提前执行
-                m_buildInfo.start[row+1] += 1;
-
-                parentNode->insert(node->root()->right, Left);
-                node->root()->right = parentNode;
-                parentNode->parent = node->root();
-            }
-
-            parentNode->insert(rightNode, Right);
-            //转下一行
-            dealBTreeNode(row+1, TurnDown, parentNode);
+        //判断是右转还是左转的并联
+        if (m_graphList[idx+MAX_COL]->getType() == NoneGraph){
+            m_buildInfo.start[row+1] = col+1;
         }else{
-            dealBTreeNode(row+1, TurnDown, rightNode);
-            //新建并联右节点，处理完后重新赋值二叉树节点进行下一次
-            parentNode->insert(node->root(), Left);
-            parentNode->insert(rightNode->root(), Right);
+
+            //此处记录本次梯级可以扫描到的最大行数
+            if (row >= m_buildInfo.startRow){
+                m_buildInfo.startRow = row + 1;
+            }
+            //设置转下一行扫描时可以达到的最大列数，为转下时的列位置
+            m_buildInfo.end[row+1] = m_buildInfo.start[row];
+
+
+            parentNode = new BTreeNode(idx, ParallelNode);
+
+            //计算下一行要处理的idx
+            idx = GraIdx(row+1, m_buildInfo.start[row+1]);
+            rightNode = new BTreeNode(idx, LeafNode);
+            //如果OR节点后只有一个节点，则直接优先使用OR
+            if (m_graphList[idx+1]->isUp()){
+                //新建并联右节点，处理完后重新赋值二叉树节点进行下一次
+                if (node->root() == node){
+                    parentNode->insert(node, Left);
+                }else{
+                    //这种情况下，下次递归start未执行+1，所以这里提前执行
+                    m_buildInfo.start[row+1] += 1;
+
+                    parentNode->insert(node->root()->right, Left);
+                    node->root()->right = parentNode;
+                    parentNode->parent = node->root();
+                }
+
+                parentNode->insert(rightNode, Right);
+                //转下一行
+                dealBTreeNode(row+1, TurnDown, parentNode);
+            }else{
+                dealBTreeNode(row+1, TurnDown, rightNode);
+                //新建并联右节点，处理完后重新赋值二叉树节点进行下一次
+                parentNode->insert(node->root(), Left);
+                parentNode->insert(rightNode->root(), Right);
+            }
         }
 
     }
@@ -512,7 +538,7 @@ void GraphModel::clearBuild()
     memset(m_buildInfo.end, MAX_COL, MAX_ROW * sizeof(uchar));
     m_buildInfo.startRow = 0;
     m_buildInfo.outStatus.clear();
-
+    m_buildInfo.blankRow.clear();
 
     m_buildTrail.clear();
     m_instsList.clear();
@@ -529,6 +555,36 @@ void GraphModel::clearBuild()
     }
     m_HeadNode.clear();
 }
+
+bool GraphModel::checkGraph()
+{
+    bool ret = true;
+    //1.去掉末尾空白单元格
+    while(m_graphList.last()->isEmpty()){
+        m_graphList.removeLast();
+    }
+    //2.空白行检测并记录
+    int maxRow = getMaxRow();
+    for(int i=0;i<maxRow;i++){
+        bool isEmpty = true;
+        for(int j=0;j<MAX_COL;j++){
+            if (!isEmptyGraph(i, j)){
+                isEmpty = false;
+                break;
+            }
+        }
+        if (isEmpty){
+            m_buildInfo.blankRow.append(i);
+        }
+    }
+    //删除
+    for(int i=0;i<m_buildInfo.blankRow.count();i++){
+        removeRow(m_buildInfo.blankRow[i]-i);
+    }
+
+    return ret;
+}
+
 /******************************************************************************
 * @brief: 根据梯形图链表生成二叉树森林
 * @author:leek
@@ -543,7 +599,12 @@ void GraphModel::createBTree()
     {
         //本次梯级递归起始行号为上次扫描到的最大行号
         row = m_buildInfo.startRow;
+
         if (row <= getMaxRow()){
+            if (isEmptyGraph(row, 0)){
+                m_buildInfo.startRow++;
+                continue;
+            }
             m_OutNode = new QMap<int, BTreeNode *>();
             //记录本次梯级第一个叶子节点,value为idx
             BTreeNode *firstNode = new BTreeNode(GraIdx(row, 0), LeafNode);

@@ -83,7 +83,7 @@ void InputGraphWindow::SetCurrentName(int index)
         m_nameCom->setCurrentIndex(0);
         break;
     case 4:
-        m_type = StepNode;
+        m_type = StepGraph;
         setWindowIcon(QIcon(":/images/graph/Btn4.bmp"));
         m_nameCom->setCurrentIndex(3);
         break;
@@ -190,6 +190,12 @@ InputInstsWindow::InputInstsWindow(QWidget *parent) : QFrame(parent)
 
 }
 
+void InputInstsWindow::setInstText(QString inst)
+{
+    lineEdit->setText(inst);
+    lineEdit->selectAll();
+}
+
 void InputInstsWindow::InitUi()
 {
     QHBoxLayout *hbox = new QHBoxLayout(this);
@@ -258,7 +264,6 @@ int InputInstsWindow::InstsDecoder()
 
 void InputInstsWindow::showEvent(QShowEvent *event)
 {
-    lineEdit->clear();
     QWidget::showEvent(event);
 }
 

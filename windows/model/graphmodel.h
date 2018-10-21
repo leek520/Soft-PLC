@@ -20,6 +20,7 @@ struct BuildInfo
     uchar end[MAX_ROW];
     int startRow;
     QList<bool> outStatus;
+    QList<int> blankRow;
 };
 class GraphModel
 {
@@ -52,6 +53,7 @@ public:
     //删除一个行单元格
     void removeRow(int row);
 
+    bool isEmptyGraph(int row, int col);
     //获取用户已经插入图形的最大个数
     int getCount();
     //获取用户已经插入图形的最大行数
@@ -61,8 +63,10 @@ public:
     bool checkGraph(int row, int col, int type);
     void buildGraph();
     QStringList getInsts();
+    BuildInfo *getBuildInfo();
 private:
     void clearBuild();
+    bool checkGraph();
     void createBTree();
     int createInsts();
     int dealBTreeNode(int row, Direction dir = TurnStart,BTreeNode *node = NULL);

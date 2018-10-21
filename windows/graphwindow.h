@@ -71,7 +71,6 @@ private:
     void MaxRowGraphJudge();
     void ReDrawGraph(GraphFB *graph);
     void SetCurrentUnit(int row, int col, bool direction=true);
-    int DealNode(int row, int col);
 
     void removeGraphVLine(int row, int col);
     void insertGraphVLine(int row, int col);

@@ -2,6 +2,9 @@
 #define COMMON_H
 
 #include <QString>
+#include <QDebug>
+
+#define SOFT_NAME    "Soft PLC"
 /*********主窗体************/
 #define SCREEN_WIDTH	1480						//屏幕宽
 #define SCREEN_HEIGHT	960							//屏幕高
@@ -51,7 +54,7 @@ enum GraphType
     InputClose,
     InputPedge,
     InputNedge,
-    StepNode,
+    StepGraph,
     OutputGraph,
     ReverseLogic,
     LogicGraph,

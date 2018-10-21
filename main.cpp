@@ -69,10 +69,10 @@ int main(int argc, char *argv[])
     splash.setDisabled(true); //禁用用户的输入事件响应
     splash.show();
     splash.showMessage(QObject::tr("正在启动中...."),
-        Qt::AlignLeft|Qt::AlignBottom,Qt::green);
+        Qt::AlignCenter|Qt::AlignBottom,Qt::green);
 
     a.processEvents();              //使程序在显示启动画面的同时仍能响应鼠标等其他事件
-    QThread::sleep(5);
+    QThread::sleep(3);
 
     //设置程序中文字的编码方式
     QTextCodec *codec = QTextCodec::codecForName("UTF_8");
