@@ -58,6 +58,7 @@ protected:
     void wheelEvent(QWheelEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
     void keyPressEvent(QKeyEvent *event);
+
 signals:
     void sig_InsertBottomRowText(QString text);
     void sig_InsertInst(int row, QString inst);
@@ -65,13 +66,16 @@ signals:
     void sig_zoomout();
     void sig_enableUndo(bool status);
     void sig_enableRedo(bool status);
+    void sig_showInputWindow(QString inst, bool isSelected);
+private slots:
+    void slt_itemDoubleClicked(QTableWidgetItem *item);
 private:
     void createActions();
-    void InsertNewRow(int row);
-    void InsertSplitLine(int row);
-    void MaxRowGraphJudge();
-    void ReDrawGraph(GraphFB *graph);
-    void SetCurrentUnit(int row, int col, bool direction=true);
+    void insertNewRow(int row);
+    void insertSplitLine(int row);
+    void maxRowGraphJudge();
+    void reDrawGraph(GraphFB *graph);
+    void setCurrentUnit(int row, int col, bool direction=true);
 
     void removeGraphVLine(int row, int col);
     void insertGraphVLine(int row, int col);
@@ -113,11 +117,6 @@ private:
     QAction *removeVLine;
     QAction *insertRowAct;
     QAction *removeRowAct;
-
-
-    int buildPos[MAX_ROW];
-    int buildPreRow;
-    QList<QPoint> m_buildTrail;
 
     //操作板：记录操作类型，操作的表格范围以及操作的数据
     struct OperationBorad{

@@ -28,6 +28,8 @@ GraphTable::GraphTable(QWidget *parent) :
 //                  "QTableWidget::item {padding:0px 0px 0px 0px; margin:0px 0px 0px 0px;}"
                   "QTableWidget::item:selected {background-color: rgb(0,0,255,100);}");
 
+    connect(this, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
+            this, SLOT(slt_itemDoubleClicked(QTableWidgetItem*)));
     setItemDelegate(new GraphItemDelegate());
 
     createActions();
@@ -42,7 +44,7 @@ void GraphTable::InitTable()
     setColumnCount(MAX_COL+1);
 
     for (int i=0;i<INIT_ROW;i++){
-        InsertSplitLine(i);
+        insertSplitLine(i);
 
     }
     setCurrentCell(0,1);
@@ -100,24 +102,24 @@ void GraphTable::InsertGraph(Element emt)
 {
     GraphFB *graph = GM->getUnit(emt.row, emt.col);
     graph->emt = emt;
-    ReDrawGraph(graph);
+    reDrawGraph(graph);
 }
 /******************************************************************************
 * @brief: 在表格中插入新行，并绘制左侧第一列竖直线
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-void GraphTable::InsertNewRow(int row)
+void GraphTable::insertNewRow(int row)
 {
     insertRow(row);
-    InsertSplitLine(row);
+    insertSplitLine(row);
 }
 /******************************************************************************
 * @brief: 插入左侧第一列竖直线
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-void GraphTable::InsertSplitLine(int row)
+void GraphTable::insertSplitLine(int row)
 {
     //填充 item
     for(int j=1;j<MAX_COL+1;j++){
@@ -127,7 +129,7 @@ void GraphTable::InsertSplitLine(int row)
 
     GraphFB graph(row, 0);
     graph.emt.graphType = NumLine;
-    ReDrawGraph(&graph);
+    reDrawGraph(&graph);
 }
 
 /******************************************************************************
@@ -135,13 +137,13 @@ void GraphTable::InsertSplitLine(int row)
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-void GraphTable::MaxRowGraphJudge()
+void GraphTable::maxRowGraphJudge()
 {
     int curMaxRow = GM->getMaxRow();
     //始终末尾多两个空行
     int rowCnt = rowCount();
     for (int i=rowCnt;i<=curMaxRow+2;i++){
-        InsertNewRow(i);
+        insertNewRow(i);
     }
 }
 /******************************************************************************
@@ -149,7 +151,7 @@ void GraphTable::MaxRowGraphJudge()
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-void GraphTable::ReDrawGraph(GraphFB *graph)
+void GraphTable::reDrawGraph(GraphFB *graph)
 {
     graph->drawGraph();
 
@@ -170,14 +172,15 @@ void GraphTable::ReDrawGraph(GraphFB *graph)
     item->setToolTip(mark);
 
     if (col == 0) return;
-    MaxRowGraphJudge();
+    maxRowGraphJudge();
 }
+
 /******************************************************************************
 * @brief: 绘图完成后自动转下一个单元格
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-void GraphTable::SetCurrentUnit(int row, int col, bool direction)
+void GraphTable::setCurrentUnit(int row, int col, bool direction)
 {
     //取消所有选中
     QList<QTableWidgetSelectionRange> selectRange = this->selectedRanges();
@@ -202,11 +205,11 @@ void GraphTable::removeGraphVLine(int row, int col)
     //清除上半部竖直线
     graph = GM->getUnit(row, col);
     graph->clearVdnLine();
-    ReDrawGraph(graph);
+    reDrawGraph(graph);
     //清除下半部竖直线
     graph = GM->getUnit(row+1, col);
     graph->clearVupLine();
-    ReDrawGraph(graph);
+    reDrawGraph(graph);
 
 }
 
@@ -217,11 +220,11 @@ void GraphTable::insertGraphVLine(int row, int col)
     //插入下半部分
     graph = GM->getUnit(row+1, col);
     graph->setVupLine();
-    ReDrawGraph(graph);
+    reDrawGraph(graph);
     //插入上半部分
     graph = GM->getUnit(row, col);
     graph->setVdnLine();
-    ReDrawGraph(graph);
+    reDrawGraph(graph);
 
 
 }
@@ -276,7 +279,7 @@ void GraphTable::slt_inputPara(Element emt)
     case verticalLine:
         insertGraphVLine(curRow, curCol);
         RecordOperation(&isNew, GM->getUnit(curRow, curCol), RedoVLineInsert, range);
-        SetCurrentUnit(curRow, curCol-1);
+        setCurrentUnit(curRow, curCol-1);
         break;
     case HorizontalLine:
     case InputOpen:
@@ -291,15 +294,15 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        ReDrawGraph(graph);
+        reDrawGraph(graph);
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
-        SetCurrentUnit(curRow, curCol);
+        setCurrentUnit(curRow, curCol);
         break;
     case OutputGraph:
         for(i=curCol;i<MAX_COL;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
             RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
 
@@ -309,16 +312,16 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        ReDrawGraph(graph);
+        reDrawGraph(graph);
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
-        SetCurrentUnit(curRow, i);
+        setCurrentUnit(curRow, i);
         break;
     case LogicGraph:
     {
         for(i=curCol;i<MAX_COL-1;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
             RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
         int spanCol = 2;
@@ -333,9 +336,9 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        ReDrawGraph(graph);
+        reDrawGraph(graph);
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
-        SetCurrentUnit(curRow, i);
+        setCurrentUnit(curRow, i);
         break;
     }
     case EndGraph:
@@ -343,7 +346,7 @@ void GraphTable::slt_inputPara(Element emt)
         for(i=1;i<MAX_COL;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         graph = GM->getUnit(curRow, i);
         graph->emt.graphType = emt.graphType;
@@ -351,8 +354,8 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        ReDrawGraph(graph);
-        SetCurrentUnit(curRow, i);
+        reDrawGraph(graph);
+        setCurrentUnit(curRow, i);
         break;
     default:
         break;
@@ -374,10 +377,10 @@ void GraphTable::redo()
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         m_OperationBorad.type[step] = RedoGraphInsert;
-        SetCurrentUnit(emt.row, emt.col, true);
+        setCurrentUnit(emt.row, emt.col, true);
         break;
     case UndoVLineInsert:
         for (int i=0;i<optList->count();i++){
@@ -391,7 +394,7 @@ void GraphTable::redo()
             emt = optList->at(i+1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         m_OperationBorad.type[step] = RedoCopyPaste;
         break;
@@ -407,12 +410,12 @@ void GraphTable::redo()
             int srcCol = startCol + (i / 2) % width;
             graph = GM->getUnit(srcRow, srcCol);
             graph->clearAll();
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
             //重置dst
             emt = optList->at(i+1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         m_OperationBorad.type[step] = RedoCutPaste;
         break;
@@ -422,7 +425,7 @@ void GraphTable::redo()
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->clearEelment();
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         m_OperationBorad.type[step] = RedoDelete;
         break;
@@ -455,7 +458,7 @@ void GraphTable::undo()
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->clearEelment();
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         m_OperationBorad.type[step] = UndoGraphInsert;
         break;
@@ -471,7 +474,7 @@ void GraphTable::undo()
             emt = optList->at(i-1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         m_OperationBorad.type[step] = UndoCopyPaste;
         break;
@@ -490,12 +493,12 @@ void GraphTable::undo()
             emt.col = srcCol;
             graph = GM->getUnit(srcRow, srcCol);
             graph->setEelment(emt);
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
             //再把old放到dst
             emt = optList->at(i-1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         m_OperationBorad.type[step] = UndoCutPaste;
         break;
@@ -505,7 +508,7 @@ void GraphTable::undo()
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            ReDrawGraph(graph);
+            reDrawGraph(graph);
         }
         m_OperationBorad.type[step] = UndoDelete;
         break;
@@ -519,7 +522,7 @@ void GraphTable::undo()
     default:
         break;
     }
-    SetCurrentUnit(emt.row, emt.col, false);
+    setCurrentUnit(emt.row, emt.col, false);
     m_OperationBorad.curStep--;
     doOptChcek();
 }
@@ -563,12 +566,12 @@ void GraphTable::paste()
             dstGraph->emt = srcGraph->emt;
             dstGraph->emt.row = row;
             dstGraph->emt.col = col;
-            ReDrawGraph(dstGraph);
+            reDrawGraph(dstGraph);
 
             //如果是剪切，则删除原来位置内容
             if (m_ClipBorad.type == RedoCutPaste){
                 srcGraph->clearAll();
-                ReDrawGraph(srcGraph);
+                reDrawGraph(srcGraph);
             }
             //记录新粘贴来的graph
             RecordOperation(&isNew, dstGraph, (OptType)m_ClipBorad.type, &m_ClipBorad.range);
@@ -604,7 +607,7 @@ void GraphTable::remove()
                     graph->clearEelment();
                 }
 
-                ReDrawGraph(graph);
+                reDrawGraph(graph);
             }
         }
     }
@@ -627,7 +630,7 @@ void GraphTable::zoom()
 
     //重绘所有graph
     for (int i=0; i<GM->getCount();i++){
-        ReDrawGraph(GM->getUnit(i));
+        reDrawGraph(GM->getUnit(i));
     }
 }
 
@@ -665,12 +668,12 @@ void GraphTable::slt_insertGraphRow()
 {
     int row = currentRow();
     //在当前行的上一行添加新行
-    InsertNewRow(row);
+    insertNewRow(row);
     if (row > GM->getMaxRow()) return;
     GM->insertRow(row);
     //刷新绘图
     for (int i=1;i<MAX_COL+1;i++){
-        ReDrawGraph(GM->getUnit(row, i));
+        reDrawGraph(GM->getUnit(row, i));
     }
 }
 /******************************************************************************
@@ -688,7 +691,7 @@ void GraphTable::slt_removeGraphRow()
     GM->removeRow(row);
     //刷新绘图
     for (int i=1;i<MAX_COL+1;i++){
-        ReDrawGraph(GM->getUnit(row, i));
+        reDrawGraph(GM->getUnit(row, i));
     }
 }
 
@@ -775,8 +778,43 @@ void GraphTable::contextMenuEvent(QContextMenuEvent *event)
 
 void GraphTable::keyPressEvent(QKeyEvent *event)
 {
+    int  key = event->key();
 
+    if (((key >= Qt::Key_A) && (key <= Qt::Key_Z))
+            || (key == Qt::Key_Backspace)){
+        emit sig_showInputWindow(event->text(), false);
+    }
 }
+
+void GraphTable::slt_itemDoubleClicked(QTableWidgetItem *item)
+{
+    int row = item->row();
+    int col = item->column();
+    if (col==0) return;
+
+    GraphFB *graph = GM->getUnit(row, col);
+    QString text;
+    switch (graph->getType()) {
+    case InputOpen:
+        text = "LD";
+        break;
+    case InputClose:
+        text = "LDI";
+        break;
+    case OutputGraph:
+        text = "OUT";
+        break;
+    default:
+        break;
+    }
+    if (!text.isEmpty()){
+        text = QString("%1 %2%3").arg(text).arg(graph->getName()).arg(graph->getIndex());
+    }
+    emit sig_showInputWindow(text, true);
+}
+
+
+
 /******************************************************************************
 * @brief: 创建右键菜单的action
 * @author:leek

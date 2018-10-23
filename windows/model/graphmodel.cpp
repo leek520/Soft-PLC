@@ -236,6 +236,11 @@ BuildInfo *GraphModel::getBuildInfo()
 {
     return &m_buildInfo;
 }
+
+QList<int> GraphModel::getNetRow()
+{
+    return m_netRow;
+}
 /******************************************************************************
 * @brief: 递归处理节点
 * @author:leek
@@ -539,6 +544,7 @@ void GraphModel::clearBuild()
     m_buildInfo.startRow = 0;
     m_buildInfo.outStatus.clear();
     m_buildInfo.blankRow.clear();
+
 
     m_buildTrail.clear();
     m_instsList.clear();

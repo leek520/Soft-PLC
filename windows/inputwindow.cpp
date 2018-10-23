@@ -190,10 +190,12 @@ InputInstsWindow::InputInstsWindow(QWidget *parent) : QFrame(parent)
 
 }
 
-void InputInstsWindow::setInstText(QString inst)
+void InputInstsWindow::setInstText(QString inst, bool isSelected)
 {
     lineEdit->setText(inst);
-    lineEdit->selectAll();
+
+    if (isSelected)
+        lineEdit->selectAll();
 }
 
 void InputInstsWindow::InitUi()
@@ -233,11 +235,13 @@ int InputInstsWindow::InstsDecoder()
     QStringList instsStr = str.split(" ");
     int cnt = instsStr.count();
     QString inst = instsStr[0];
-    if (inst.indexOf("LD") > -1){
+
+    if ((inst.indexOf("LD") > -1) ||
+        (inst.indexOf("AN") > -1)){
         if (cnt < 2) return -1;
         QRegExp re("^[XYMSTC][0-9]{1,3}");
         if (instsStr[1].indexOf(re) > -1){
-            if (inst.indexOf("LDI") > -1){
+            if (inst.indexOf("I") > -1){
                 emt.graphType = InputClose;
             }else{
                 emt.graphType = InputOpen;
@@ -264,6 +268,7 @@ int InputInstsWindow::InstsDecoder()
 
 void InputInstsWindow::showEvent(QShowEvent *event)
 {
+    lineEdit->setFocus();
     QWidget::showEvent(event);
 }
 

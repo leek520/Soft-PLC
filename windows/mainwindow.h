@@ -81,7 +81,7 @@ private slots:
     void slt_enableUndo(bool status);
     void slt_enableRedo(bool status);
 
-    void slt_doubleClickTable(QTableWidgetItem *item);
+    void slt_showInputWindow(QString text, bool isSelected);
     void slt_InsertBottomRowText(QString text);
 private :
     QStatusBar *stateBar;

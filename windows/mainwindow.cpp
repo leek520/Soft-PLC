@@ -42,8 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_graphWid->m_graphTable, SIGNAL(sig_enableRedo(bool)),
             this, SLOT(slt_enableRedo(bool)));
 
-    connect(m_graphWid->m_graphTable, SIGNAL(itemDoubleClicked(QTableWidgetItem*)),
-            this, SLOT(slt_doubleClickTable(QTableWidgetItem *)));
+    connect(m_graphWid->m_graphTable, SIGNAL(sig_showInputWindow(QString, bool)),
+            this, SLOT(slt_showInputWindow(QString, bool)));
 
     connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertInst(int,QString)),
             m_instsWid, SLOT(slt_InsertInst(int,QString)));
@@ -549,31 +549,9 @@ void MainWindow::slt_enableRedo(bool status)
     redoAct->setEnabled(status);
 }
 
-void MainWindow::slt_doubleClickTable(QTableWidgetItem *item)
+void MainWindow::slt_showInputWindow(QString text, bool isSelected)
 {
-    int row = item->row();
-    int col = item->column();
-    GraphFB *graph = GM->getUnit(row, col);
-    QString text;
-    switch (graph->getType()) {
-    case InputOpen:
-        text = "LD";
-        break;
-    case InputClose:
-        text = "LDI";
-        break;
-    case OutputGraph:
-        text = "OUT";
-        break;
-    default:
-        break;
-    }
-    if (!text.isEmpty()){
-        text = QString("%1 %2%3").arg(text).arg(graph->getName()).arg(graph->getIndex());
-        m_inputIW->setInstText(text);
-    }else{
-        m_inputIW->setInstText("");
-    }
+    m_inputIW->setInstText(text, isSelected);
     m_inputIW->show();
 }
 

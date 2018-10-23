@@ -64,6 +64,7 @@ public:
     void buildGraph();
     QStringList getInsts();
     BuildInfo *getBuildInfo();
+    QList<int> getNetRow();
 private:
     void clearBuild();
     bool checkGraph();
@@ -83,6 +84,7 @@ private:
     QList<QPoint> m_buildTrail;
     QStringList m_instsList;
     BuildInfo m_buildInfo;
+    QList<int> m_netRow;
 };
 
 #endif // GRAPHMODEL_H

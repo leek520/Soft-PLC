@@ -16,6 +16,7 @@ GraphFB::GraphFB(Element element) : emt(element)
 {
     conColor = QColor(Qt::black);
     entColor = QColor(Qt::black);
+    backColor = QColor(Qt::white);
 }
 /******************************************************************************
 * @brief: 根据行列初始化图元
@@ -35,6 +36,9 @@ GraphFB::GraphFB(int row, int col)
     emt.upFlag = false;
     emt.name = "";
     emt.mark = "";
+    conColor = QColor(Qt::black);
+    entColor = QColor(Qt::black);
+    backColor = QColor(Qt::white);
 }
 
 GraphFB::~GraphFB()
@@ -52,13 +56,7 @@ void GraphFB::drawGraph()
     int height = g_unitHeight * emt.height;
 
     QPixmap pix(width, height);
-    if ((emt.graphType == NoneGraph) | (emt.graphType == NumLine)){
-        pix.fill(Qt::white);
-    }else{
-        //pix.fill(QColor(245, 245, 245));
-        pix.fill(Qt::white);
-    }
-
+    pix.fill(backColor);
 
     QPainter painter(&pix);
     painter.setPen(QPen(entColor, g_unitWidth/UNIT_WIDTH));
@@ -341,6 +339,11 @@ void GraphFB::setVupLine(bool status)
 void GraphFB::setVdnLine(bool status)
 {
     emt.dnFlag = status;
+}
+
+void GraphFB::setBackColor(QColor color)
+{
+    backColor = color;
 }
 
 bool GraphFB::isDown()
