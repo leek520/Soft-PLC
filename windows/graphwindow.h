@@ -57,6 +57,7 @@ public:
 protected:
     void wheelEvent(QWheelEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 signals:
     void sig_InsertBottomRowText(QString text);
     void sig_InsertInst(int row, QString inst);

@@ -772,6 +772,11 @@ void GraphTable::contextMenuEvent(QContextMenuEvent *event)
 
     }
 }
+
+void GraphTable::keyPressEvent(QKeyEvent *event)
+{
+
+}
 /******************************************************************************
 * @brief: 创建右键菜单的action
 * @author:leek
