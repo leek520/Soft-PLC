@@ -12,8 +12,12 @@ TARGET = Soft-PLC
 TEMPLATE = app
 
 INCLUDEPATH += ./include/
+INCLUDEPATH += ./compile/
+INCLUDEPATH += ./comm/
 INCLUDEPATH += ./windows/
-INCLUDEPATH += ./windows/model/
+INCLUDEPATH += ./windows/instruction/
+INCLUDEPATH += ./windows/ladder/
+INCLUDEPATH += ./windows/input/
 
 SOURCES +=  main.cpp\
             windows/mainwindow.cpp \
