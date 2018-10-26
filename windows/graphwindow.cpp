@@ -232,6 +232,35 @@ void GraphTable::setCurrentUnit(int row, int col, bool direction)
     }
 }
 
+void GraphTable::setFirstColText()
+{
+    QList<QStringList> insts = GM->getInsts();
+    int sum = 0;
+
+    //先绘制第0行第0列的text
+    GraphFB graphS(0, 0);
+    graphS.emt.graphType = NumLine;
+    graphS.emt.name = QString::number(0);
+    reDrawGraph(&graphS);
+
+    for(int i=0;i<insts.count();i++){
+        //根据梯级索引 获取其所在的行号
+        GraphFB graph(GM->getLadderRow(i), 0);
+        graph.emt.graphType = NumLine;
+        graph.emt.name = QString::number(sum+1);
+        reDrawGraph(&graph);
+        //发送该梯级的所有指令
+        for(int j=0;j<insts[i].count();j++){
+            emit sig_InsertInst(sum, insts[i][j]);
+            sum++;
+        }
+    }
+    //根据梯级索引 获取其所在的行号
+    GraphFB graphE(GM->getMaxRow()+1, 0);
+    graphE.emt.graphType = NumLine;
+    graphE.emt.name = QString::number(sum+1);
+    reDrawGraph(&graphE);
+}
 void GraphTable::removeGraphVLine(int row, int col)
 {
     GraphFB *graph = NULL;
@@ -386,8 +415,7 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        reDrawGraphNet(curRow);
-        setCurrentUnit(curRow, i);
+        reDrawGraphNet(curRow, RePaint);
         break;
     default:
         break;
@@ -744,10 +772,10 @@ void GraphTable::BuildGraph()
     if (maxIdx == 0) return;
 
     GM->buildGraph();
-    QStringList insts = GM->getInsts();
-    for(int i=0;i<insts.count();i++){
-        emit sig_InsertInst(i, insts[i]);
-    }
+
+    setFirstColText();
+
+    //清除空白行
     BuildInfo *info = GM->getBuildInfo();
     for(int i;i<info->blankRow.count();i++){
         this->removeRow(info->blankRow[i]-i);
@@ -757,24 +785,19 @@ void GraphTable::BuildGraph()
     for(int i=0;i<=GM->getMaxRow();i++){
         reDrawGraphNet(i, RePaint);
     }
+    //加入End行
+    Element emt;
+    emt.row = GM->getMaxRow()+1;
+    emt.col = 1;
+    emt.name = "END";
+    emt.graphType = EndGraph;
+    slt_inputPara(emt);
 
 }
 
 void GraphTable::RunGraph(bool enable)
 {
-//    for (int i=0;i<m_graphList.count();i++){
-//        if (enable){
-//            if (m_graphList[i]->emt.name == "Y"){
-//                m_graphList[i]->entColor = Qt::blue;
-//            }
-//            m_graphList[i]->conColor = Qt::red;
-//        }else{
-//            m_graphList[i]->entColor = Qt::black;
-//            m_graphList[i]->conColor = Qt::black;
-//        }
 
-//        ReDrawGraph(m_graphList[i]);
-    //    }
 }
 
 void GraphTable::wheelEvent(QWheelEvent *event)

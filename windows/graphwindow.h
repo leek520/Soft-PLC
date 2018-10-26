@@ -77,7 +77,7 @@ private:
     void reDrawGraph(GraphFB *graph);
     void reDrawGraphNet(int row, DrawType draw=RedoDraw);
     void setCurrentUnit(int row, int col, bool direction=true);
-
+    void setFirstColText();
     void removeGraphVLine(int row, int col);
     void insertGraphVLine(int row, int col);
     void doOptChcek();

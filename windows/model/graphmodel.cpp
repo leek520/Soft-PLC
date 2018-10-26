@@ -187,6 +187,19 @@ void GraphModel::clearAllGraph()
     m_graphList.clear();
 }
 
+int GraphModel::getLadderRow(int index)
+{
+    int idx = 0;
+    if (index >= m_HeadNode.count()){
+        idx = m_HeadNode.last()->value;
+        return getUnit(idx)->emt.row + 1;
+    }else{
+        idx = m_HeadNode[index]->value;
+        return getUnit(idx)->emt.row;
+    }
+
+}
+
 QPoint GraphModel::getLadderRange(int row)
 {
     //未编译过，m_ladderRow为空
@@ -238,9 +251,9 @@ void GraphModel::buildGraph()
 * @author:leek
 * @date 2018/10/10
 *******************************************************************************/
-QStringList GraphModel::getInsts()
+QList<QStringList> GraphModel::getInsts()
 {
-    return m_instsList;
+    return m_instruction;
 }
 
 BuildInfo *GraphModel::getBuildInfo()
@@ -274,7 +287,9 @@ int GraphModel::dealBTreeNode(int row, Direction dir, BTreeNode *node)
         dealBTreeNode(row-1);
         return 1;
     }
-
+    if (m_graphList[idx]->getType() == EndGraph){
+        return -1;
+    }
     //是否要转上一行：条件=upflag和已经处理完，即上一行处理到尾部了
     if ((m_graphList[idx]->isUp()) &&
         (m_buildInfo.start[row-1] < MAX_COL)){
@@ -559,6 +574,7 @@ void GraphModel::clearBuild()
 
     m_buildTrail.clear();
     m_instsList.clear();
+    m_instruction.clear();
     m_OutNode = NULL;
 
     for(int i=0;i<m_OutTree.count();i++){
@@ -579,6 +595,12 @@ bool GraphModel::checkGraph()
     //1.去掉末尾空白单元格
     while(m_graphList.last()->isEmpty()){
         m_graphList.removeLast();
+    }
+    //2.去掉end行
+    if (m_graphList.last()->getType() == EndGraph){
+        for(int i=0;i<MAX_COL;i++){
+            m_graphList.removeLast();
+        }
     }
     //2.空白行检测并记录
     int maxRow = getMaxRow();
@@ -661,7 +683,8 @@ int GraphModel::createInsts()
         BTreeNode *root = m_HeadNode[i]->root();
         inOrderTraversal(root, i);
         dealMultOutNode_MPS(m_HeadNode[i], i);
-
+        m_instruction.append(m_instsList);
+        m_instsList.clear();
         //打印
         qDebug()<<QString("Tree index: %1").arg(i);
         root->print(root);

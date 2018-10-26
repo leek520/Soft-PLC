@@ -91,6 +91,12 @@ void GraphFB::drawGraph()
     switch (emt.graphType) {
     case NumLine:
         painter.drawLine(width-1, 0, width-1, height);
+        if (!emt.name.isEmpty()){
+            text = QString("%1").arg(emt.name);
+            QPoint pt((width-fm.width(text))/2,
+                      (height*3/2-(fm.ascent()+fm.descent()))/2+fm.ascent());
+            painter.drawText(pt, text);
+        }
         break;
 
     case HorizontalLine:
