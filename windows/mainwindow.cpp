@@ -17,36 +17,36 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_inputGW = new InputGraphWindow();
     m_inputIW = new InputInstsWindow();
-    connect(this, SIGNAL(sig_inputPara(Element)),
-            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
+//    connect(this, SIGNAL(sig_inputPara(Element)),
+//            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
 
-    connect(m_inputGW, SIGNAL(sig_inputPara(Element)),
-            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
+//    connect(m_inputGW, SIGNAL(sig_inputPara(Element)),
+//            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
 
-    connect(m_inputIW, SIGNAL(sig_inputPara(Element)),
-            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
+//    connect(m_inputIW, SIGNAL(sig_inputPara(Element)),
+//            m_graphWid->m_graphTable,SLOT(slt_inputPara(Element)));
 
 
-    connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertBottomRowText(QString)),
-            this, SLOT(slt_InsertBottomRowText(QString)));
+//    connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertBottomRowText(QString)),
+//            this, SLOT(slt_InsertBottomRowText(QString)));
 
-    connect(m_graphWid->m_graphTable, SIGNAL(sig_zoomin()),
-            this, SLOT(zoomin()));
+//    connect(m_graphWid->m_graphTable, SIGNAL(sig_zoomin()),
+//            this, SLOT(zoomin()));
 
-    connect(m_graphWid->m_graphTable, SIGNAL(sig_zoomout()),
-            this, SLOT(zoomout()));
+//    connect(m_graphWid->m_graphTable, SIGNAL(sig_zoomout()),
+//            this, SLOT(zoomout()));
 
-    connect(m_graphWid->m_graphTable, SIGNAL(sig_enableUndo(bool)),
-            this, SLOT(slt_enableUndo(bool)));
+//    connect(m_graphWid->m_graphTable, SIGNAL(sig_enableUndo(bool)),
+//            this, SLOT(slt_enableUndo(bool)));
 
-    connect(m_graphWid->m_graphTable, SIGNAL(sig_enableRedo(bool)),
-            this, SLOT(slt_enableRedo(bool)));
+//    connect(m_graphWid->m_graphTable, SIGNAL(sig_enableRedo(bool)),
+//            this, SLOT(slt_enableRedo(bool)));
 
-    connect(m_graphWid->m_graphTable, SIGNAL(sig_showInputWindow(QString, bool)),
-            this, SLOT(slt_showInputWindow(QString, bool)));
+//    connect(m_graphWid->m_graphTable, SIGNAL(sig_showInputWindow(QString, bool)),
+//            this, SLOT(slt_showInputWindow(QString, bool)));
 
-    connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertInst(int,QString)),
-            m_instsWid, SLOT(slt_InsertInst(int,QString)));
+//    connect(m_graphWid->m_graphTable, SIGNAL(sig_InsertInst(int,QString)),
+//            m_instsWid, SLOT(slt_InsertInst(int,QString)));
 }
 
 MainWindow::~MainWindow()
@@ -428,95 +428,95 @@ void MainWindow::about()
 
 void MainWindow::redo()
 {
-    if (this->focusWidget() != m_graphWid->m_graphTable) return;
-    m_graphWid->m_graphTable->redo();
+//    if (this->focusWidget() != m_graphWid->m_graphTable) return;
+//    m_graphWid->m_graphTable->redo();
 }
 
 void MainWindow::undo()
 {
-    if (this->focusWidget() != m_graphWid->m_graphTable) return;
-    m_graphWid->m_graphTable->undo();
+//    if (this->focusWidget() != m_graphWid->m_graphTable) return;
+//    m_graphWid->m_graphTable->undo();
 }
 
 void MainWindow::copy()
 {
-    if (this->focusWidget() != m_graphWid->m_graphTable) return;
-    m_graphWid->m_graphTable->copy();
+//    if (this->focusWidget() != m_graphWid->m_graphTable) return;
+//    m_graphWid->m_graphTable->copy();
 }
 
 void MainWindow::paste()
 {
-    if (this->focusWidget() != m_graphWid->m_graphTable) return;
-    m_graphWid->m_graphTable->paste();
+//    if (this->focusWidget() != m_graphWid->m_graphTable) return;
+//    m_graphWid->m_graphTable->paste();
 }
 
 void MainWindow::cut()
 {
-    m_graphWid->m_graphTable->cut();
+//    m_graphWid->m_graphTable->cut();
 }
 
 void MainWindow::remove()
 {
-    if (this->focusWidget() != m_graphWid->m_graphTable) return;
-    m_graphWid->m_graphTable->remove();
+//    if (this->focusWidget() != m_graphWid->m_graphTable) return;
+//    m_graphWid->m_graphTable->remove();
 }
 
 void MainWindow::zoomin()
 {
 
-    if (!GraphFB::zoom(true)) return;
+//    if (!GraphFB::zoom(true)) return;
 
-    m_graphWid->m_graphTable->zoom();
+//    m_graphWid->m_graphTable->zoom();
 
-    m_instsWid->setZoom(GraphFB::g_factor);
+//    m_instsWid->setZoom(GraphFB::g_factor);
 }
 
 void MainWindow::zoomout()
 {
-    if (!GraphFB::zoom(false)) return;
+//    if (!GraphFB::zoom(false)) return;
 
-    m_graphWid->m_graphTable->zoom();
+//    m_graphWid->m_graphTable->zoom();
 
-    m_instsWid->setZoom(GraphFB::g_factor);
+//    m_instsWid->setZoom(GraphFB::g_factor);
 }
 
 void MainWindow::find()
 {
-    m_graphWid->m_graphTable->find();
+//    m_graphWid->m_graphTable->find();
 }
 
 void MainWindow::drawGraph()
 {
-    Element emt;
-    int index = m_graphActList.indexOf((QAction *)sender());
-    if (index < 0) return;
+//    Element emt;
+//    int index = m_graphActList.indexOf((QAction *)sender());
+//    if (index < 0) return;
 
-    if (index < 6){
-        m_inputGW->SetCurrentName(index);
-        m_inputGW->show();
-    }else{
-        emt.name = "";
-        emt.index = 0;
-        emt.mark = "";
+//    if (index < 6){
+//        m_inputGW->SetCurrentName(index);
+//        m_inputGW->show();
+//    }else{
+//        emt.name = "";
+//        emt.index = 0;
+//        emt.mark = "";
 
-        switch (index) {
-        case 6:
-            emt.graphType = HorizontalLine;
-            emit sig_inputPara(emt);
-            break;
-        case 7:
-            emt.graphType = verticalLine;
-            emit sig_inputPara(emt);
-            break;
-        case 8:
-            emt.graphType = ReverseLogic;
-            emit sig_inputPara(emt);
-            break;
-        default:
-            break;
-        }
+//        switch (index) {
+//        case 6:
+//            emt.graphType = HorizontalLine;
+//            emit sig_inputPara(emt);
+//            break;
+//        case 7:
+//            emt.graphType = verticalLine;
+//            emit sig_inputPara(emt);
+//            break;
+//        case 8:
+//            emt.graphType = ReverseLogic;
+//            emit sig_inputPara(emt);
+//            break;
+//        default:
+//            break;
+//        }
 
-    }
+//    }
 
 
 }
@@ -525,18 +525,18 @@ void MainWindow::buildGraph()
 {
     m_bottomW->clear();
     m_instsWid->buildInsts();
-    m_graphWid->m_graphTable->BuildGraph();
+    //m_graphWid->m_graphTable->BuildGraph();
 
     stateBar->showMessage("Build success.", 3000); // 显示临时信息，时间3秒钟.
 }
 
 void MainWindow::runGraph()
 {
-    if (runAct->isChecked()){
-        m_graphWid->m_graphTable->RunGraph(true);
-    }else{
-        m_graphWid->m_graphTable->RunGraph(false);
-    }
+//    if (runAct->isChecked()){
+//        m_graphWid->m_graphTable->RunGraph(true);
+//    }else{
+//        m_graphWid->m_graphTable->RunGraph(false);
+//    }
 }
 
 void MainWindow::slt_enableUndo(bool status)

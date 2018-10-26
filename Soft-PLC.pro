@@ -16,26 +16,28 @@ INCLUDEPATH += ./compile/
 INCLUDEPATH += ./comm/
 INCLUDEPATH += ./windows/
 INCLUDEPATH += ./windows/instruction/
-INCLUDEPATH += ./windows/ladder/
+INCLUDEPATH += ./windows/graph/
 INCLUDEPATH += ./windows/input/
 
 SOURCES +=  main.cpp\
             windows/mainwindow.cpp \
-            windows/graphwindow.cpp \
-            windows/inputwindow.cpp \
-            windows/instswindow.cpp \
-            windows/model/graphfb.cpp \
-            windows/model/binarytree.cpp \
-    windows/model/graphmodel.cpp
+            windows/graph/graphwindow.cpp \
+            windows/input/inputwindow.cpp \
+            windows/instruction/instswindow.cpp \
+    windows/graph/graphmodel.cpp \
+    windows/graph/graphdelegate.cpp \
+    windows/graph/graphview.cpp
+
 
 HEADERS  += include/common.h \
             windows/mainwindow.h \
-            windows/graphwindow.h \
-            windows/inputwindow.h \
-            windows/instswindow.h \
-            windows/model/graphfb.h \
-            windows/model/binarytree.h \
-    windows/model/graphmodel.h
+            windows/graph/graphwindow.h \
+            windows/input/inputwindow.h \
+            windows/instruction/instswindow.h \
+    windows/graph/graphmodel.h \
+    windows/graph/graphdelegate.h \
+    windows/graph/graphview.h
+
 
 RESOURCES += application.qrc
 

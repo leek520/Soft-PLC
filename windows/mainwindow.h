@@ -34,6 +34,7 @@ Copyright (c) 2018 PLT. All Rights Reserved.
 #include <QMutex>
 #include <QDateTime>
 #include <QFileDialog>
+
 class ListWidget;
 class TextEdit;
 class MainWindow : public QMainWindow

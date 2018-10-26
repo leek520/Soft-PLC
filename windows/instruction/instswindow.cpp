@@ -56,13 +56,13 @@ void InstsWindow::initTable()
 
 void InstsWindow::setItemFormat(int row, int col)
 {
-    QTableWidgetItem *unit = item(row, col);
-    if (unit == NULL) return;
+//    QTableWidgetItem *unit = item(row, col);
+//    if (unit == NULL) return;
 
-    QFont font;
-    int fontSize = GraphFB::g_factor * 16;
-    font.setPixelSize(fontSize);
-    unit->setFont(font);
+//    QFont font;
+//    int fontSize = GraphFB::g_factor * 16;
+//    font.setPixelSize(fontSize);
+//    unit->setFont(font);
 }
 
 void InstsWindow::slt_InsertInst(int row, QString inst)

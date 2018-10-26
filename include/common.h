@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <QString>
+#include <QColor>
 #include <QDebug>
 
 #define SOFT_NAME    "Soft PLC"
@@ -19,25 +20,6 @@
 #define MAX_ROW         1000
 #define INIT_ROW        14
 
-#define CalIdx(row, col) (row) * MAX_COL + (col) -1
-#define GraIdx(row, col) (row) * MAX_COL + (col)
-/*****************************
- * 图元数据结构：梯形图梯级的存储结构采用两个层次的双向链表结构
-*****************************/
-typedef struct _tElement
-{
-    int row;
-    int col;
-    int width;
-    int height;
-    int graphType;      //类型
-    int funInsType;     //功能指令 
-    int index;
-    bool upFlag;
-    bool dnFlag;
-    QString name;
-    QString mark;
-}Element;
 
 enum GraphType
 {
@@ -60,6 +42,72 @@ enum GraphType
     LogicGraph,
     EndGraph,
 };
+/*****************************
+ * 图元数据结构：梯形图梯级的存储结构采用两个层次的双向链表结构
+*****************************/
+struct Element
+{
+    int row;
+    int col;
+    int type;      //类型
+    int index;
+    bool upFlag;
+    bool dnFlag;
+    QString name;
+    QString mark;
+    int conRGB;
+    int entRGB;
+    int backRGB;
+    int textRGB;
+    Element(){
+        row = 0;
+        col = 0;
+        type = 0;
+        index = 0;
+        dnFlag = false;
+        upFlag = false;
+        name = "";
+        mark = "";
+        conRGB = 0x000000;
+        entRGB = 0xffff00;
+        backRGB = 0xffffff;
+        textRGB = 0x000000;
+    }
+    Element(const int r, const int c, const int tp=NoneGraph){
+        row = r;
+        col = c;
+        type = tp;
+        index = 0;
+        dnFlag = false;
+        upFlag = false;
+        name = "";
+        mark = "";
+        conRGB = 0x000000;
+        entRGB = 0x000000;
+        backRGB = 0xffffff;
+        textRGB = 0x000000;
+    }
+    Element(const int r, const int c,
+            int tp, int idx,
+            const QString nameStr, const QString maskStr,
+            const bool up=false, const bool dn=false){
+        row = r;
+        col = c;
+        type = tp;
+        index = idx;
+        dnFlag = up;
+        upFlag = dn;
+        name = nameStr;
+        mark = maskStr;
+        conRGB = 0x000000;
+        entRGB = 0x000000;
+        backRGB = 0xffffff;
+        textRGB = 0x000000;
+    }
+
+};
+
+
 enum Direction{
     TurnStart,
     TurnDown,

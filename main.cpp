@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         Qt::AlignCenter|Qt::AlignBottom,Qt::green);
 
     a.processEvents();              //使程序在显示启动画面的同时仍能响应鼠标等其他事件
-    QThread::sleep(3);
+    QThread::sleep(0);
 
     //设置程序中文字的编码方式
     QTextCodec *codec = QTextCodec::codecForName("UTF_8");

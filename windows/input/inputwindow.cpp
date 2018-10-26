@@ -156,16 +156,16 @@ void InputGraphWindow::on_m_nameCom_triggered(QString idx)
 
 void InputGraphWindow::on_yesBtn_triggered()
 {
-    Element emt;
-    emt.graphType = m_type;
-    emt.name = m_nameCom->currentText();
-    emt.index = m_indexSpi->value();
-    emt.mark = m_textEdit->toPlainText();
+//    Element emt;
+//    emt.graphType = m_type;
+//    emt.name = m_nameCom->currentText();
+//    emt.index = m_indexSpi->value();
+//    emt.mark = m_textEdit->toPlainText();
 
-    emit sig_inputPara(emt);
+//    emit sig_inputPara(emt);
 
-    close();
-    m_indexSpi->setValue(m_indexSpi->value()+1);
+//    close();
+//    m_indexSpi->setValue(m_indexSpi->value()+1);
 }
 
 void InputGraphWindow::on_cancelBtn_triggered()
@@ -229,41 +229,41 @@ void InputInstsWindow::InitUi()
 
 int InputInstsWindow::InstsDecoder()
 {
-    Element emt;
-    QString str = lineEdit->text();
-    str = str.toUpper();
-    QStringList instsStr = str.split(" ");
-    int cnt = instsStr.count();
-    QString inst = instsStr[0];
+//    Element emt;
+//    QString str = lineEdit->text();
+//    str = str.toUpper();
+//    QStringList instsStr = str.split(" ");
+//    int cnt = instsStr.count();
+//    QString inst = instsStr[0];
 
-    if ((inst.indexOf("LD") > -1) ||
-        (inst.indexOf("AN") > -1)){
-        if (cnt < 2) return -1;
-        QRegExp re("^[XYMSTC][0-9]{1,3}");
-        if (instsStr[1].indexOf(re) > -1){
-            if (inst.indexOf("I") > -1){
-                emt.graphType = InputClose;
-            }else{
-                emt.graphType = InputOpen;
-            }
-            emt.name = instsStr[1][0];
-            emt.index = instsStr[1].mid(1).toInt();
-            emt.mark = str;
-            emit sig_inputPara(emt);
-        }
-    }else if (inst.indexOf("ADD") > -1){
-        if (cnt < 2) return -1;
-        emt.graphType = LogicGraph;
-        emt.mark = str;
-        emit sig_inputPara(emt);
-    }else if (inst.indexOf("OUT") > -1){
-        if (cnt < 2) return -1;
-        emt.graphType = OutputGraph;
-        emt.name = instsStr[1][0];
-        emt.index = instsStr[1].mid(1).toInt();
-        emt.mark = str;
-        emit sig_inputPara(emt);
-    }
+//    if ((inst.indexOf("LD") > -1) ||
+//        (inst.indexOf("AN") > -1)){
+//        if (cnt < 2) return -1;
+//        QRegExp re("^[XYMSTC][0-9]{1,3}");
+//        if (instsStr[1].indexOf(re) > -1){
+//            if (inst.indexOf("I") > -1){
+//                emt.graphType = InputClose;
+//            }else{
+//                emt.graphType = InputOpen;
+//            }
+//            emt.name = instsStr[1][0];
+//            emt.index = instsStr[1].mid(1).toInt();
+//            emt.mark = str;
+//            emit sig_inputPara(emt);
+//        }
+//    }else if (inst.indexOf("ADD") > -1){
+//        if (cnt < 2) return -1;
+//        emt.graphType = LogicGraph;
+//        emt.mark = str;
+//        emit sig_inputPara(emt);
+//    }else if (inst.indexOf("OUT") > -1){
+//        if (cnt < 2) return -1;
+//        emt.graphType = OutputGraph;
+//        emt.name = instsStr[1][0];
+//        emt.index = instsStr[1].mid(1).toInt();
+//        emt.mark = str;
+//        emit sig_inputPara(emt);
+//    }
 }
 
 void InputInstsWindow::showEvent(QShowEvent *event)
