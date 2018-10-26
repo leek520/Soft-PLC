@@ -179,6 +179,10 @@ void MainWindow::createActions()
     act->setStatusTip(tr("垂直线"));
     connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
     m_graphActList.append(act);
+    act = new QAction(QIcon(":/images/graph/Btn12.bmp"), tr("删除垂直线"), this);
+    act->setStatusTip(tr("删除垂直线"));
+    connect(act, SIGNAL(triggered()), this, SLOT(drawGraph()));
+    m_graphActList.append(act);
 
     act = new QAction(QIcon(":/images/graph/Btn8.bmp"), tr("反向逻辑"), this);
     act->setStatusTip(tr("反向逻辑"));
@@ -506,9 +510,15 @@ void MainWindow::drawGraph()
             break;
         case 7:
             emt.graphType = verticalLine;
+            emt.index = 1;
             emit sig_inputPara(emt);
             break;
         case 8:
+            emt.graphType = verticalLine;
+            emt.index = -1;
+            emit sig_inputPara(emt);
+            break;
+        case 9:
             emt.graphType = ReverseLogic;
             emit sig_inputPara(emt);
             break;

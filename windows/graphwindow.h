@@ -75,7 +75,7 @@ private:
     void insertSplitLine(int row);
     void maxRowGraphJudge();
     void reDrawGraph(GraphFB *graph);
-    void reDrawGraphNet(int row, bool isBack=true);
+    void reDrawGraphNet(int row, DrawType draw=RedoDraw);
     void setCurrentUnit(int row, int col, bool direction=true);
 
     void removeGraphVLine(int row, int col);
@@ -127,7 +127,7 @@ private:
     }m_ClipBorad;
 
     //记录梯形图的梯级关系
-    QMap<int, bool> m_ladderBack;
+    int m_ladderBack[MAX_ROW];
 };
 
 

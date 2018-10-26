@@ -57,6 +57,9 @@ void GraphTable::InitParament()
     m_OperationBorad.type.clear();
 
     m_ClipBorad.type = RedoCopyPaste;
+
+    memset(m_ladderBack, 0, sizeof(int) * MAX_ROW);
+
 }
 /******************************************************************************
 * @brief: 记录用户操作，以便撤销和恢复功能使用
@@ -76,6 +79,7 @@ void GraphTable::RecordOperation(bool *isNew,
         m_OperationBorad.recordRange.removeLast();
         m_OperationBorad.type.removeLast();
     }
+
     //记录
     if (*isNew){
         m_OperationBorad.curStep++;
@@ -173,17 +177,32 @@ void GraphTable::reDrawGraph(GraphFB *graph)
 
     if (col == 0) return;
     maxRowGraphJudge();
+
 }
 
-void GraphTable::reDrawGraphNet(int row, bool isBack)
+void GraphTable::reDrawGraphNet(int row, DrawType draw)
 {
+    if (draw == RedoDraw){
+        m_ladderBack[row] += 1;
+    }else if (draw == UndoDraw){
+        m_ladderBack[row] -= 1;
+    }
     GraphFB *graph = NULL;
 
     QPoint range = GM->getLadderRange(row);
+
     for(int i=range.x();i<range.y();i++){
         for(int j=1;j<=MAX_COL;j++){
             graph = GM->getUnit(row, j);
-            graph->setBackColor(isBack);
+            if (draw == RePaint){
+               graph->setBackColor(false);
+            }else{
+                if (m_ladderBack[row] > 0){
+                    graph->setBackColor(true);
+                }else{
+                    graph->setBackColor(false);
+                }
+            }
             reDrawGraph(graph);
         }
     }
@@ -219,11 +238,9 @@ void GraphTable::removeGraphVLine(int row, int col)
     //清除上半部竖直线
     graph = GM->getUnit(row, col);
     graph->clearVdnLine();
-    reDrawGraphNet(row);
     //清除下半部竖直线
     graph = GM->getUnit(row+1, col);
     graph->clearVupLine();
-    reDrawGraphNet(row+1);
 
 }
 
@@ -234,13 +251,9 @@ void GraphTable::insertGraphVLine(int row, int col)
     //插入下半部分
     graph = GM->getUnit(row+1, col);
     graph->setVupLine();
-    reDrawGraphNet(row+1);
     //插入上半部分
     graph = GM->getUnit(row, col);
     graph->setVdnLine();
-    reDrawGraphNet(row);
-
-
 }
 
 void GraphTable::doOptChcek()
@@ -291,7 +304,13 @@ void GraphTable::slt_inputPara(Element emt)
     switch (emt.graphType) {
     //如果要画竖直线，则分两步，先画下一行
     case verticalLine:
-        insertGraphVLine(curRow, curCol);
+        if (emt.index<0){
+            removeGraphVLine(curRow, curCol);
+        }else{
+            insertGraphVLine(curRow, curCol);
+        }
+        reDrawGraphNet(curRow);
+        reDrawGraphNet(curRow+1);
         RecordOperation(&isNew, GM->getUnit(curRow, curCol), RedoVLineInsert, range);
         setCurrentUnit(curRow, curCol-1);
         break;
@@ -316,6 +335,7 @@ void GraphTable::slt_inputPara(Element emt)
         for(i=curCol;i<MAX_COL;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
+            reDrawGraphNet(curRow);
             RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
 
@@ -334,6 +354,7 @@ void GraphTable::slt_inputPara(Element emt)
         for(i=curCol;i<MAX_COL-1;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
+            reDrawGraphNet(curRow);
             RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
         int spanCol = 2;
@@ -388,7 +409,7 @@ void GraphTable::redo()
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row);
         }
         m_OperationBorad.type[step] = RedoGraphInsert;
         setCurrentUnit(emt.row, emt.col, true);
@@ -397,6 +418,8 @@ void GraphTable::redo()
         for (int i=0;i<optList->count();i++){
             emt = optList->at(i);
             insertGraphVLine(emt.row, emt.col);
+            reDrawGraphNet(emt.row);
+            reDrawGraphNet(emt.row+1);
         }
         m_OperationBorad.type[step] = RedoVLineInsert;
         break;
@@ -405,7 +428,7 @@ void GraphTable::redo()
             emt = optList->at(i+1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row);
         }
         m_OperationBorad.type[step] = RedoCopyPaste;
         break;
@@ -421,12 +444,12 @@ void GraphTable::redo()
             int srcCol = startCol + (i / 2) % width;
             graph = GM->getUnit(srcRow, srcCol);
             graph->clearAll();
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row);
             //重置dst
             emt = optList->at(i+1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row);
         }
         m_OperationBorad.type[step] = RedoCutPaste;
         break;
@@ -436,7 +459,7 @@ void GraphTable::redo()
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->clearEelment();
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row);
         }
         m_OperationBorad.type[step] = RedoDelete;
         break;
@@ -444,6 +467,8 @@ void GraphTable::redo()
         for (int i=0;i<optList->count();i++){
             emt = optList->at(i);
             removeGraphVLine(emt.row, emt.col);
+            reDrawGraphNet(emt.row);
+            reDrawGraphNet(emt.row+1);
         }
         m_OperationBorad.type[step] = RedoDeleteVLine;
         break;
@@ -469,7 +494,7 @@ void GraphTable::undo()
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->clearEelment();
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row, UndoDraw);
         }
         m_OperationBorad.type[step] = UndoGraphInsert;
         break;
@@ -477,6 +502,8 @@ void GraphTable::undo()
         for (int i=optList->count()-1;i>-1;i--){
             emt = optList->at(i);
             removeGraphVLine(emt.row, emt.col);
+            reDrawGraphNet(emt.row, UndoDraw);
+            reDrawGraphNet(emt.row+1, UndoDraw);
         }
         m_OperationBorad.type[step] = UndoVLineInsert;
         break;
@@ -485,7 +512,7 @@ void GraphTable::undo()
             emt = optList->at(i-1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row, UndoDraw);
         }
         m_OperationBorad.type[step] = UndoCopyPaste;
         break;
@@ -504,12 +531,12 @@ void GraphTable::undo()
             emt.col = srcCol;
             graph = GM->getUnit(srcRow, srcCol);
             graph->setEelment(emt);
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row, UndoDraw);
             //再把old放到dst
             emt = optList->at(i-1);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row, UndoDraw);
         }
         m_OperationBorad.type[step] = UndoCutPaste;
         break;
@@ -519,7 +546,7 @@ void GraphTable::undo()
             emt = optList->at(i);
             graph = GM->getUnit(emt.row, emt.col);
             graph->setEelment(emt);
-            reDrawGraph(graph);
+            reDrawGraphNet(emt.row, UndoDraw);
         }
         m_OperationBorad.type[step] = UndoDelete;
         break;
@@ -527,6 +554,8 @@ void GraphTable::undo()
         for (int i=optList->count()-1;i>-1;i--){
             emt = optList->at(i);
             insertGraphVLine(emt.row, emt.col);
+            reDrawGraphNet(emt.row, UndoDraw);
+            reDrawGraphNet(emt.row+1, UndoDraw);
         }
         m_OperationBorad.type[step] = UndoDeleteVLine;
         break;
@@ -577,12 +606,12 @@ void GraphTable::paste()
             dstGraph->emt = srcGraph->emt;
             dstGraph->emt.row = row;
             dstGraph->emt.col = col;
-            reDrawGraph(dstGraph);
+            reDrawGraphNet(dstGraph->emt.row);
 
             //如果是剪切，则删除原来位置内容
             if (m_ClipBorad.type == RedoCutPaste){
                 srcGraph->clearAll();
-                reDrawGraph(srcGraph);
+                reDrawGraphNet(srcGraph->emt.row);
             }
             //记录新粘贴来的graph
             RecordOperation(&isNew, dstGraph, (OptType)m_ClipBorad.type, &m_ClipBorad.range);
@@ -665,7 +694,9 @@ void GraphTable::slt_removeGraphVLine()
             for(int k=selectRange[i].leftColumn();k<=selectRange[i].rightColumn();k++){
                 graph = GM->getUnit(j, k);
                 RecordOperation(&isNew, graph, RedoDeleteVLine, &selectRange[0]);
-                removeGraphVLine(j, k);            
+                removeGraphVLine(j, k);
+                reDrawGraphNet(j);
+                reDrawGraphNet(j+1);
             }
         }
     }
@@ -709,6 +740,9 @@ void GraphTable::slt_removeGraphRow()
 
 void GraphTable::BuildGraph()
 {
+    int maxIdx = GM->getCount();
+    if (maxIdx == 0) return;
+
     GM->buildGraph();
     QStringList insts = GM->getInsts();
     for(int i=0;i<insts.count();i++){
@@ -719,14 +753,11 @@ void GraphTable::BuildGraph()
         this->removeRow(info->blankRow[i]-i);
     }
 
+    //清除编辑过的行的底色
+    for(int i=0;i<=GM->getMaxRow();i++){
+        reDrawGraphNet(i, RePaint);
+    }
 
-    int maxIdx = GM->getCount();
-    if (maxIdx == 0) return;
-
-
-    //编译过的部分加底色显示
-
-    //https://wenku.baidu.com/view/f69bc79f8762caaedd33d428.html
 }
 
 void GraphTable::RunGraph(bool enable)

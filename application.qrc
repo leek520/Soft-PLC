@@ -36,5 +36,6 @@
         <file>images/wstack.png</file>
         <file>images/wvside.png</file>
         <file>images/splash.png</file>
+        <file>images/graph/Btn12.bmp</file>
     </qresource>
 </RCC>

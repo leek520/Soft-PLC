@@ -76,6 +76,10 @@ enum OptType{RedoGraphInsert=0, UndoGraphInsert,    //插入删除图形
              RedoDelete, UndoDelete,
              RedoDeleteVLine, UndoDeleteVLine};              //删除
 
-
+enum DrawType{
+    RedoDraw,
+    UndoDraw,
+    RePaint,
+};
 
 #endif // COMMON_H
