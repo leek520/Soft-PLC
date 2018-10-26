@@ -182,18 +182,23 @@ void GraphTable::reDrawGraph(GraphFB *graph)
 
 void GraphTable::reDrawGraphNet(int row, DrawType draw)
 {
+    GraphFB *graph = NULL;
+    QPoint range;
     if (draw == RedoDraw){
         m_ladderBack[row] += 1;
     }else if (draw == UndoDraw){
         m_ladderBack[row] -= 1;
     }
-    GraphFB *graph = NULL;
 
-    QPoint range = GM->getLadderRange(row);
-
+    if (draw == RePaint){
+        range.setX(row);
+        range.setY(row+1);
+    }else{
+        range = GM->getLadderRange(row);
+    }
     for(int i=range.x();i<range.y();i++){
         for(int j=1;j<=MAX_COL;j++){
-            graph = GM->getUnit(row, j);
+            graph = GM->getUnit(i, j);
             if (draw == RePaint){
                graph->setBackColor(false);
             }else{
@@ -335,12 +340,13 @@ void GraphTable::slt_inputPara(Element emt)
     case verticalLine:
         if (emt.index<0){
             removeGraphVLine(curRow, curCol);
+            RecordOperation(&isNew, GM->getUnit(curRow, curCol), RedoDeleteVLine, range);
         }else{
             insertGraphVLine(curRow, curCol);
+            RecordOperation(&isNew, GM->getUnit(curRow, curCol), RedoVLineInsert, range);
         }
         reDrawGraphNet(curRow);
         reDrawGraphNet(curRow+1);
-        RecordOperation(&isNew, GM->getUnit(curRow, curCol), RedoVLineInsert, range);
         setCurrentUnit(curRow, curCol-1);
         break;
     case HorizontalLine:
@@ -769,21 +775,22 @@ void GraphTable::slt_removeGraphRow()
 void GraphTable::BuildGraph()
 {
     int maxIdx = GM->getCount();
+    int maxRow = GM->getMaxRow();
     if (maxIdx == 0) return;
 
     GM->buildGraph();
 
     setFirstColText();
 
-    //清除空白行
-    BuildInfo *info = GM->getBuildInfo();
-    for(int i;i<info->blankRow.count();i++){
-        this->removeRow(info->blankRow[i]-i);
-    }
 
-    //清除编辑过的行的底色
-    for(int i=0;i<=GM->getMaxRow();i++){
+    //重绘所有图，并清除编辑过的行的底色
+    int curRow = GM->getMaxRow();
+    for(int i=0;i<=curRow;i++){
         reDrawGraphNet(i, RePaint);
+    }
+    //移除多于的行
+    for(int i=0;i<maxRow-curRow;i++){
+        this->removeRow(curRow+1);
     }
     //加入End行
     Element emt;

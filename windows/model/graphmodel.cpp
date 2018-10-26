@@ -172,7 +172,12 @@ int GraphModel::getCount()
 int GraphModel::getMaxRow()
 {
     if (getCount()>0){
-        return  m_graphList.last()->emt.row;
+        if (m_graphList.last()->getType() == EndGraph){
+            return  m_graphList.last()->emt.row-1;
+        }else{
+            return  m_graphList.last()->emt.row;
+        }
+
     }else{
         return -1;
     }
@@ -202,12 +207,24 @@ int GraphModel::getLadderRow(int index)
 
 QPoint GraphModel::getLadderRange(int row)
 {
-    //未编译过，m_ladderRow为空
-    if (m_ladderRow.isEmpty()){
-        return QPoint(row,row+1);
-    }else{
-        return QPoint(row,row+1);
+
+    int ladder = m_HeadNode.count();
+
+    if (ladder == 1){
+        return QPoint(m_HeadNode[0]->value / MAX_COL, getMaxRow()+1);
     }
+    for(int i=1;i<ladder;i++){
+        int row_start = m_HeadNode[i-1]->value / MAX_COL;
+        int row_end = m_HeadNode[i]->value / MAX_COL;
+        if ((row >= row_start) && (row < row_end)){
+            return QPoint(row_start, row_end);
+        }
+        //如果是最后一个头节点，则其结尾为最大行号+1
+        if ((i == ladder-1) && (row >= row_end)){
+            return QPoint(row_end, getMaxRow()+1);
+        }
+    }
+    return QPoint(row,row+1);
 
 }
 /******************************************************************************
@@ -256,15 +273,7 @@ QList<QStringList> GraphModel::getInsts()
     return m_instruction;
 }
 
-BuildInfo *GraphModel::getBuildInfo()
-{
-    return &m_buildInfo;
-}
 
-QList<int> GraphModel::getNetRow()
-{
-    return m_netRow;
-}
 /******************************************************************************
 * @brief: 递归处理节点
 * @author:leek
@@ -689,4 +698,5 @@ int GraphModel::createInsts()
         qDebug()<<QString("Tree index: %1").arg(i);
         root->print(root);
     }
+    m_instruction.append(QStringList()<<"END");
 }
