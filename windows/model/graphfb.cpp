@@ -2,7 +2,8 @@
 double GraphFB::g_factor = 1.0;
 int GraphFB::g_unitWidth = UNIT_WIDTH;
 int GraphFB::g_unitHeight = UNIT_HEIGH;
-
+int GraphFB::g_noBackRGB = 0xffffff;    //white
+int GraphFB::g_BackRGB = 0xF5F5F5;      //WhiteSmoke
 GraphFB::GraphFB()
 {
 
@@ -341,9 +342,14 @@ void GraphFB::setVdnLine(bool status)
     emt.dnFlag = status;
 }
 
-void GraphFB::setBackColor(QColor color)
+void GraphFB::setBackColor(bool status)
 {
-    backColor = color;
+    if (status){
+       backColor = g_BackRGB;
+    }else{
+       backColor = g_noBackRGB;
+    }
+
 }
 
 bool GraphFB::isDown()

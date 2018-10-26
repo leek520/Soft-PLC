@@ -39,7 +39,7 @@ public:
     void clearVdnLine();
     void setVupLine(bool status=true);
     void setVdnLine(bool status=true);
-    void setBackColor(QColor color);
+    void setBackColor(bool status=false);
     bool isDown();
     bool isUp();
     bool isEmpty();
@@ -56,6 +56,8 @@ public:
     static double g_factor;
     static int g_unitWidth;
     static int g_unitHeight;
+    static int g_noBackRGB;
+    static int g_BackRGB;
     Element emt;
     QPixmap pixMap;  //用作绘图设备
 public:

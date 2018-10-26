@@ -186,6 +186,17 @@ void GraphModel::clearAllGraph()
 {
     m_graphList.clear();
 }
+
+QPoint GraphModel::getLadderRange(int row)
+{
+    //未编译过，m_ladderRow为空
+    if (m_ladderRow.isEmpty()){
+        return QPoint(row,row+1);
+    }else{
+        return QPoint(row,row+1);
+    }
+
+}
 /******************************************************************************
 * @brief: 画图检测函数
 * @author:leek

@@ -75,19 +75,13 @@ private:
     void insertSplitLine(int row);
     void maxRowGraphJudge();
     void reDrawGraph(GraphFB *graph);
+    void reDrawGraphNet(int row, bool isBack=true);
     void setCurrentUnit(int row, int col, bool direction=true);
 
     void removeGraphVLine(int row, int col);
     void insertGraphVLine(int row, int col);
     void doOptChcek();
     void spanUnit(int row, int col, int num=1);
-    //To do:
-    /*
-    1.用户插入图形合法性校验
-    2.编译时去除空白行；
-    5.软件打开时的无边框加载图
-    6.如何做类似word样式的菜单
-    */
 
 public slots:
     void slt_inputPara(Element emt);
@@ -131,6 +125,9 @@ private:
         int type;
         QTableWidgetSelectionRange range;
     }m_ClipBorad;
+
+    //记录梯形图的梯级关系
+    QMap<int, bool> m_ladderBack;
 };
 
 

@@ -60,6 +60,7 @@ public:
     int getMaxRow();
     void clearAllGraph();
 
+    QPoint getLadderRange(int row);
     bool checkGraph(int row, int col, int type);
     void buildGraph();
     QStringList getInsts();
@@ -81,6 +82,7 @@ private:
     QList<QMap<int, BTreeNode *>* > m_OutTree;
     QMap<int, BTreeNode *> *m_OutNode;
 
+    QList<int> m_ladderRow;
     QList<QPoint> m_buildTrail;
     QStringList m_instsList;
     BuildInfo m_buildInfo;

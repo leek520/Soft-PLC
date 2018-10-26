@@ -175,6 +175,20 @@ void GraphTable::reDrawGraph(GraphFB *graph)
     maxRowGraphJudge();
 }
 
+void GraphTable::reDrawGraphNet(int row, bool isBack)
+{
+    GraphFB *graph = NULL;
+
+    QPoint range = GM->getLadderRange(row);
+    for(int i=range.x();i<range.y();i++){
+        for(int j=1;j<=MAX_COL;j++){
+            graph = GM->getUnit(row, j);
+            graph->setBackColor(isBack);
+            reDrawGraph(graph);
+        }
+    }
+}
+
 /******************************************************************************
 * @brief: 绘图完成后自动转下一个单元格
 * @author:leek
@@ -205,11 +219,11 @@ void GraphTable::removeGraphVLine(int row, int col)
     //清除上半部竖直线
     graph = GM->getUnit(row, col);
     graph->clearVdnLine();
-    reDrawGraph(graph);
+    reDrawGraphNet(row);
     //清除下半部竖直线
     graph = GM->getUnit(row+1, col);
     graph->clearVupLine();
-    reDrawGraph(graph);
+    reDrawGraphNet(row+1);
 
 }
 
@@ -220,11 +234,11 @@ void GraphTable::insertGraphVLine(int row, int col)
     //插入下半部分
     graph = GM->getUnit(row+1, col);
     graph->setVupLine();
-    reDrawGraph(graph);
+    reDrawGraphNet(row+1);
     //插入上半部分
     graph = GM->getUnit(row, col);
     graph->setVdnLine();
-    reDrawGraph(graph);
+    reDrawGraphNet(row);
 
 
 }
@@ -294,7 +308,7 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        reDrawGraph(graph);
+        reDrawGraphNet(curRow);
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
         setCurrentUnit(curRow, curCol);
         break;
@@ -302,7 +316,6 @@ void GraphTable::slt_inputPara(Element emt)
         for(i=curCol;i<MAX_COL;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
-            reDrawGraph(graph);
             RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
 
@@ -312,7 +325,7 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        reDrawGraph(graph);
+        reDrawGraphNet(curRow);
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
         setCurrentUnit(curRow, i);
         break;
@@ -321,7 +334,6 @@ void GraphTable::slt_inputPara(Element emt)
         for(i=curCol;i<MAX_COL-1;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
-            reDrawGraph(graph);
             RecordOperation(&isNew, graph, RedoGraphInsert, range);
         }
         int spanCol = 2;
@@ -336,7 +348,7 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        reDrawGraph(graph);
+        reDrawGraphNet(curRow);
         RecordOperation(&isNew, graph, RedoGraphInsert, range);
         setCurrentUnit(curRow, i);
         break;
@@ -346,7 +358,6 @@ void GraphTable::slt_inputPara(Element emt)
         for(i=1;i<MAX_COL;i++){
             graph = GM->getUnit(curRow, i);
             graph->emt.graphType =  HorizontalLine;
-            reDrawGraph(graph);
         }
         graph = GM->getUnit(curRow, i);
         graph->emt.graphType = emt.graphType;
@@ -354,7 +365,7 @@ void GraphTable::slt_inputPara(Element emt)
         graph->emt.name = emt.name;
         graph->emt.index = emt.index;
         graph->emt.mark = emt.mark;
-        reDrawGraph(graph);
+        reDrawGraphNet(curRow);
         setCurrentUnit(curRow, i);
         break;
     default:
@@ -784,6 +795,7 @@ void GraphTable::keyPressEvent(QKeyEvent *event)
             || (key == Qt::Key_Backspace)){
         emit sig_showInputWindow(event->text(), false);
     }
+    QTableWidget::keyPressEvent(event);
 }
 
 void GraphTable::slt_itemDoubleClicked(QTableWidgetItem *item)
