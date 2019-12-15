@@ -252,16 +252,21 @@ bool GraphModel::checkGraph(int row, int col, int type)
  * 树由三个数据结构组成，树（tree）,节点（node），表（list），分别对应根节点，主干节点和叶子节点
  * 第二步：扫描树，生成指令表
 */
-void GraphModel::buildGraph()
+int GraphModel::buildGraph()
 { 
 
     clearBuild();
 
-    if (!checkGraph()) return;
+    if (!checkGraph()) return -1;
 
     createBTree();
 
     createInsts();
+}
+
+QPoint GraphModel::getErrorUnit()
+{
+    return m_buildInfo.errorPoint;
 }
 /******************************************************************************
 * @brief: 获取该模型编译好的指令集
@@ -271,6 +276,73 @@ void GraphModel::buildGraph()
 QList<QStringList> GraphModel::getInsts()
 {
     return m_instruction;
+}
+
+int GraphModel::moveLeftVerLine(int row, int col)
+{
+    int ret = 0;
+    int i = 0;
+    int idx = GraIdx(row, col);
+    if (idx >= getCount()) return 0;
+    if (m_graphList[idx]->isDown()){
+        //错误情况
+        if (((m_graphList[idx-1]->getType() == HorizontalLine) ||
+            (m_graphList[idx+MAX_COL-1]->getType() == HorizontalLine)) &&
+             (m_graphList[idx-1]->isDown())){
+            //报错
+            qDebug()<<"梯形图错误！";
+            m_buildInfo.errorPoint.setX(row);
+            m_buildInfo.errorPoint.setY(col);
+            ret = -1;
+        }
+        //查找当前单元格左侧第一个有效图元
+        if ((m_graphList[idx-1]->getType() == HorizontalLine) &&
+            (m_graphList[idx+MAX_COL-1]->getType() == HorizontalLine)){
+            for(i=col;i<MAX_COL;i++){
+                copyGraph(row,i-1,row,i);
+                copyGraph(row+1,i-1,row+1,i);
+            }
+            ret = 1;
+        }
+    }
+    if (col > 0){
+        if((m_graphList[idx]->getType() >= InputOpen) &&
+           (m_graphList[idx]->getType() != OutputGraph)){
+            //图元左移
+            if (m_graphList[idx-1]->getType() == HorizontalLine){
+                for(i=col;i<MAX_COL;i++){
+                    copyGraph(row,i-1,row,i);
+                }
+                ret = 1;
+            }
+        }
+    }
+    return ret;
+}
+
+void GraphModel::copyGraph(int dstRow, int dstCol, int srcRow, int srcCol)
+{
+    int dstIdx = GraIdx(dstRow, dstCol);
+    int srcIdx = GraIdx(srcRow, srcCol);
+    if ((dstIdx >= getCount()) || (srcIdx >= getCount())){
+        return;
+    }
+    qDebug()<<dstIdx<<srcIdx<<getCount();
+    if (dstCol == MAX_COL - 2){
+        m_graphList[dstIdx]->clearAll();
+        m_graphList[dstIdx]->emt.graphType = HorizontalLine;
+    }else{
+        //保留dst位置的up和dn的flage位
+        bool up = m_graphList[dstIdx]->emt.upFlag;
+        bool dn = m_graphList[dstIdx]->emt.dnFlag;
+        m_graphList[dstIdx]->emt = m_graphList[srcIdx]->emt;
+        m_graphList[dstIdx]->emt.row = dstRow;
+        m_graphList[dstIdx]->emt.col = dstCol+1;
+        m_graphList[dstIdx]->emt.upFlag |= up;
+        m_graphList[dstIdx]->emt.dnFlag |= dn;
+
+        m_graphList[srcIdx]->clearAll();
+    }
 }
 
 
@@ -611,7 +683,11 @@ bool GraphModel::checkGraph()
             m_graphList.removeLast();
         }
     }
-    //2.空白行检测并记录
+    //1.去掉末尾空白单元格
+    while(m_graphList.last()->isEmpty()){
+        m_graphList.removeLast();
+    }
+    //3.空白行检测并记录
     int maxRow = getMaxRow();
     for(int i=0;i<maxRow;i++){
         bool isEmpty = true;
@@ -629,7 +705,18 @@ bool GraphModel::checkGraph()
     for(int i=0;i<m_buildInfo.blankRow.count();i++){
         removeRow(m_buildInfo.blankRow[i]-i);
     }
+    //4.竖直线左移
+    for(int i=0;i<=maxRow;i++){
+        for(int j=0;j<MAX_COL;j++){
+            int rst = moveLeftVerLine(i, j);
+            if (rst == -1){
+                return false;
+            }else if (rst == 1){
+                j=j-2;
+            }
+        }
 
+    }
     return ret;
 }
 

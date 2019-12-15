@@ -21,6 +21,7 @@ struct BuildInfo
     int startRow;
     QList<bool> outStatus;
     QList<int> blankRow;
+    QPoint errorPoint;
 };
 class GraphModel
 {
@@ -63,9 +64,13 @@ public:
     int getLadderRow(int index);
     QPoint getLadderRange(int row);
     bool checkGraph(int row, int col, int type);
-    void buildGraph();
+    int buildGraph();
+    QPoint getErrorUnit();
     QList<QStringList> getInsts();
 private:
+    int moveLeftVerLine(int row, int col);
+    void copyGraph(int dstRow, int dstCol, int srcRow, int srcCol);
+
     void clearBuild();
     bool checkGraph();
     void createBTree();

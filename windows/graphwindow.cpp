@@ -173,8 +173,9 @@ void GraphTable::reDrawGraph(GraphFB *graph)
     }
     item->setData(Qt::DisplayRole,
                   QVariant::fromValue<QPixmap>(graph->pixMap));
-    item->setToolTip(mark);
 
+    //item->setToolTip(mark);
+    item->setToolTip(QString("(%1,%2)").arg(row).arg(col));
     if (col == 0) return;
     maxRowGraphJudge();
 
@@ -775,23 +776,24 @@ void GraphTable::slt_removeGraphRow()
 void GraphTable::BuildGraph()
 {
     int maxIdx = GM->getCount();
-    int maxRow = GM->getMaxRow();
     if (maxIdx == 0) return;
 
-    GM->buildGraph();
+    int ret = GM->buildGraph();
+    if (ret == -1){
+        QPoint pt = GM->getErrorUnit();
+        sig_InsertBottomRowText(QString("(%1, %2)处编译错误！").arg(pt.x()).arg(pt.y()));
+        return;
+    }
+    //重绘所有图，并清除编辑过的行的底色
+    //清屏重绘
+    int curRow = GM->getMaxRow();
+    for(int i=0;i<=curRow;i++){
+        insertSplitLine(i);
+        reDrawGraphNet(i, RePaint);
+    }
 
     setFirstColText();
 
-
-    //重绘所有图，并清除编辑过的行的底色
-    int curRow = GM->getMaxRow();
-    for(int i=0;i<=curRow;i++){
-        reDrawGraphNet(i, RePaint);
-    }
-    //移除多于的行
-    for(int i=0;i<maxRow-curRow;i++){
-        this->removeRow(curRow+1);
-    }
     //加入End行
     Element emt;
     emt.row = GM->getMaxRow()+1;
